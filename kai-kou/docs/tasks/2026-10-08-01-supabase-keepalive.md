@@ -74,6 +74,8 @@ Supabase 判定"无活动"的具体规则以官方说明为准。本方案用真
 - [x] 自动化测试：8 条 health 测试，全项目 71 条通过；构建通过。
 - [x] 本地真实数据库验收：带正确 token 返回 200；无 token 返回 401；POST 返回 405。
 - [x] 独立代码审查通过。
-- [ ] Vercel 所有环境配置 `CRON_SECRET`。
-- [ ] 生产部署并在 Cron Jobs 手动 Run 成功。
+- [x] Vercel 所有环境配置 `CRON_SECRET`（用户确认完成）。
+- [x] 生产部署 `84d0ff2` Ready；Cron Jobs 已注册，手动 Run 返回 HTTP 200。
+  - 实测日志：`[health] {"ok":true,"db_ms":760}`；User Agent 为 `vercel-cron/1.0`。
+  - 日程 `0 3 * * *` 使用 UTC；墨尔本当前夏令时约 14:00–15:00 执行。
 - [ ] 次日确认自动执行日志（未来验收，不以手动执行替代）。
