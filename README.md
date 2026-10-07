@@ -1,6 +1,6 @@
-# PTE Workspace
+# Kai-Kou（开口）
 
-This repository is organized around the Kai-Kou PTE practice app.
+Kai-Kou (开口) is an AI practice platform for the PTE Academic speaking and writing tasks.
 
 ## Main App
 
