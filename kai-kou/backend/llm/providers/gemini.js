@@ -21,7 +21,7 @@ export async function callGemini({
       message: "Gemini API key is missing",
       status: 500,
       raw_error_type: "gemini_api_key_missing",
-      fallback_allowed: false,
+      fallback_allowed: true,
       model: resolvedModel,
       timeout_ms: resolvedTimeoutMs
     });
@@ -66,7 +66,7 @@ export async function callGemini({
         message: "Gemini returned empty content",
         status: 502,
         raw_error_type: "gemini_empty_content",
-        fallback_allowed: false,
+        fallback_allowed: true,
         model: resolvedModel,
         timeout_ms: resolvedTimeoutMs
       });

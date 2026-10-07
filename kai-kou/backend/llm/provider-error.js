@@ -1,5 +1,4 @@
-const FALLBACK_HTTP_STATUS = new Set([429, 502, 503, 504]);
-const NON_FALLBACK_HTTP_STATUS = new Set([400, 401, 403]);
+const NON_FALLBACK_HTTP_STATUS = new Set([400, 413, 422]);
 const NETWORK_ERROR_CODES = new Set([
   "ETIMEDOUT",
   "ECONNRESET",
@@ -104,7 +103,7 @@ function resolveRawErrorType(provider, details, status) {
 function resolveFallbackAllowed(status, details) {
   if (details.timeout || details.network) return true;
   if (NON_FALLBACK_HTTP_STATUS.has(status)) return false;
-  return FALLBACK_HTTP_STATUS.has(status);
+  return true;
 }
 
 function isConnectTimeoutError(error) {

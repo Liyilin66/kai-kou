@@ -268,7 +268,6 @@ export async function callScoringOpenAICompatible({
       throw createProviderError(SCORING_PROVIDER_NAME, {
         message: extractProviderErrorMessage(data) || `OpenAI-compatible request failed with status ${response.status}`,
         status: response.status,
-        fallback_allowed: true,
         model: resolvedModel,
         timeout_ms: resolvedTimeoutMs,
         sanitized_error_body: sanitizedBody

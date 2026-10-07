@@ -59,11 +59,11 @@ async function generateRAScoreTextWithFallback({ prompt } = {}) {
     primaryLatencyMs = Number(primaryError?.attempt_duration_ms || 0);
     const primaryRawErrorType = primaryError?.raw_error_type || "openai_provider_error";
 
-    if (!fallbackApiKey) {
+    if (!isFallbackEligible(primaryError) || !fallbackApiKey) {
       primaryError.provider_used = null;
       primaryError.last_provider_attempted = "openai";
       primaryError.fallback_reason = primaryRawErrorType;
-      primaryError.fallback_error_type = "groq_api_key_missing";
+      if (!fallbackApiKey) primaryError.fallback_error_type = "groq_api_key_missing";
       primaryError.provider_attempts = providerAttempts;
       primaryError.latency = {
         total_ms: elapsedMs(startedAt),
@@ -311,7 +311,7 @@ async function generateWEScoreTextWithFallback({ prompt } = {}) {
   } catch (primaryError) {
     primaryLatencyMs = Number(primaryError?.attempt_duration_ms || 0);
     const primaryRawErrorType = primaryError?.raw_error_type || `${primaryProvider}_provider_error`;
-    if (!fallbackProvider) {
+    if (!isFallbackEligible(primaryError) || !fallbackProvider) {
       primaryError.provider_used = primaryProvider;
       primaryError.fallback_reason = null;
       primaryError.provider_attempts = providerAttempts;
