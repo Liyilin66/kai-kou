@@ -43,6 +43,7 @@ export async function sendAgentMessage(message, conversationId = "", recentMessa
     message: normalizedMessage,
     conversation_id: normalizeText(conversationId) || undefined,
     session_id: normalizeText(options?.sessionId || options?.session_id) || undefined,
+    practice_signature: normalizeText(options?.practiceSignature || options?.practice_signature) || undefined,
     recent_messages: sanitizeRecentMessages(recentMessages)
   };
 
@@ -503,7 +504,7 @@ async function loadRecentTaskSnapshot(authStore) {
 
   const { data, error } = await supabase
     .from("practice_logs")
-    .select("task_type, created_at, score_json")
+    .select("id, task_type, created_at, score_json")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(60);
@@ -572,6 +573,8 @@ async function loadRecentTaskSnapshot(authStore) {
     weakTaskType: weakTask?.taskType || "",
     weakTaskTypeLabel: weakTask?.label || "",
     weakTaskAverageDisplay: weakTask?.averageDisplay ?? null,
+    latestPracticeId: normalizeText(data?.[0]?.id),
+    latestPracticeAt: normalizeText(data?.[0]?.created_at),
     sampleInsufficient: recentRows.length < 5 || totalComparableScoreCount < 3
   };
 }
@@ -584,6 +587,8 @@ function createEmptyRecentTaskSnapshot() {
     weakTaskType: "",
     weakTaskTypeLabel: "",
     weakTaskAverageDisplay: null,
+    latestPracticeId: "",
+    latestPracticeAt: "",
     sampleInsufficient: true
   };
 }

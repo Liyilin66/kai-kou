@@ -37,6 +37,7 @@ const routes = [
   { path: "/rts/analyzing", name: "rts-analyzing", component: () => import("@/views/RTSAnalyzingView.vue"), meta: { requiresAuth: true } },
   { path: "/rts/result", name: "rts-result", component: () => import("@/views/RTSResultView.vue"), meta: { requiresAuth: true } },
   { path: "/wfd", name: "wfd", component: () => import("@/views/WFDView.vue"), meta: { requiresAuth: true } },
+  { path: "/wfd/practice", name: "wfd-practice", component: () => import("@/views/WFDPracticeView.vue"), meta: { requiresAuth: true } },
   { path: "/wfd/list", name: "wfd-list", component: () => import("@/views/WFDListView.vue"), meta: { requiresAuth: true } },
   { path: "/wfd/listen", name: "wfd-listen", component: () => import("@/views/WFDListenView.vue"), meta: { requiresAuth: true } },
   { path: "/wfd/result", name: "wfd-result", component: () => import("@/views/WFDResultView.vue"), meta: { requiresAuth: true } },

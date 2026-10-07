@@ -1,454 +1,459 @@
-﻿<script setup>
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useUIStore } from "@/stores/ui";
+import { BILLING_PAUSED, BILLING_PAUSED_MESSAGE } from "@/lib/billing";
+import { classifyDeviceFamily, getDeviceIconSource } from "@/lib/device-icons";
 import {
   createEmptyHomeAnalytics,
   formatInteger,
-  formatScore,
   loadHomeAnalyticsSnapshotForAuth
 } from "@/lib/home-analytics";
 import {
-  createEmptyProfilePortrait,
-  loadProfilePortraitSnapshotForAuth
-} from "@/lib/profile-portrait";
+  createEmptyLoginEventsSnapshot,
+  formatLoginEventMeta,
+  loadLoginEventsForAuth,
+  parseCurrentDevice
+} from "@/lib/login-events";
 import {
   createEmptyProfileProgress,
   loadProfileProgressSnapshotForAuth
 } from "@/lib/profile-progress";
+import { supabase } from "@/lib/supabase";
 
+const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const uiStore = useUIStore();
 
 const selectedPlanKey = ref("month");
 const homeAnalytics = ref(createEmptyHomeAnalytics());
-const profilePortrait = ref(createEmptyProfilePortrait());
+const favoritesSnapshot = ref(createEmptyFavoritesSnapshot());
+const planSnapshot = ref(createEmptyPlanSnapshot());
+const loginEventsSnapshot = ref(createEmptyLoginEventsSnapshot());
 const profileProgress = ref(createEmptyProfileProgress());
+const avatarInputRef = ref(null);
+const avatarUploading = ref(false);
+const avatarUploadError = ref("");
+const profileModalOpen = ref(false);
+const profileSaving = ref(false);
+const profileSaveError = ref("");
+const profileDraft = ref(createProfileDraft());
+const profileDraftOriginal = ref(createProfileDraft());
+const avatarDraftDataUrl = ref("");
+const avatarDraftName = ref("");
+const loggingOut = ref(false);
 let profileRefreshPromise = null;
-const STREAK_MILESTONES = [
-  { days: 1, reward: "✅" },
-  { days: 3, reward: "⚡" },
-  { days: 7, reward: "🏆" },
-  { days: 14, reward: "🎯" },
-  { days: 30, reward: "🎁" }
+const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+const PROFILE_AVATAR_ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const stageOptions = ["基础巩固", "稳步提分", "冲刺提升"];
+const profileInfoIconMap = {
+  target:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.6"/></svg>',
+  calendar:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></svg>',
+  stage:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18.5h16"/><path d="M7 15.5l4-4 3 3 5-6"/><path d="M15.5 8.5H19v3.5"/></svg>',
+  mail:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M5 8l6.1 4.4a1.6 1.6 0 0 0 1.8 0L19 8"/></svg>'
+};
+
+const navIconMap = {
+  home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
+  list: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  spark: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1.5C4.24 1.5 2 3.74 2 6.5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h4M7 4.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  square: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  report: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 11l3-4 3 2.5 3-5 2 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  box: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 3h11M1.5 7h7M1.5 11h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  circle: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>'
+};
+
+const navItems = [
+  { key: "home", label: "首页", icon: "home", to: "/home" },
+  { key: "practice", label: "练习中心", icon: "list", to: "/home#quick" },
+  { key: "agent", label: "AI 私教", icon: "spark", to: "/agent" },
+  { key: "plan", label: "学习计划", icon: "square", to: "/home#goal" },
+  { key: "report", label: "学习报告", icon: "report", to: "/home#report" },
+  { key: "library", label: "题库", icon: "box", to: "/home#quick" },
+  { key: "profile", label: "个人中心", icon: "circle", to: "/profile" }
 ];
-const WEEKDAY_SHORT_LABELS = ["一", "二", "三", "四", "五", "六", "日"];
 
 const plans = [
   {
     key: "week",
     name: "周卡",
     price: "6.9",
-    unit: "7 天无限",
-    per: "无试用期",
-    featured: false,
-    badge: ""
+    duration: "7 天",
+    tags: ["无限练习", "AI 私教", "专属分析"]
   },
   {
     key: "month",
     name: "月卡",
     price: "19.9",
-    unit: "30 天无限",
-    per: "含 每天 ¥0.66",
-    featured: true,
-    badge: "🔥 最划算"
+    duration: "30 天",
+    badge: "推荐",
+    recommended: true,
+    tags: ["无限练习", "AI 私教", "专属分析"]
   },
   {
     key: "lifetime",
     name: "永久卡",
     price: "49.9",
-    unit: "永久无限",
-    per: "一次购罄",
-    featured: false,
-    badge: ""
+    duration: "永久",
+    badge: "超值",
+    value: true,
+    tags: ["无限练习", "AI 私教", "专属分析"]
   }
 ];
 
-const heroStats = computed(() => [
-  {
-    key: "total",
-    value: homeAnalytics.value.loading ? "--" : formatInteger(homeAnalytics.value.totalCount),
-    label: "累计题数"
-  },
-  {
-    key: "days",
-    value: homeAnalytics.value.loading ? "--" : formatInteger(homeAnalytics.value.activeDaysCount),
-    label: "累计天数"
-  },
-  {
-    key: "streak",
-    value: homeAnalytics.value.loading ? "--" : `🔥 ${formatInteger(homeAnalytics.value.currentStreak)}`,
-    label: "连续天数"
-  },
-  {
-    key: "score",
-    value: homeAnalytics.value.loading ? "--" : formatScore(homeAnalytics.value.averageScore),
-    label: "平均评分"
-  }
-]);
+const accountStatusIconMap = {
+  summary:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h7"/><path d="M9 12h7"/><path d="M9 19h5"/><path d="M5 5h.01"/><path d="M5 12h.01"/><path d="M5 19h.01"/></svg>',
+  login:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 2.64 6.36"/><path d="M3 17h3v-3"/></svg>',
+  status:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 2.9 8 7 10 4.1-2 7-5.6 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>',
+  time:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12"/><path d="M6 21h12"/><path d="M7 3c0 4 5 5 5 9s-5 5-5 9"/><path d="M17 3c0 4-5 5-5 9s5 5 5 9"/></svg>',
+  memory:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6a3 3 0 0 1 5.4-1.8A3.7 3.7 0 0 1 19 7.4a3.2 3.2 0 0 1-.7 5.8A3.7 3.7 0 0 1 15 20a3 3 0 0 1-3-2 3 3 0 0 1-3 2 3.7 3.7 0 0 1-3.3-6.8A3.2 3.2 0 0 1 5 7.4 3.7 3.7 0 0 1 8 6Z"/><path d="M12 6v12"/><path d="M8.5 10H12"/><path d="M12 14h3.5"/></svg>',
+  plan:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10"/><path d="M10 12h10"/><path d="M10 18h10"/><path d="m4 6 1 1 2-2"/><path d="m4 12 1 1 2-2"/><path d="m4 18 1 1 2-2"/></svg>'
+};
 
-const heroStatIcons = ["", "", "🔥", ""];
+const identityIconMap = {
+  summary:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 7l8 4 8-4-8-4Z"/><path d="m4 11 8 4 8-4"/><path d="m4 15 8 4 8-4"/></svg>',
+  score:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 1 0-9-9"/><path d="M12 17a5 5 0 1 0-5-5"/><path d="M12 13a1 1 0 1 0-1-1"/><path d="m15 9 5-5"/><path d="M16 4h4v4"/></svg>',
+  modules:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg>',
+  duration:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>',
+  window:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  ai:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m18.4 5.6-2.1 2.1"/><path d="m7.7 16.3-2.1 2.1"/><path d="M9.5 12a2.5 2.5 0 0 1 5 0c0 1.4-1.2 2.2-2.5 3-1.3-.8-2.5-1.6-2.5-3Z"/></svg>'
+};
 
-function formatHeroStatValue(value) {
-  const text = `${value ?? ""}`.trim();
-  if (!text) return "--";
-  if (/^[^\d-]/.test(text) && /\d/.test(text)) {
-    return text.replace(/^[^\d-]+\s*/, "");
-  }
-  return text;
-}
-const progressItemMeta = [
-  {
-    taskType: "RA",
-    icon: "🎙",
-    iconBg: "#EEF3FD",
-    name: "RA · 朗读",
-    fill: "#2563EB"
-  },
-  {
-    taskType: "WFD",
-    icon: "🎧",
-    iconBg: "#ECFDF3",
-    name: "WFD · 听写句子",
-    fill: "#059669"
-  },
-  {
-    taskType: "RTS",
-    icon: "💬",
-    iconBg: "#F4F3FF",
-    name: "RTS · 情景回应",
-    fill: "#6941C6"
-  },
-  {
-    taskType: "DI",
-    icon: "🖼",
-    iconBg: "var(--og-bg)",
-    name: "DI · 图片描述",
-    fill: "var(--orange)"
-  },
-  {
-    taskType: "RS",
-    icon: "🔊",
-    iconBg: "#EEF3FD",
-    name: "RS · 复述句子",
-    fill: "#4F7BEE"
-  },
-  {
-    taskType: "WE",
-    icon: "✍️",
-    iconBg: "#FFF2EA",
-    name: "WE · 写作",
-    fill: "#E36F35"
-  }
-];
+const favoriteIconMap = {
+  ra:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><path d="M12 19v3"/></svg>',
+  rs:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h8a4 4 0 0 1 0 8H9"/><path d="m11 12-4 4 4 4"/><path d="M5 8h2"/><path d="M3 5h4"/></svg>',
+  rl:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M7 19V9a5 5 0 0 1 10 0v10"/><path d="M9 10h6"/><path d="M12 3v3"/></svg>',
+  wfd:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><path d="M5 13h3v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z"/><path d="M19 13h-3v6h3a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z"/></svg>',
+  we:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 4 4 4-10 10H6v-4L16 4Z"/><path d="m14 6 4 4"/><path d="M4 20h16"/></svg>',
+  di:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="m21 15-4.2-4.2a2 2 0 0 0-2.8 0L7 18"/></svg>',
+  rts:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 18.5 4 21v-5.5A7.5 7.5 0 0 1 11.5 8h1A7.5 7.5 0 0 1 20 15.5 7.5 7.5 0 0 1 12.5 23h-1a7.4 7.4 0 0 1-4-1.2"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>'
+};
 
-const liveProgressItems = computed(() =>
-  progressItemMeta.map((item) => {
-    const completedCountRaw = Number(profileProgress.value.completedCounts?.[item.taskType] || 0);
-    const totalCount = Number(profileProgress.value.totalCounts?.[item.taskType] || 0);
-    const completedCount = totalCount > 0
-      ? Math.min(completedCountRaw, totalCount)
-      : completedCountRaw;
-    const hasStarted = completedCount > 0;
-    const percent = totalCount > 0 ? Math.min(100, Math.round((completedCount / totalCount) * 100)) : 0;
-
-    let pct = "同步中...";
-    let pctColor = "";
-    if (!profileProgress.value.loading) {
-      if (totalCount <= 0) {
-        pct = hasStarted ? "已练习" : "题库待同步";
-        pctColor = "var(--hi)";
-      } else if (hasStarted) {
-        pct = `${percent}%`;
-      } else {
-        pct = "未开始";
-        pctColor = "var(--hi)";
-      }
-    }
-
-    return {
-      ...item,
-      width: profileProgress.value.loading || !totalCount || !hasStarted
-        ? "0%"
-        : `${Math.max(percent, 4)}%`,
-      count: profileProgress.value.loading
-        ? "--/--"
-        : `${formatInteger(completedCount)}/${totalCount > 0 ? formatInteger(totalCount) : "--"}`,
-      pct,
-      pctColor
-    };
-  })
+const displayNavItems = computed(() =>
+  navItems.map((item) => ({
+    ...item,
+    icon: navIconMap[item.icon] || navIconMap.circle
+  }))
 );
 
-const settingsItems = [
-  {
-    icon: "🔔",
-    iconBg: "#EEF3FD",
-    label: "练习提醒",
-    sub: "每天 20:00",
-    value: "已开启",
-    badge: ""
-  },
-  {
-    icon: "🎯",
-    iconBg: "#ECFDF3",
-    label: "目标分数",
-    sub: "当前设定目标",
-    value: "58 分",
-    badge: ""
-  },
-  {
-    icon: "💬",
-    iconBg: "var(--og-bg)",
-    label: "意见反馈",
-    sub: "告诉开发者你的想法",
-    value: "",
-    badge: "有礼品"
-  },
-  {
-    icon: "🔐",
-    iconBg: "#F0EEFE",
-    label: "修改密码",
-    sub: "",
-    value: "",
-    badge: ""
-  },
-  {
-    icon: "ℹ️",
-    iconBg: "var(--bg)",
-    label: "关于开口",
-    sub: "v1.0.0 · 由开发者用爱发电",
-    value: "",
-    badge: ""
-  }
-];
-
+const profile = computed(() => authStore.profile || {});
 const userDisplayName = computed(() => authStore.displayName || "同学");
-
 const userInitial = computed(() => {
   const first = `${userDisplayName.value || ""}`.trim().charAt(0);
   return first ? first.toUpperCase() : "K";
 });
-
-const userEmail = computed(() => {
-  return `${authStore.user?.email || authStore.profile?.email || ""}`.trim();
-});
-
-const userAvatarUrl = computed(() => `${authStore.avatarUrl || ""}`.trim());
-const avatarInputRef = ref(null);
-const avatarUploading = ref(false);
-const avatarUploadError = ref("");
-
-const trialPillText = computed(() => {
-  if (!authStore.loaded) return "状态同步中";
-  if (authStore.isPremium) return "VIP · 已开通";
-  if (authStore.isInTrial) return `试用中 · 剩余 ${authStore.trialDaysLeft} 天`;
-  if (authStore.accessStatus === "trial_expired") return "试用已结束";
-  return "当前暂无练习权限";
-});
-
-const selectedPlan = computed(
-  () => plans.find((plan) => plan.key === selectedPlanKey.value) || plans[1]
+const userEmail = computed(() =>
+  normalizeText(authStore.user?.email || profile.value?.email)
+);
+const userAvatarUrl = computed(() => normalizeText(authStore.avatarUrl));
+const modalAvatarPreview = computed(() => avatarDraftDataUrl.value || userAvatarUrl.value);
+const todayDateKey = computed(() => getLocalDateKey());
+const emailVerified = computed(() =>
+  Boolean(authStore.user?.email_confirmed_at || authStore.user?.confirmed_at)
 );
 
-const ctaLabel = computed(() => `立即升级${selectedPlan.value.name} · ¥${selectedPlan.value.price}`);
-const portraitMetrics = computed(() =>
-  profilePortrait.value.metrics.map((item) => ({
-    ...item,
-    displayScore: item.score > 0 ? formatInteger(item.score) : "--",
-    barPercent: item.score > 0 ? Math.round((item.score / 90) * 100) : 0
-  }))
+const targetScore = computed(() =>
+  formatTargetScore(
+    pickText(
+      profile.value?.target_score,
+      profile.value?.targetScore,
+      profile.value?.goal_score,
+      profile.value?.goalScore,
+      profile.value?.pte_target_score,
+      authStore.user?.user_metadata?.target_score
+    ) || "79+"
+  )
 );
 
-const portraitSampleCount = computed(() => {
-  const totalFromHome = Number(homeAnalytics.value.totalCount || 0);
-  if (totalFromHome > 0) return totalFromHome;
-  return Number(profilePortrait.value.sampleCount || 0);
-});
-
-const portraitSampleLabel = computed(() => {
-  if (profilePortrait.value.loading) return "画像生成中...";
-  return `基于 ${formatInteger(portraitSampleCount.value)} 条作答`;
-});
-
-const portraitAdvice = computed(() => profilePortrait.value.advice);
-
-const radarChart = computed(() => buildRadarChart(portraitMetrics.value));
-const currentStreak = computed(() => Math.max(0, Number(homeAnalytics.value.currentStreak || 0)));
-const currentGoalDays = computed(() => {
-  if (currentStreak.value < 7) return 7;
-  if (currentStreak.value < 14) return 14;
-  if (currentStreak.value < 30) return 30;
-  return 30;
-});
-const streakGoalGap = computed(() => Math.max(0, currentGoalDays.value - currentStreak.value));
-const streakRingProgress = computed(() => {
-  if (homeAnalytics.value.loading) return 0;
-  if (!currentGoalDays.value) return 0;
-  return Math.max(0, Math.min(currentStreak.value / currentGoalDays.value, 1));
-});
-const streakRingDashoffset = computed(() => (276.5 * (1 - streakRingProgress.value)).toFixed(1));
-const streakHeading = computed(() => `连续练习 ${formatInteger(currentStreak.value)} 天`);
-const streakSummary = computed(() => {
-  if (homeAnalytics.value.loading) return "正在根据真实练习记录同步状态...";
-
-  if (currentStreak.value <= 0) {
-    if (Number(homeAnalytics.value.totalCount || 0) > 0) {
-      return "今天尚未练习，连续记录已中断";
-    }
-    return "完成第一题后即可开始累计连续记录";
-  }
-
-  if (currentStreak.value < 7) {
-    return `距 7 天目标还差 ${formatInteger(7 - currentStreak.value)} 天 · 继续加油`;
-  }
-
-  if (currentStreak.value < 14) {
-    return `7 天里程碑已解锁 · 距 14 天目标还差 ${formatInteger(14 - currentStreak.value)} 天`;
-  }
-
-  if (currentStreak.value < 30) {
-    return `14 天里程碑已解锁 · 距 30 天目标还差 ${formatInteger(30 - currentStreak.value)} 天`;
-  }
-
-  return `30 天里程碑已解锁 · 当前已连续 ${formatInteger(currentStreak.value)} 天`;
-});
-const nextMilestoneIndex = computed(() =>
-  STREAK_MILESTONES.findIndex((item) => currentStreak.value < item.days)
+const examDate = computed(() =>
+  formatDateValue(
+    pickText(
+      profile.value?.exam_date,
+      profile.value?.examDate,
+      profile.value?.test_date,
+      profile.value?.testDate,
+      profile.value?.target_exam_date,
+      authStore.user?.user_metadata?.exam_date
+    ),
+    "2026-08-18"
+  )
 );
-const milestoneSteps = computed(() =>
-  STREAK_MILESTONES.map((item, index) => {
-    const completed = currentStreak.value >= item.days;
-    const active = !completed && index === nextMilestoneIndex.value;
-    return {
-      ...item,
-      key: `milestone-${item.days}` ,
-      daysLabel: `${item.days}天`,
-      circle: completed ? "✓" : active ? "🔥" : `${item.days}`,
-      state: completed ? "done" : active ? "active" : ""
-    };
-  })
+
+const currentStage = computed(() =>
+  pickText(
+    profile.value?.current_stage,
+    profile.value?.currentStage,
+    profile.value?.stage,
+    profile.value?.learning_stage,
+    authStore.user?.user_metadata?.current_stage
+  ) || inferStageFromScore() || "冲刺提升"
 );
-const milestoneSegments = computed(() =>
-  STREAK_MILESTONES.slice(1).map((item, index) => ({
-    key: `segment-${item.days}`,
-    completed: currentStreak.value >= item.days,
-    index
-  }))
-);
-const streakTip = computed(() => {
-  if (homeAnalytics.value.loading) {
-    return {
-      icon: "🎯",
-      title: "正在根据真实练习记录计算里程碑状态",
-      subtitle: "节点、链条和周练习题数会在数据同步后自动更新"
-    };
-  }
 
-  if (Number(homeAnalytics.value.totalCount || 0) <= 0) {
-    return {
-      icon: "🎯",
-      title: "完成今天的第一题即可开始累计 7 天里程碑奖励",
-      subtitle: "连续打卡和本周练习统计会跟随真实练习记录自动更新"
-    };
+const membershipPill = computed(() => {
+  if (!authStore.loaded) {
+    return { kind: "loading", icon: "⌛", label: "状态同步中" };
   }
-
-  if (currentStreak.value < 7) {
-    return {
-      icon: "🎯",
-      title: `再练 ${formatInteger(7 - currentStreak.value)} 天即可解锁 7 天里程碑奖励`,
-      subtitle: currentStreak.value > 0
-        ? `当前已连续练习 ${formatInteger(currentStreak.value)} 天`
-        : "今天尚未练习，连续记录已中断"
-    };
+  if (authStore.isPremium) {
+    return { kind: "vip", icon: "♛", label: "VIP 无限练习" };
   }
-
-  if (currentStreak.value < 14) {
-    return {
-      icon: "🏆",
-      title: `7 天里程碑奖励已解锁，距离 14 天还差 ${formatInteger(14 - currentStreak.value)} 天`,
-      subtitle: `当前已连续练习 ${formatInteger(currentStreak.value)} 天`
-    };
+  if (authStore.isInTrial) {
+    return { kind: "trial", icon: "✦", label: `试用 ${formatInteger(authStore.trialDaysLeft)} 天` };
   }
-
-  if (currentStreak.value < 30) {
-    return {
-      icon: "🎯",
-      title: `14 天里程碑奖励已解锁，距离 30 天还差 ${formatInteger(30 - currentStreak.value)} 天`,
-      subtitle: `当前已连续练习 ${formatInteger(currentStreak.value)} 天`
-    };
-  }
-
-  return {
-    icon: "🎁",
-    title: "30 天里程碑奖励已解锁",
-    subtitle: `当前已连续练习 ${formatInteger(currentStreak.value)} 天，全部阶段已达成`
-  };
+  return { kind: "locked", icon: "◇", label: "未开通" };
 });
-const weekMaxCount = computed(() =>
-  Math.max(...homeAnalytics.value.recentDays.map((item) => Number(item.count || 0)), 0)
-);
-const weeklyBars = computed(() =>
-  homeAnalytics.value.recentDays.map((item) => {
-    const count = Number(item.count || 0);
-    const ratio = weekMaxCount.value > 0 ? count / weekMaxCount.value : 0;
-    return {
-      key: item.key,
-      label: item.isToday ? "今" : `${item.label || ""}`.replace(/^周/, "").slice(-1),
-      today: item.isToday,
-      has: count > 0,
-      count,
-      height: count > 0 ? `${Math.max(14, Math.round(ratio * 100))}%` : "3px"
-    };
-  })
-);
-const heroStudyRingProgress = computed(() => {
-  const score = Number(homeAnalytics.value.averageScore ?? 0);
-  if (homeAnalytics.value.loading || !Number.isFinite(score) || score <= 0) return 0;
-  return Math.max(0, Math.min(score / 90, 1));
-});
-const heroStudyRingDegree = computed(() => `${(heroStudyRingProgress.value * 360).toFixed(1)}deg`);
-const heroStudyScore = computed(() =>
-  homeAnalytics.value.loading ? "--" : formatScore(homeAnalytics.value.averageScore)
-);
-const heroStudyStatus = computed(() => {
-  if (homeAnalytics.value.loading) return "正在同步你的学习状态...";
 
-  const totalCount = Number(homeAnalytics.value.totalCount || 0);
-  const averageScore = Number(homeAnalytics.value.averageScore || 0);
-
-  if (totalCount <= 0) return "开始第一题后，这里会自动点亮。";
-  if (averageScore >= 60) return "状态在线，继续保持冲分节奏！";
-  if (averageScore >= 45) return "继续保持，稳步提升中！";
-  return "基础在累积，坚持练习会更稳。";
+const currentPlanLabel = computed(() => {
+  if (!authStore.loaded) return "同步中";
+  if (authStore.isPremium) {
+    const plan = normalizeText(profile.value?.vip_plan);
+    if (plan === "week") return "VIP 周卡";
+    if (plan === "month") return "VIP 月卡";
+    return "VIP 无限练习";
+  }
+  if (authStore.isInTrial) return `试用中 · 剩余 ${formatInteger(authStore.trialDaysLeft)} 天`;
+  return "暂未开通";
 });
-const heroStudyFacts = computed(() => [
-  `累计练习 ${formatInteger(homeAnalytics.value.totalCount)} 题`,
-  `已坚持 ${formatInteger(homeAnalytics.value.activeDaysCount)} 天`
+
+const membershipSummary = computed(() => {
+  if (!authStore.loaded) return "当前套餐：正在同步会员状态";
+  if (authStore.isPremium) {
+    const expiresAt = formatDateValue(profile.value?.vip_expires_at, "");
+    const suffix = expiresAt ? `有效期至 ${expiresAt}` : "长期有效";
+    return `当前套餐：${currentPlanLabel.value}（${suffix}）`;
+  }
+  if (authStore.isInTrial) return `当前套餐：试用权益（剩余 ${formatInteger(authStore.trialDaysLeft)} 天）`;
+  return "当前套餐：未开通";
+});
+
+const profileInfoRows = computed(() => [
+  { icon: "target", label: "目标分数", value: targetScore.value, strong: true },
+  { icon: "calendar", label: "考试日期", value: examDate.value, strong: true },
+  { icon: "stage", label: "当前阶段", value: currentStage.value, strong: true },
+  {
+    icon: "mail",
+    label: "邮箱",
+    value: userEmail.value || "邮箱未绑定",
+    badge: emailVerified.value ? "已验证" : "未验证",
+    badgeTone: emailVerified.value ? "ok" : "warn"
+  }
 ]);
-const heroWeekSummary = computed(() => {
-  if (homeAnalytics.value.loading) return "正在同步本周练习频率";
-  return `已练习 ${formatInteger(homeAnalytics.value.activeDaysCount)} 天 · 当前连续 ${formatInteger(currentStreak.value)} 天`;
+
+const latestLoginEvent = computed(() => {
+  const rows = Array.isArray(loginEventsSnapshot.value.rows) ? loginEventsSnapshot.value.rows : [];
+  return rows[0] || null;
 });
-const heroWeekDots = computed(() =>
-  homeAnalytics.value.recentDays.map((item, index) => ({
-    key: item.key,
-    label: WEEKDAY_SHORT_LABELS[index] || `${index + 1}`,
-    active: Number(item.count || 0) > 0,
-    today: Boolean(item.isToday)
-  }))
+
+const accountStatusRows = computed(() => [
+  {
+    label: "最近一次登录",
+    value: formatLatestLoginText(),
+    icon: "login",
+    color: "purple"
+  },
+  {
+    label: "考员状态",
+    value: buildVipStatusText(),
+    icon: "status",
+    color: "gold"
+  },
+  {
+    label: "做题时长/天数",
+    value: buildPracticeTimeText(),
+    icon: "time",
+    color: "green"
+  },
+  {
+    label: "AI 私教记忆",
+    value: buildAgentMemoryText(),
+    icon: "memory",
+    color: "blue"
+  },
+  {
+    label: "今日计划状态",
+    value: buildPlanStatusText(),
+    icon: "plan",
+    color: "teal"
+  }
+]);
+
+const identityTargetScore = computed(() => {
+  const configuredTarget = pickText(
+    profile.value?.target_score,
+    profile.value?.targetScore,
+    profile.value?.goal_score,
+    profile.value?.goalScore,
+    profile.value?.pte_target_score
+  );
+  return configuredTarget ? formatTargetScore(configuredTarget) : "未设置";
+});
+
+const identityConfig = computed(() => [
+  { label: "目标分数", value: identityTargetScore.value, icon: "score", color: "blue" },
+  { label: "重点模块", value: focusModules.value, icon: "modules", color: "purple" },
+  { label: "每日学习时长", value: dailyStudyTime.value, icon: "duration", color: "cyan" },
+  { label: "最佳时段", value: bestStudyWindow.value, icon: "window", color: "gold" },
+  { label: "AI 建议强度", value: aiIntensity.value, icon: "ai", color: "red" }
+]);
+
+const focusModules = computed(() => {
+  const explicit = normalizeListValue(
+    profile.value?.focus_modules ||
+    profile.value?.focusModules ||
+    profile.value?.priority_modules ||
+    authStore.user?.user_metadata?.focus_modules
+  );
+  if (explicit.length) return explicit.slice(0, 4).join(" / ");
+
+  const completedCounts = profileProgress.value?.completedCounts || {};
+  const ranked = ["RA", "DI", "WFD", "RTS", "WE", "RS"]
+    .map((taskType) => ({
+      taskType,
+      count: Number(completedCounts[taskType] || 0)
+    }))
+    .sort((left, right) => left.count - right.count)
+    .map((item) => item.taskType);
+
+  return ranked.slice(0, 3).join(" / ") || "RA / DI / WFD";
+});
+
+const dailyStudyTime = computed(() => {
+  const explicit = pickText(
+    profile.value?.daily_study_time,
+    profile.value?.dailyStudyTime,
+    profile.value?.daily_minutes,
+    profile.value?.dailyStudyMinutes
+  );
+  if (explicit) return /\d/.test(explicit) && !explicit.includes("分钟") ? `${explicit} 分钟` : explicit;
+  if (planSnapshot.value.plan?.total_minutes) {
+    return `${formatInteger(planSnapshot.value.plan.total_minutes)} 分钟`;
+  }
+  return "60-90 分钟";
+});
+
+const bestStudyWindow = computed(() =>
+  pickText(
+    profile.value?.best_study_time,
+    profile.value?.bestStudyTime,
+    profile.value?.preferred_study_time,
+    profile.value?.study_window
+  ) || "晚上 19:00-22:00"
 );
-const heroQuoteLines = ["每一次练习，", "都是通往更好的自己。"];
+
+const aiIntensity = computed(() =>
+  pickText(
+    profile.value?.ai_intensity,
+    profile.value?.aiIntensity,
+    profile.value?.coach_intensity,
+    authStore.user?.user_metadata?.ai_intensity
+  ) || "标准"
+);
+
+const favorites = computed(() => {
+  const summary = favoritesSnapshot.value;
+  const counts = summary.countsByTask || {};
+
+  return favoriteTaskTypes.map((item) => ({
+    ...item,
+    count: Number(counts[item.type] || 0)
+  }));
+});
+
+const favoriteTotalCount = computed(() => Number(favoritesSnapshot.value.totalCount || 0));
+
+const favoriteSummaryText = computed(() => {
+  if (favoritesSnapshot.value.loading) return "正在同步你的重点题目。";
+  if (favoritesSnapshot.value.source === "error") return "收藏暂时同步失败，可以先进入题库继续练习。";
+  if (favoriteTotalCount.value > 0) {
+    return `已整理 ${formatInteger(favoriteTotalCount.value)} 个重点内容，适合考前集中复习。`;
+  }
+  return "把高频题、易错题和需要回看的题收藏起来，这里会成为你的复习清单。";
+});
+
+const favoriteTaskTypes = [
+  { type: "RA", label: "RA 朗读", hint: "朗读题", icon: "ra", color: "blue" },
+  { type: "RS", label: "RS 复述", hint: "复述句子", icon: "rs", color: "purple" },
+  { type: "RL", label: "RL 讲座", hint: "复述讲座", icon: "rl", color: "green" },
+  { type: "WFD", label: "WFD 听写", hint: "听写句子", icon: "wfd", color: "cyan" },
+  { type: "WE", label: "WE 作文", hint: "写作题", icon: "we", color: "gold" },
+  { type: "DI", label: "DI 图片", hint: "图片描述", icon: "di", color: "indigo" },
+  { type: "RTS", label: "RTS 情景", hint: "情景回应", icon: "rts", color: "orange" }
+];
+
+const devices = computed(() => {
+  const current = detectCurrentDevice();
+  return [
+    {
+      icon: getDeviceIconSource(current),
+      name: current.name,
+      meta: current.meta,
+      time: "正在使用",
+      status: "当前设备",
+      current: true
+    }
+  ];
+});
+
+const loginRecords = computed(() => {
+  const rows = Array.isArray(loginEventsSnapshot.value.rows) ? loginEventsSnapshot.value.rows : [];
+  const current = detectCurrentDevice();
+  const currentRecordIndex = rows.findIndex((row) => doesLoginRecordMatchCurrentDevice(row, current));
+
+  return rows.slice(0, 5).map((row, index) => ({
+    icon: getDeviceIconSource(row),
+    device: row.device_label || "设备未记录",
+    meta: formatLoginEventMeta(row),
+    time: formatRelativeDateTime(row.created_at || row.logged_in_at) || "时间未记录",
+    current: index === currentRecordIndex,
+    status: index === currentRecordIndex ? "当前设备" : ""
+  }));
+});
+
+function isNavActive(item) {
+  if (item.key === "profile") return route.path === "/profile";
+  if (item.key === "home") return route.path === "/home" || route.path === "/";
+  return route.path === item.to || route.fullPath === item.to;
+}
+
+function goTo(path) {
+  const normalized = normalizeText(path);
+  if (!normalized) return;
+  if (normalized === route.fullPath) return;
+  router.push(normalized);
+}
 
 function selectPlan(planKey) {
   selectedPlanKey.value = planKey;
 }
 
-function goBack() {
-  router.push("/home");
-}
-
 function openUpgrade() {
+  if (BILLING_PAUSED) {
+    uiStore.showToast(BILLING_PAUSED_MESSAGE, "info", 3600);
+  }
   router.push({
     path: "/upgrade",
     query: {
@@ -457,13 +462,54 @@ function openUpgrade() {
   });
 }
 
+function handleEditProfile() {
+  const draft = createProfileDraft({
+    displayName: userDisplayName.value,
+    targetScore: targetScore.value,
+    examDate: examDate.value,
+    currentStage: currentStage.value
+  });
+  profileDraft.value = draft;
+  profileDraftOriginal.value = { ...draft };
+  avatarDraftDataUrl.value = "";
+  avatarDraftName.value = "";
+  avatarUploadError.value = "";
+  profileSaveError.value = "";
+  profileModalOpen.value = true;
+}
+
+function openFavorites() {
+  router.push("/rts/favorites");
+}
+
 async function handleLogout() {
-  await authStore.logout();
-  router.replace("/auth");
+  if (loggingOut.value) return;
+  loggingOut.value = true;
+  try {
+    await authStore.logout();
+    router.replace("/auth");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    uiStore.showToast("退出登录失败，请稍后重试", "warning");
+  } finally {
+    loggingOut.value = false;
+  }
+}
+
+function showLoginRecordsNotice() {
+  if (loginEventsSnapshot.value.source === "missing_table") {
+    uiStore.showToast("登录记录表尚未创建，请先执行 user_login_events SQL。", "warning");
+    return;
+  }
+  if (loginEventsSnapshot.value.source === "error") {
+    uiStore.showToast("登录记录同步失败，请稍后重试。", "warning");
+    return;
+  }
+  uiStore.showToast("当前仅保留最近 5 条真实登录记录。", "info");
 }
 
 function triggerAvatarPicker() {
-  if (avatarUploading.value) return;
+  if (avatarUploading.value || profileSaving.value) return;
   avatarInputRef.value?.click?.();
 }
 
@@ -475,28 +521,466 @@ async function handleAvatarFileChange(event) {
   }
   if (!file) return;
 
-  avatarUploadError.value = "请选择图片文件";
+  avatarUploadError.value = "";
 
-  if (!String(file.type || "").startsWith("image/")) {
-    avatarUploadError.value = "请选择图片文件";
+  if (!PROFILE_AVATAR_ACCEPTED_TYPES.has(String(file.type || "").toLowerCase())) {
+    avatarUploadError.value = "请选择 JPG、PNG 或 WebP 图片";
+    uiStore.showToast(avatarUploadError.value, "warning");
     return;
   }
 
-  if (Number(file.size || 0) > 8 * 1024 * 1024) {
-    avatarUploadError.value = "请选择图片文件";
+  if (Number(file.size || 0) > PROFILE_AVATAR_MAX_BYTES) {
+    avatarUploadError.value = "图片不能超过 2MB";
+    uiStore.showToast(avatarUploadError.value, "warning");
     return;
   }
 
   avatarUploading.value = true;
   try {
     const avatarDataUrl = await createAvatarDataUrl(file);
-    await authStore.updateAvatarDataUrl(avatarDataUrl);
+    avatarDraftDataUrl.value = avatarDataUrl;
+    avatarDraftName.value = normalizeText(file.name);
   } catch (error) {
     console.error("Avatar upload failed:", error);
-    avatarUploadError.value = error?.message || "头像上传失败，请稍后重试";
+    avatarUploadError.value = "头像处理失败，请稍后重试";
+    uiStore.showToast(avatarUploadError.value, "warning");
   } finally {
     avatarUploading.value = false;
   }
+}
+
+function closeProfileModal() {
+  if (profileSaving.value) return;
+  profileModalOpen.value = false;
+  profileSaveError.value = "";
+  avatarUploadError.value = "";
+}
+
+function handleProfileOverlayClick(event) {
+  if (event.target !== event.currentTarget) return;
+  closeProfileModal();
+}
+
+async function saveProfileDraft() {
+  if (profileSaving.value) return;
+
+  const validationError = validateProfileDraft(profileDraft.value, profileDraftOriginal.value);
+  if (validationError) {
+    profileSaveError.value = validationError;
+    return;
+  }
+
+  profileSaving.value = true;
+  profileSaveError.value = "";
+  try {
+    const updatePayload = {
+      displayName: profileDraft.value.displayName,
+      avatarDataUrl: avatarDraftDataUrl.value
+    };
+
+    if (profileDraft.value.targetScore !== profileDraftOriginal.value.targetScore) {
+      updatePayload.targetScore = profileDraft.value.targetScore;
+    }
+    if (profileDraft.value.examDate !== profileDraftOriginal.value.examDate) {
+      updatePayload.examDate = profileDraft.value.examDate;
+    }
+    if (profileDraft.value.currentStage !== profileDraftOriginal.value.currentStage) {
+      updatePayload.currentStage = profileDraft.value.currentStage;
+    }
+
+    await authStore.updateProfileDetails(updatePayload);
+    profileModalOpen.value = false;
+    avatarDraftDataUrl.value = "";
+    avatarDraftName.value = "";
+    uiStore.showToast("个人资料已更新", "success");
+  } catch (error) {
+    console.error("Profile update failed:", error);
+    profileSaveError.value = toFriendlyProfileError(error);
+  } finally {
+    profileSaving.value = false;
+  }
+}
+
+async function loadProfileSnapshots({ reset = false } = {}) {
+  if (profileRefreshPromise) {
+    return profileRefreshPromise;
+  }
+
+  if (reset) {
+    homeAnalytics.value = createEmptyHomeAnalytics();
+    favoritesSnapshot.value = createEmptyFavoritesSnapshot();
+    planSnapshot.value = createEmptyPlanSnapshot();
+    loginEventsSnapshot.value = createEmptyLoginEventsSnapshot();
+    profileProgress.value = createEmptyProfileProgress();
+  }
+
+  profileRefreshPromise = (async () => {
+    await authStore.init();
+    if (!authStore.loaded) {
+      await authStore.loadStatus();
+    }
+
+    const [
+      analyticsSnapshot,
+      favoriteSummary,
+      todayPlan,
+      loginEventsSummary,
+      progressSnapshot
+    ] = await Promise.all([
+      loadHomeAnalyticsSnapshotForAuth(authStore),
+      loadFavoritesSnapshotForAuth(),
+      loadTodayPlanSnapshotForAuth(),
+      loadLoginEventsForAuth(authStore),
+      loadProfileProgressSnapshotForAuth(authStore)
+    ]);
+
+    homeAnalytics.value = analyticsSnapshot;
+    favoritesSnapshot.value = favoriteSummary;
+    planSnapshot.value = todayPlan;
+    loginEventsSnapshot.value = loginEventsSummary;
+    profileProgress.value = progressSnapshot;
+  })();
+
+  try {
+    await profileRefreshPromise;
+  } finally {
+    profileRefreshPromise = null;
+  }
+}
+
+function handleProfileFocusRefresh() {
+  void loadProfileSnapshots({ reset: false });
+}
+
+function handleProfileVisibilityChange() {
+  if (typeof document === "undefined") return;
+  if (document.visibilityState !== "visible") return;
+  void loadProfileSnapshots({ reset: false });
+}
+
+onMounted(async () => {
+  await loadProfileSnapshots({ reset: true });
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("focus", handleProfileFocusRefresh);
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", handleProfileVisibilityChange);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== "undefined") {
+    window.removeEventListener("focus", handleProfileFocusRefresh);
+  }
+  if (typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", handleProfileVisibilityChange);
+  }
+});
+
+function buildVipStatusText() {
+  if (!authStore.loaded) return "会员状态同步中";
+  if (authStore.isPremium) {
+    const expiresAt = formatDateValue(profile.value?.vip_expires_at, "");
+    return expiresAt ? `${currentPlanLabel.value} · 有效期至 ${expiresAt}` : `${currentPlanLabel.value} · 长期有效`;
+  }
+  if (authStore.isInTrial) return `试用中 · 剩余 ${formatInteger(authStore.trialDaysLeft)} 天`;
+  return "未开通 VIP";
+}
+
+function buildPracticeTimeText() {
+  if (homeAnalytics.value.loading) return "练习记录同步中";
+  const weekMinutes = Number(homeAnalytics.value.weekMinutes || 0);
+  const activeDays = Number(homeAnalytics.value.activeDaysCount || 0);
+  if (weekMinutes > 0) return `本周 ${formatInteger(weekMinutes)} 分钟 · 累计 ${formatInteger(activeDays)} 天`;
+  return `累计 ${formatInteger(activeDays)} 天 · 做题时长待同步`;
+}
+
+function buildAgentMemoryText() {
+  if (!authStore.loaded || planSnapshot.value.loading) return "同步中";
+  if (!authStore.isPremium && !authStore.isInTrial) return "未启用 · VIP 专属";
+  if (planSnapshot.value.reasonCode === "table_missing") return "待配置 · 计划表未创建";
+  if (planSnapshot.value.reasonCode === "progress_error") return "已启用 · 进度同步失败";
+  if (planSnapshot.value.reasonCode === "error") return "同步失败";
+  if (planSnapshot.value.plan) {
+    const updatedAt = formatShortTime(planSnapshot.value.plan.updated_at || planSnapshot.value.plan.created_at);
+    return updatedAt ? `已启用 · 计划更新于 ${updatedAt}` : "已启用 · 今日计划已同步";
+  }
+  return "已启用 · 今日暂无计划";
+}
+
+function buildPlanStatusText() {
+  if (planSnapshot.value.loading) return "计划同步中";
+  if (planSnapshot.value.reasonCode === "progress_error") return "计划进度同步失败";
+  if (planSnapshot.value.reasonCode === "error") return "AI 计划同步失败";
+  const progress = planSnapshot.value.progress;
+  if (progress?.targetCount > 0) {
+    if (progress.isComplete) {
+      return `已完成 · ${formatInteger(progress.completedCount)} / ${formatInteger(progress.targetCount)} 项`;
+    }
+    return `进行中 · 已完成 ${formatInteger(progress.completedCount)} / ${formatInteger(progress.targetCount)} 项`;
+  }
+  if (homeAnalytics.value.todayCount > 0) {
+    return `暂无 AI 计划 · 今日已练 ${formatInteger(homeAnalytics.value.todayCount)} 题`;
+  }
+  return "暂无计划 · 可在 AI 私教生成";
+}
+
+function inferStageFromScore() {
+  const average = Number(homeAnalytics.value.averageScore);
+  if (!Number.isFinite(average) || average <= 0) return "";
+  if (average >= 75) return "冲刺提升";
+  if (average >= 58) return "稳步提分";
+  return "基础巩固";
+}
+
+async function loadFavoritesSnapshotForAuth() {
+  const userId = await resolveCurrentUserId();
+  if (!userId) {
+    return {
+      ...createEmptyFavoritesSnapshot(),
+      loading: false,
+      source: "auth_missing"
+    };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("favorites")
+      .select("task_type, question_id, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    if (error) {
+      if (isMissingTableError(error, "favorites")) {
+        const localCounts = readLocalFavoriteCounts(userId);
+        return buildFavoritesSnapshotFromCounts(localCounts, "local_missing_table");
+      }
+      throw error;
+    }
+
+    const countsByTask = {};
+    (Array.isArray(data) ? data : []).forEach((row) => {
+      const taskType = normalizeTaskType(row?.task_type) || "OTHER";
+      countsByTask[taskType] = (countsByTask[taskType] || 0) + 1;
+    });
+
+    return buildFavoritesSnapshotFromCounts(countsByTask, "remote");
+  } catch (error) {
+    console.warn("Favorites summary load failed:", error);
+    return {
+      ...createEmptyFavoritesSnapshot(),
+      loading: false,
+      source: "error"
+    };
+  }
+}
+
+async function loadTodayPlanSnapshotForAuth() {
+  const userId = await resolveCurrentUserId();
+  if (!userId) {
+    return {
+      ...createEmptyPlanSnapshot(),
+      loading: false,
+      reasonCode: "auth_missing"
+    };
+  }
+
+  const dateKey = getLocalDateKey();
+
+  try {
+    const { data, error } = await supabase
+      .from("agent_daily_plans")
+      .select("id, user_id, plan_date, title, source, plan_json, created_at, updated_at")
+      .eq("user_id", userId)
+      .eq("plan_date", dateKey)
+      .maybeSingle();
+
+    if (error) {
+      if (isMissingTableError(error, "agent_daily_plans")) {
+        return {
+          ...createEmptyPlanSnapshot(),
+          loading: false,
+          reasonCode: "table_missing"
+        };
+      }
+      throw error;
+    }
+
+    if (!data) {
+      return {
+        ...createEmptyPlanSnapshot(),
+        loading: false,
+        reasonCode: "no_plan"
+      };
+    }
+
+    const plan = normalizePlanRow(data);
+    const progress = await loadPlanProgress({ userId, plan, dateKey });
+
+    return {
+      loading: false,
+      reasonCode: "ok",
+      plan,
+      progress
+    };
+  } catch (error) {
+    console.warn("Agent plan summary load failed:", error);
+    if (error?.profileViewReasonCode === "progress_error") {
+      return {
+        ...createEmptyPlanSnapshot(),
+        loading: false,
+        reasonCode: "progress_error"
+      };
+    }
+    return {
+      ...createEmptyPlanSnapshot(),
+      loading: false,
+      reasonCode: "error"
+    };
+  }
+}
+
+async function loadPlanProgress({ userId, plan, dateKey }) {
+  const { startIso, endIso } = getLocalDayRange(dateKey);
+  const { data, error } = await supabase
+    .from("practice_logs")
+    .select("id, task_type, created_at")
+    .eq("user_id", userId)
+    .gte("created_at", startIso)
+    .lt("created_at", endIso);
+
+  if (error) {
+    const progressError = new Error(error.message || "Plan progress load failed");
+    progressError.profileViewReasonCode = "progress_error";
+    progressError.cause = error;
+    throw progressError;
+  }
+
+  const counts = {};
+  if (Array.isArray(data)) {
+    data.forEach((row) => {
+      const taskType = normalizeTaskType(row?.task_type);
+      if (!taskType) return;
+      counts[taskType] = (counts[taskType] || 0) + 1;
+    });
+  }
+
+  let completedCount = 0;
+  let targetCount = 0;
+  (Array.isArray(plan.items) ? plan.items : []).forEach((item) => {
+    const taskType = normalizeTaskType(item?.task_type);
+    const target = Math.max(1, Math.round(Number(item?.target_count || item?.count || 1)));
+    const completed = Math.min(Math.max(0, Number(counts[taskType] || 0)), target);
+    targetCount += target;
+    completedCount += completed;
+  });
+
+  return {
+    completedCount,
+    targetCount,
+    isComplete: targetCount > 0 && completedCount >= targetCount
+  };
+}
+
+function normalizePlanRow(row) {
+  const rawPlan = isPlainObject(row?.plan_json) ? row.plan_json : {};
+  const rawItems = Array.isArray(rawPlan?.items) ? rawPlan.items : [];
+  const items = rawItems.map((item) => ({
+    task_type: normalizeTaskType(item?.task_type || item?.type),
+    label: normalizeText(item?.label),
+    count: Math.max(1, Math.round(Number(item?.count || item?.target_count || 1))),
+    minutes: Math.max(0, Math.round(Number(item?.minutes || 0)))
+  })).filter((item) => item.task_type);
+
+  return {
+    id: normalizeText(row?.id),
+    plan_date: normalizeText(row?.plan_date),
+    title: normalizeText(row?.title || rawPlan?.title) || "今日 AI 训练计划",
+    source: normalizeText(row?.source || rawPlan?.source),
+    total_minutes: Math.max(0, Math.round(Number(rawPlan?.total_minutes || sumBy(items, "minutes") || 0))),
+    created_at: normalizeText(row?.created_at),
+    updated_at: normalizeText(row?.updated_at),
+    items
+  };
+}
+
+function createEmptyFavoritesSnapshot() {
+  return {
+    loading: true,
+    source: "loading",
+    totalCount: 0,
+    countsByTask: {}
+  };
+}
+
+function createEmptyPlanSnapshot() {
+  return {
+    loading: true,
+    reasonCode: "loading",
+    plan: null,
+    progress: null
+  };
+}
+
+function createProfileDraft(seed = {}) {
+  return {
+    displayName: normalizeText(seed.displayName),
+    targetScore: normalizeTargetScoreInput(seed.targetScore),
+    examDate: normalizeDateInput(seed.examDate),
+    currentStage: normalizeText(seed.currentStage)
+  };
+}
+
+function buildFavoritesSnapshotFromCounts(countsByTask, source) {
+  const safeCounts = isPlainObject(countsByTask) ? countsByTask : {};
+  return {
+    loading: false,
+    source,
+    totalCount: Object.values(safeCounts).reduce((sum, value) => sum + Number(value || 0), 0),
+    countsByTask: safeCounts
+  };
+}
+
+function readLocalFavoriteCounts(userId) {
+  const taskTypes = ["RA", "RTS", "DI"];
+  return taskTypes.reduce((counts, taskType) => {
+    const key = `kai_kou_${taskType.toLowerCase()}_favorites_${userId}`;
+    counts[taskType] = readJsonArrayLengthFromLocalStorage(key);
+    return counts;
+  }, {});
+}
+
+function readJsonArrayLengthFromLocalStorage(key, userId = "") {
+  if (typeof localStorage === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return 0;
+
+    if (!userId) return parsed.length;
+
+    return parsed.filter((item) => {
+      const itemUserId = normalizeText(item?.user_id || item?.userId || item?.owner_id);
+      return itemUserId === userId;
+    }).length;
+  } catch {
+    return 0;
+  }
+}
+
+function formatFavoriteCount(count) {
+  if (favoritesSnapshot.value.loading || favoritesSnapshot.value.source === "error") return "--";
+  return formatInteger(count);
+}
+
+async function resolveCurrentUserId() {
+  const authUserId = normalizeText(authStore.user?.id);
+  if (authUserId) return authUserId;
+  const { data } = await supabase.auth.getSession();
+  return normalizeText(data?.session?.user?.id);
 }
 
 async function createAvatarDataUrl(file) {
@@ -507,16 +991,10 @@ async function createAvatarDataUrl(file) {
   canvas.height = size;
 
   const context = canvas.getContext("2d");
-  if (!context) {
-      throw new Error("当前浏览器不支持头像处理");
-  }
+  if (!context) throw new Error("当前浏览器不支持头像处理");
 
-  const sourceWidth = Number(image.naturalWidth || image.width || 0);
-  const sourceHeight = Number(image.naturalHeight || image.height || 0);
-  if (!sourceWidth || !sourceHeight) {
-    throw new Error("图片读取失败，请重新选择");
-  }
-
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
   const sourceSize = Math.min(sourceWidth, sourceHeight);
   const sourceX = Math.max(0, (sourceWidth - sourceSize) / 2);
   const sourceY = Math.max(0, (sourceHeight - sourceSize) / 2);
@@ -565,2133 +1043,2048 @@ function blobToDataUrl(blob) {
   });
 }
 
-async function loadProfileSnapshots({ reset = false } = {}) {
-  if (profileRefreshPromise) {
-    return profileRefreshPromise;
-  }
-
-  if (reset) {
-    homeAnalytics.value = createEmptyHomeAnalytics();
-    profilePortrait.value = createEmptyProfilePortrait();
-    profileProgress.value = createEmptyProfileProgress();
-  }
-
-  profileRefreshPromise = (async () => {
-    await authStore.init();
-    if (!authStore.loaded) {
-      await authStore.loadStatus();
-    }
-
-    const [analyticsSnapshot, portraitSnapshot, progressSnapshot] = await Promise.all([
-      loadHomeAnalyticsSnapshotForAuth(authStore),
-      loadProfilePortraitSnapshotForAuth(authStore),
-      loadProfileProgressSnapshotForAuth(authStore)
-    ]);
-
-    homeAnalytics.value = analyticsSnapshot;
-    profilePortrait.value = portraitSnapshot;
-    profileProgress.value = progressSnapshot;
-  })();
-
-  try {
-    await profileRefreshPromise;
-  } finally {
-    profileRefreshPromise = null;
-  }
-}
-
-function handleProfileFocusRefresh() {
-  void loadProfileSnapshots({ reset: false });
-}
-
-function handleProfileVisibilityChange() {
-  if (typeof document === "undefined") return;
-  if (document.visibilityState !== "visible") return;
-  void loadProfileSnapshots({ reset: false });
-}
-
-onMounted(async () => {
-  await loadProfileSnapshots({ reset: true });
-
-  if (typeof window !== "undefined") {
-    window.addEventListener("focus", handleProfileFocusRefresh);
-  }
-  if (typeof document !== "undefined") {
-    document.addEventListener("visibilitychange", handleProfileVisibilityChange);
-  }
-});
-
-onUnmounted(() => {
-  if (typeof window !== "undefined") {
-    window.removeEventListener("focus", handleProfileFocusRefresh);
-  }
-  if (typeof document !== "undefined") {
-    document.removeEventListener("visibilitychange", handleProfileVisibilityChange);
-  }
-});
-
-function buildRadarChart(metrics) {
-  const normalizedMetrics = Array.isArray(metrics) ? metrics : [];
-  const count = normalizedMetrics.length;
-  const center = 70;
-  const radius = 44;
-  const labelRadius = 58;
-  const levels = [0.25, 0.5, 0.75, 1];
-
-  if (!count) {
-    return {
-      gridPolygons: [],
-      axes: [],
-      labels: [],
-      polygonPoints: "",
-      dataPoints: []
-    };
-  }
-
-  const pointAt = (index, scale = 1) => {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
-    return {
-      x: center + Math.cos(angle) * radius * scale,
-      y: center + Math.sin(angle) * radius * scale
-    };
-  };
-
-  const labelPointAt = (index) => {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / count;
-    return {
-      x: center + Math.cos(angle) * labelRadius,
-      y: center + Math.sin(angle) * labelRadius
-    };
-  };
-
-  const gridPolygons = levels.map((level) =>
-    normalizedMetrics.map((_, index) => {
-      const point = pointAt(index, level);
-      return `${point.x},${point.y}`;
-    }).join(" ")
-  );
-
-  const axes = normalizedMetrics.map((_, index) => {
-    const point = pointAt(index, 1);
-    return {
-      key: `axis-${index}`,
-      x1: center,
-      y1: center,
-      x2: point.x,
-      y2: point.y
-    };
-  });
-
-  const labels = normalizedMetrics.map((metric, index) => {
-    const point = labelPointAt(index);
-    return {
-      key: metric.key,
-      label: metric.shortLabel,
-      x: point.x,
-      y: point.y,
-      anchor: resolveRadarAnchor(point.x, center)
-    };
-  });
-
-  const dataPoints = normalizedMetrics.map((metric, index) => {
-    const point = pointAt(index, Math.max(0, Math.min(metric.score / 90, 1)));
-    return {
-      key: metric.key,
-      color: metric.color,
-      x: point.x,
-      y: point.y
-    };
-  });
+function detectCurrentDevice() {
+  const device = parseCurrentDevice();
 
   return {
-    gridPolygons,
-    axes,
-    labels,
-    polygonPoints: dataPoints.map((point) => `${point.x},${point.y}`).join(" "),
-    dataPoints
+    device_label: device.device_label,
+    browser: device.browser,
+    os: device.os,
+    name: device.device_label || "当前浏览器设备",
+    meta: [device.os, device.browser].filter(Boolean).join(" · ") || "设备信息未记录"
   };
 }
 
-function resolveRadarAnchor(x, center) {
-  if (x > center + 6) return "start";
-  if (x < center - 6) return "end";
-  return "middle";
+function doesLoginRecordMatchCurrentDevice(row, currentDevice) {
+  if (!row || !currentDevice) return false;
+  const sameFamily = classifyDeviceFamily(row) === classifyDeviceFamily(currentDevice);
+  const recordBrowser = normalizeText(row.browser).toLowerCase();
+  const currentBrowser = normalizeText(currentDevice.browser).toLowerCase();
+  return sameFamily && (!recordBrowser || !currentBrowser || recordBrowser === currentBrowser);
+}
+
+function formatLatestLoginText() {
+  const event = latestLoginEvent.value;
+  if (event) {
+    const formatted = formatRelativeDateTime(event.created_at || event.logged_in_at) || "时间未记录";
+    return `${formatted} · ${event.device_label || "设备未记录"}`;
+  }
+
+  const fallback = formatRelativeDateTime(authStore.user?.last_sign_in_at);
+  return fallback ? `${fallback} · 设备未记录` : "暂无登录记录";
+}
+
+function formatRelativeDateTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  const time = date.toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+
+  if (sameDay) return `今天 ${time}`;
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) return `昨天 ${time}`;
+
+  return date.toLocaleDateString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit"
+  }) + ` ${time}`;
+}
+
+function formatShortTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  const time = date.toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+  return sameDay ? `今日 ${time}` : formatDateValue(value, "");
+}
+
+function formatDateValue(value, fallback) {
+  const text = normalizeText(value);
+  if (!text) return fallback;
+  const date = new Date(text);
+  if (!Number.isFinite(date.getTime())) return text;
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatTargetScore(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "79+";
+  if (normalized.endsWith("+")) return normalized;
+  const numeric = Number(normalized);
+  if (Number.isFinite(numeric)) return `${Math.round(numeric)}+`;
+  return normalized;
+}
+
+function normalizeTargetScoreInput(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "";
+  const numeric = Number(normalized.replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(numeric)) return "";
+  return `${Math.max(10, Math.min(90, Math.round(numeric)))}`;
+}
+
+function normalizeDateInput(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "";
+  const date = new Date(normalized);
+  if (!Number.isFinite(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function validateProfileDraft(draft, original = {}) {
+  if (!normalizeText(draft?.displayName)) return "请输入昵称/用户名";
+
+  const targetText = normalizeText(draft?.targetScore);
+  const target = Number(targetText);
+  if (!targetText && normalizeText(original?.targetScore)) {
+    return "目标分数不能为空";
+  }
+  if (targetText && (!Number.isFinite(target) || target < 10 || target > 90)) {
+    return "目标分数请输入 10 到 90 之间的数字";
+  }
+
+  if (normalizeText(draft?.examDate)) {
+    const date = new Date(`${draft.examDate}T00:00:00`);
+    if (!Number.isFinite(date.getTime())) return "请选择有效的考试日期";
+    if (draft.examDate < getLocalDateKey()) return "考试日期不能早于今天";
+  }
+
+  return "";
+}
+
+function toFriendlyProfileError(error) {
+  const message = normalizeText(error?.message);
+  if (/schema cache|column .* does not exist|could not find .* column/i.test(message)) {
+    return "当前资料字段还未在数据库启用，已保留其它可保存内容。";
+  }
+  if (/permission|policy|rls|row-level|not authorized|401|403/i.test(message)) {
+    return "当前账号暂时没有更新权限，请重新登录后再试。";
+  }
+  if (/jwt|token|session|auth/i.test(message)) {
+    return "登录状态已过期，请重新登录后再试。";
+  }
+  return "保存失败，请稍后重试。";
+}
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getLocalDayRange(dateKey) {
+  const [year, month, day] = `${dateKey || getLocalDateKey()}`.split("-").map((value) => Number(value));
+  const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+  const end = new Date(year, month - 1, day + 1, 0, 0, 0, 0);
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString()
+  };
+}
+
+function isMissingTableError(error, tableName) {
+  const code = normalizeText(error?.code).toUpperCase();
+  const message = normalizeText(error?.message).toLowerCase();
+  if (code === "42P01" || code === "PGRST205") return true;
+  return message.includes("relation") && message.includes(tableName);
+}
+
+function normalizeTaskType(value) {
+  const taskType = normalizeText(value).toUpperCase();
+  return ["RA", "RS", "RL", "WE", "WFD", "DI", "RTS"].includes(taskType) ? taskType : "";
+}
+
+function normalizeListValue(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeText(item)).filter(Boolean);
+  }
+  const normalized = normalizeText(value);
+  if (!normalized) return [];
+  return normalized.split(/[,/、，\s]+/).map((item) => normalizeText(item)).filter(Boolean);
+}
+
+function pickText(...values) {
+  for (const value of values) {
+    const normalized = normalizeText(value);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function normalizeText(value) {
+  if (typeof value !== "string" && typeof value !== "number") return "";
+  return `${value}`.trim();
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function sumBy(items, key) {
+  return (Array.isArray(items) ? items : []).reduce((sum, item) => sum + Number(item?.[key] || 0), 0);
 }
 </script>
 
 <template>
-  <div class="profile-page">
-    <div class="nav">
-      <button type="button" class="nav-back" @click="goBack">← 返回首页</button>
-      <div class="nav-title">个人中心</div>
-      <div class="nav-spacer" />
-    </div>
+  <div class="personal-center-page">
+    <aside class="profile-sidebar">
+      <RouterLink class="profile-logo" to="/home" aria-label="返回首页">
+        <div class="profile-logo-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
+            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".95" />
+            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
+            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
+            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".75" />
+          </svg>
+        </div>
+        <span class="profile-logo-name">开口 PTE</span>
+      </RouterLink>
 
-    <div class="wrap">
-      <div class="hero">
-        <div class="hero-glow" />
-        <div class="hero-top">
-          <div class="av-wrap">
-            <button
-              type="button"
-              class="av"
-              :disabled="avatarUploading"
-              title="点击更换头像"
-              aria-label="点击更换头像"
-              @click="triggerAvatarPicker"
-            >
-              <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" class="av__img" />
+      <nav class="profile-nav" aria-label="个人中心导航">
+        <RouterLink
+          v-for="item in displayNavItems"
+          :key="item.key"
+          class="profile-nav-item"
+          :class="{ 'profile-nav-item--active': isNavActive(item) }"
+          :to="item.to"
+          :aria-current="isNavActive(item) ? 'page' : undefined"
+        >
+          <span class="profile-nav-icon" aria-hidden="true" v-html="item.icon"></span>
+          <span>{{ item.label }}</span>
+        </RouterLink>
+      </nav>
+
+      <div class="profile-sidebar-footer">
+        <div class="profile-promo">
+          <div class="profile-promo-title">PTE 备考资料包</div>
+          <div class="profile-promo-sub">真题 · 高频词汇 · 模板</div>
+          <button class="profile-promo-button" type="button" @click="goTo('/we/templates')">免费领取</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="profile-shell">
+      <header class="profile-topbar">
+        <div>
+          <div class="hello">你好，{{ userDisplayName }} 👋</div>
+          <div class="hello-sub">坚持每天进步一点，PTE 梦想更近一步！</div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="vip-pill" :class="`vip-pill--${membershipPill.kind}`">
+            <span>{{ membershipPill.icon }}</span>
+            <span>{{ membershipPill.label }}</span>
+          </div>
+          <div class="user-mini">
+            <span class="mini-avatar">
+              <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" />
               <span v-else>{{ userInitial }}</span>
-            </button>
-            <span class="av-crown" aria-hidden="true">
-              <svg viewBox="0 0 24 24" class="av-crown__icon" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M4 17h16l-1.4-8-4.8 3.5L12 5 10.2 12.5 5.4 9 4 17Z" fill="currentColor" stroke="none" />
-                <path d="M6 19h12" stroke-linecap="round" />
-              </svg>
             </span>
-            <span class="av-spark" aria-hidden="true">
-              <svg viewBox="0 0 16 16" class="av-spark__icon" fill="currentColor">
-                <path d="M8 1.2 9.6 6.4 14.8 8l-5.2 1.6L8 14.8 6.4 9.6 1.2 8l5.2-1.6Z" />
-              </svg>
-            </span>
+            <span>{{ userDisplayName }}</span>
           </div>
-          <input
-            ref="avatarInputRef"
-            type="file"
-            accept="image/*"
-            class="avatar-input"
-            @change="handleAvatarFileChange"
-          />
-          <div>
-            <div class="hero-name">{{ userDisplayName }}</div>
-            <div v-if="userEmail" class="hero-email">{{ userEmail }}</div>
-            <div class="trial-pill">
-              <div class="trial-pill__dot" />
-              {{ trialPillText }}
-            </div>
-            <div v-if="avatarUploadError" class="hero-avatar-error">{{ avatarUploadError }}</div>
-          </div>
+          <button class="logout-btn" type="button" :disabled="loggingOut" @click="handleLogout">
+            {{ loggingOut ? "退出中..." : "退出登录" }}
+          </button>
         </div>
+      </header>
 
-        <div class="hero-stats">
-          <div v-for="(stat, index) in heroStats" :key="stat.label" class="hs">
-            <div v-if="heroStatIcons[index]" class="hs-icon" aria-hidden="true">{{ heroStatIcons[index] }}</div>
-            <div class="hs-copy">
-              <div class="hs-n">{{ formatHeroStatValue(stat.value) }}</div>
-              <div class="hs-l">{{ stat.label }}</div>
-            </div>
-          </div>
-        </div>
+      <main class="profile-main">
+        <section class="page-heading">
+          <h1>个人中心</h1>
+          <span>PERSONAL CENTER</span>
+          <p>管理您的账号信息、学习身份配置、会员权益与设备安全</p>
+        </section>
 
-        <div class="hero-study-rail">
-          <section class="hero-study-card">
-            <div class="hero-study-card__title">学习状态</div>
-            <div class="hero-study-card__ring" :style="{ '--hero-study-progress': heroStudyRingDegree }">
-              <div class="hero-study-card__ring-inner">
-                <div class="hero-study-card__ring-value">{{ heroStudyScore }}</div>
-                <div class="hero-study-card__ring-label">平均分</div>
+        <section class="dashboard-grid">
+          <div class="dashboard-column">
+            <article class="pc-card profile-card">
+              <div class="card-title">
+                <span class="title-icon">♟</span>
+                <span>个人资料与账号中心</span>
               </div>
-            </div>
-            <p class="hero-study-card__message">{{ heroStudyStatus }}</p>
-            <ul class="hero-study-card__facts">
-              <li v-for="item in heroStudyFacts" :key="item">{{ item }}</li>
-            </ul>
-          </section>
 
-          <section class="hero-week-card">
-            <div class="hero-week-card__title">本周练习频率</div>
-            <p class="hero-week-card__summary">{{ heroWeekSummary }}</p>
-            <div class="hero-week-card__days">
-              <div v-for="item in heroWeekDots" :key="item.key" class="hero-week-card__day">
-                <span class="hero-week-card__label">{{ item.label }}</span>
-                <span
-                  class="hero-week-card__dot"
-                  :class="{
-                    'hero-week-card__dot--active': item.active,
-                    'hero-week-card__dot--today': item.today
-                  }"
-                >
-                  <span
-                    v-if="item.active"
-                    class="hero-week-card__dot-core"
-                    :class="{ 'hero-week-card__dot-core--today': item.today }"
+              <div class="profile-body">
+                <div class="profile-left">
+                  <button
+                    type="button"
+                    class="avatar-large"
+                    :disabled="avatarUploading || profileSaving"
+                    aria-label="更换头像"
+                    @click="handleEditProfile"
                   >
-                    {{ item.today ? "🔥" : "" }}
-                  </span>
+                    <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" />
+                    <span v-else>{{ userInitial }}</span>
+                  </button>
+                  <input
+                    ref="avatarInputRef"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="avatar-input"
+                    @change="handleAvatarFileChange"
+                  />
+                  <div class="profile-name">
+                    {{ userDisplayName }}
+                    <button type="button" class="icon-edit" aria-label="编辑个人资料" @click="handleEditProfile">✎</button>
+                  </div>
+                  <div class="profile-vip">♛ {{ membershipPill.label }}</div>
+                  <div v-if="avatarUploadError" class="avatar-error">{{ avatarUploadError }}</div>
+                </div>
+
+                <div class="profile-info">
+                  <div v-for="row in profileInfoRows" :key="row.label" class="info-row">
+                    <span class="row-label">
+                      <i class="row-icon" v-html="profileInfoIconMap[row.icon]"></i>
+                      {{ row.label }}
+                    </span>
+                    <strong v-if="row.strong">{{ row.value }}</strong>
+                    <span v-else class="email-value">{{ row.value }}</span>
+                    <span v-if="row.badge" class="verified" :class="`verified--${row.badgeTone}`">{{ row.badge }}</span>
+                  </div>
+
+                  <button class="primary-btn profile-btn" type="button" @click="handleEditProfile">编辑个人资料</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="pc-card membership-card">
+              <div class="card-title with-note">
+                <span>
+                  <span class="title-icon crown">♛</span>
+                  会员充值与权益
                 </span>
+                <em>{{ membershipSummary }}</em>
+              </div>
+
+              <div class="plans">
+                <button
+                  v-for="plan in plans"
+                  :key="plan.key"
+                  type="button"
+                  class="plan-card"
+                  :class="{
+                    recommended: plan.recommended,
+                    value: plan.value,
+                    selected: selectedPlanKey === plan.key
+                  }"
+                  @click="selectPlan(plan.key)"
+                >
+                  <span v-if="plan.badge" class="plan-badge">{{ plan.badge }}</span>
+                  <div class="plan-name">{{ plan.name }}</div>
+                  <div class="plan-price">
+                    ¥{{ plan.price }}
+                    <small>/ {{ plan.duration }}</small>
+                  </div>
+                  <div class="plan-tags">
+                    <span v-for="tag in plan.tags" :key="tag">{{ tag }}</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="membership-footer">
+                <button class="primary-btn charge-btn" type="button" @click="openUpgrade">立即充值</button>
+                <div class="safe-text">⊙ 安全支付 · 随时可取消 · 专属客服支持</div>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-column">
+            <article class="pc-card status-card">
+              <div class="card-title">
+                <span class="title-icon title-icon-svg" aria-hidden="true" v-html="accountStatusIconMap.summary"></span>
+                <span>账号状态摘要</span>
+              </div>
+
+              <div class="status-list">
+                <div v-for="item in accountStatusRows" :key="item.label" class="status-row">
+                  <span class="soft-icon status-icon" :class="item.color" aria-hidden="true" v-html="accountStatusIconMap[item.icon]"></span>
+                  <span class="status-label">{{ item.label }}</span>
+                  <span class="status-value">{{ item.value }}</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="pc-card identity-card">
+              <div class="card-title">
+                <span class="title-icon title-icon-svg" aria-hidden="true" v-html="identityIconMap.summary"></span>
+                <span>学习身份配置</span>
+              </div>
+
+              <div class="config-list">
+                <div v-for="item in identityConfig" :key="item.label" class="config-row">
+                  <span class="soft-icon config-icon" :class="item.color" aria-hidden="true" v-html="identityIconMap[item.icon]"></span>
+                  <span>{{ item.label }}</span>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </div>
+            </article>
+
+          </div>
+
+          <article class="pc-card favorites-card">
+            <div class="favorite-hero">
+              <div class="favorite-heading">
+                <span class="favorite-eyebrow">全题型收藏概览</span>
+                <h2>我的收藏</h2>
+                <p>{{ favoriteSummaryText }}</p>
+              </div>
+              <div class="favorite-total-pill">
+                <strong>{{ formatFavoriteCount(favoriteTotalCount) }}</strong>
+                <span>已收藏</span>
               </div>
             </div>
-            <div class="hero-week-card__legend">
-              <span class="hero-week-card__legend-item">
-                <span class="hero-week-card__legend-dot hero-week-card__legend-dot--active" />
-                练习日
-              </span>
-              <span class="hero-week-card__legend-item">
-                <span class="hero-week-card__legend-dot" />
-                未练习
-              </span>
+
+            <div class="favorites-content">
+              <div class="favorite-tiles" aria-label="收藏分类">
+                <div
+                  v-for="item in favorites"
+                  :key="item.label"
+                  class="favorite-tile"
+                  role="button"
+                  tabindex="0"
+                  @click="openFavorites"
+                  @keydown.enter.prevent="openFavorites"
+                  @keydown.space.prevent="openFavorites"
+                >
+                  <span class="tile-icon favorite-icon" :class="item.color" aria-hidden="true" v-html="favoriteIconMap[item.icon]"></span>
+                  <span class="favorite-tile-copy">
+                    <strong>{{ item.label }}</strong>
+                    <em>{{ item.hint }}</em>
+                  </span>
+                  <b>{{ formatFavoriteCount(item.count) }}</b>
+                </div>
+              </div>
             </div>
-          </section>
+          </article>
 
-          <section class="hero-atmosphere">
-            <div class="hero-atmosphere__copy">
-              <p v-for="line in heroQuoteLines" :key="line" class="hero-atmosphere__line">{{ line }}</p>
+          <article class="pc-card device-card">
+            <div class="card-title">
+              <span class="title-icon">▰</span>
+              <span>设备与登录记录</span>
             </div>
 
-            <div class="hero-atmosphere__scene" aria-hidden="true">
-              <svg viewBox="0 0 320 360" class="hero-atmosphere__svg" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <radialGradient id="profileSceneGlow" cx="72%" cy="82%" r="48%">
-                  <stop offset="0%" stop-color="rgba(255,226,174,0.92)" />
-                  <stop offset="35%" stop-color="rgba(255,226,174,0.34)" />
-                  <stop offset="100%" stop-color="rgba(255,226,174,0)" />
-                </radialGradient>
-                <linearGradient id="profileScenePath" x1="18%" y1="100%" x2="80%" y2="0%">
-                  <stop offset="0%" stop-color="#FFF3B1" />
-                  <stop offset="42%" stop-color="#FFE08A" />
-                  <stop offset="100%" stop-color="#FFF8DE" />
-                </linearGradient>
-                <linearGradient id="profileSceneHillBack" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#18396E" />
-                  <stop offset="100%" stop-color="#0E2751" />
-                </linearGradient>
-                <linearGradient id="profileSceneHillFront" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#10284F" />
-                  <stop offset="100%" stop-color="#091731" />
-                </linearGradient>
-                <filter id="profileSceneBlur" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="7" />
-                </filter>
-                <linearGradient id="profileSceneNebula" x1="16%" y1="0%" x2="84%" y2="100%">
-                  <stop offset="0%" stop-color="rgba(255,255,255,0)" />
-                  <stop offset="30%" stop-color="rgba(195,224,255,0.12)" />
-                  <stop offset="52%" stop-color="rgba(164,204,255,0.3)" />
-                  <stop offset="72%" stop-color="rgba(255,255,255,0.14)" />
-                  <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-                </linearGradient>
-                <linearGradient id="profileSceneMist" x1="8%" y1="16%" x2="88%" y2="78%">
-                  <stop offset="0%" stop-color="rgba(125,164,245,0.03)" />
-                  <stop offset="46%" stop-color="rgba(125,164,245,0.18)" />
-                  <stop offset="100%" stop-color="rgba(125,164,245,0.02)" />
-                </linearGradient>
-              </defs>
+            <div class="device-layout">
+              <div class="device-panel">
+                <div class="section-mini-title">当前设备</div>
+                <div v-for="item in devices" :key="item.name" class="device-row device-record">
+                  <span class="device-image-wrap">
+                    <img :src="item.icon" :alt="`${item.name} 设备图标`" class="device-image" />
+                  </span>
+                  <div class="device-copy">
+                    <strong>{{ item.name }}</strong>
+                    <p>{{ item.meta }}</p>
+                  </div>
+                  <div class="device-side">
+                    <span class="device-time">{{ item.time }}</span>
+                    <span class="current-device">{{ item.status }}</span>
+                  </div>
+                </div>
+              </div>
 
-              <ellipse cx="236" cy="112" rx="126" ry="80" fill="#87AFFF" opacity="0.11" filter="url(#profileSceneBlur)" />
-              <ellipse cx="210" cy="176" rx="126" ry="88" fill="url(#profileSceneMist)" opacity="0.95" />
-              <ellipse cx="258" cy="314" rx="104" ry="36" fill="url(#profileSceneGlow)" opacity="0.75" />
-              <path d="M24 96C78 64 156 80 218 110C256 127 280 130 320 112" fill="none" stroke="url(#profileSceneNebula)" stroke-width="22" stroke-linecap="round" opacity="0.62" />
-              <path d="M42 150C96 122 150 126 192 146C228 162 264 168 320 152" fill="none" stroke="rgba(146,186,255,0.06)" stroke-width="16" stroke-linecap="round" opacity="0.7" />
-              <g fill="#FFFFFF" opacity="0.9">
-                <circle cx="34" cy="28" r="1.4" />
-                <circle cx="64" cy="42" r="1.2" />
-                <circle cx="102" cy="24" r="1.6" />
-                <circle cx="146" cy="48" r="1.2" />
-                <circle cx="188" cy="26" r="1.4" />
-                <circle cx="236" cy="38" r="1.3" />
-                <circle cx="276" cy="22" r="1.5" />
-                <circle cx="292" cy="54" r="1.1" />
-                <circle cx="52" cy="90" r="1" />
-                <circle cx="92" cy="74" r="1.1" />
-                <circle cx="254" cy="78" r="1" />
-                <circle cx="126" cy="82" r="1" />
-                <circle cx="284" cy="96" r="1.2" />
-                <circle cx="26" cy="142" r="1" />
-                <circle cx="298" cy="136" r="1" />
-              </g>
-
-              <path d="M0 240C36 216 78 206 126 214C164 220 199 214 236 186C264 166 291 164 320 174V360H0Z" fill="url(#profileSceneHillBack)" opacity="0.92" />
-              <path d="M0 282C40 258 78 256 118 268C156 280 190 273 227 244C260 220 288 218 320 230V360H0Z" fill="url(#profileSceneHillFront)" />
-
-              <path
-                d="M104 360C118 337 136 318 158 300C181 281 198 268 214 245C228 225 237 205 255 188C262 181 267 177 271 174"
-                fill="none"
-                stroke="url(#profileScenePath)"
-                stroke-width="10"
-                stroke-linecap="round"
-                opacity="0.96"
-              />
-              <path
-                d="M104 360C118 337 136 318 158 300C181 281 198 268 214 245C228 225 237 205 255 188C262 181 267 177 271 174"
-                fill="none"
-                stroke="#FFFFFF"
-                stroke-width="2.8"
-                stroke-linecap="round"
-                opacity="0.82"
-              />
-              <path
-                d="M104 360C116 343 132 328 151 312C173 293 188 282 205 258C218 239 225 220 244 201C255 190 262 183 271 177"
-                fill="none"
-                stroke="rgba(255,255,255,0.18)"
-                stroke-width="18"
-                stroke-linecap="round"
-                opacity="0.38"
-              />
-
-              <circle cx="266" cy="168" r="18" fill="#FFE8A8" opacity="0.2" />
-              <rect x="261" y="144" width="10" height="36" rx="3" fill="#F8F4EA" />
-              <rect x="256.5" y="158" width="19" height="10" rx="3" fill="#EAD49B" />
-              <rect x="263.4" y="137" width="5.2" height="12" rx="2.4" fill="#FFF3C8" />
-              <circle cx="266" cy="139" r="6" fill="#FFE59C" />
-
-              <path d="M30 318C40 292 51 280 64 271C82 258 100 258 118 268C104 282 93 299 86 318Z" fill="#08162F" />
-              <circle cx="84" cy="264" r="13" fill="#08162F" />
-              <path d="M72 270C81 278 89 288 95 302" fill="none" stroke="#15305F" stroke-width="4.5" stroke-linecap="round" />
-              <path d="M83 289C91 293 98 301 104 314" fill="none" stroke="#1C3D7A" stroke-width="3.6" stroke-linecap="round" />
-              </svg>
+              <div class="device-panel login-panel">
+                <div class="section-mini-title">近期登录记录</div>
+                <div v-if="loginEventsSnapshot.loading" class="login-empty">正在同步登录记录...</div>
+                <div v-else-if="loginEventsSnapshot.source === 'missing_table'" class="login-empty">登录记录表未配置，暂无真实记录</div>
+                <div v-else-if="loginEventsSnapshot.source === 'error'" class="login-empty login-empty--error">登录记录同步失败，请稍后重试</div>
+                <div v-else-if="!loginRecords.length" class="login-empty">暂无登录记录</div>
+                <template v-else>
+                  <div v-for="item in loginRecords" :key="`${item.device}-${item.time}`" class="login-row device-record">
+                    <span class="device-image-wrap small">
+                      <img :src="item.icon" :alt="`${item.device} 设备图标`" class="device-image" />
+                    </span>
+                    <div class="device-copy">
+                      <strong>{{ item.device }}</strong>
+                      <p>{{ item.meta }}</p>
+                    </div>
+                    <div class="device-side">
+                      <em>{{ item.time }}</em>
+                      <span v-if="item.current" class="current-device compact">{{ item.status }}</span>
+                    </div>
+                  </div>
+                </template>
+                <button class="link-btn" type="button" @click="showLoginRecordsNotice">仅显示最近 5 条登录记录</button>
+              </div>
             </div>
-          </section>
-        </div>
-      </div>
+          </article>
+        </section>
+      </main>
+    </section>
 
-      <div class="content">
-        <div class="vip-card profile-section profile-section--vip">
-          <div class="vip-top">
-            <div class="vip-title">🚀 升级 VIP · 解锁无限练习</div>
-            <div class="vip-sub">试用期结束后继续练习，选一个最适合你的方案</div>
-          </div>
-          <div class="vip-plans">
-            <div
-              v-for="plan in plans"
-              :key="plan.key"
-              class="plan"
-              :class="{ featured: plan.featured, selected: selectedPlanKey === plan.key }"
-              @click="selectPlan(plan.key)"
-            >
-              <div v-if="plan.badge" class="plan-badge">{{ plan.badge }}</div>
-              <div class="plan-name">{{ plan.name }}</div>
-              <div class="plan-price">¥{{ plan.price }}</div>
-              <div class="plan-unit">{{ plan.unit }}</div>
-              <div class="plan-per">{{ plan.per }}</div>
+    <Teleport to="body">
+      <div
+        v-if="profileModalOpen"
+        class="profile-modal-overlay"
+        role="presentation"
+        @click="handleProfileOverlayClick"
+      >
+        <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title">
+          <header class="profile-modal-head">
+            <div>
+              <p>PERSONAL PROFILE</p>
+              <h2 id="profile-edit-title">编辑个人资料</h2>
             </div>
-          </div>
-          <button id="cta-btn" type="button" class="vip-cta" @click="openUpgrade">{{ ctaLabel }}</button>
-          <div class="vip-features">
-            <div class="vf">
-              <div class="vf-dot" />
-              全题型无限练习
-            </div>
-            <div class="vf">
-              <div class="vf-dot" />
-              AI 评分不限次
-            </div>
-            <div class="vf">
-              <div class="vf-dot" />
-              随时退款
-            </div>
-          </div>
-        </div>
+            <button type="button" class="profile-modal-close" aria-label="关闭编辑个人资料" @click="closeProfileModal">
+              ×
+            </button>
+          </header>
 
-        <div class="content-column content-column--primary">
-        <div class="sec profile-section profile-section--portrait">
-          <div class="sec-hdr">
-            <div class="sec-title">📊 口语能力画像</div>
-            <div class="sec-action">{{ portraitSampleLabel }}</div>
-          </div>
-          <div class="sec-body">
-            <div class="radar-wrap">
-              <svg
-                class="portrait-radar"
-                width="164"
-                height="152"
-                viewBox="-18 -10 176 160"
-                style="flex-shrink: 0"
+          <div class="profile-modal-body">
+            <div class="profile-edit-avatar">
+              <button
+                type="button"
+                class="profile-edit-avatar-btn"
+                :disabled="avatarUploading || profileSaving"
+                @click="triggerAvatarPicker"
               >
-                <defs>
-                  <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color: #E8845A; stop-opacity: 0.3" />
-                    <stop offset="100%" style="stop-color: #2563EB; stop-opacity: 0.12" />
-                  </linearGradient>
-                </defs>
-                <polygon
-                  v-for="(polygon, index) in radarChart.gridPolygons"
-                  :key="`grid-${index}`"
-                  :points="polygon"
-                  fill="none"
-                  stroke="#DDE3EE"
-                  stroke-width="1"
-                />
-                <line
-                  v-for="axis in radarChart.axes"
-                  :key="axis.key"
-                  :x1="axis.x1"
-                  :y1="axis.y1"
-                  :x2="axis.x2"
-                  :y2="axis.y2"
-                  stroke="#DDE3EE"
-                  stroke-width="1"
-                />
-                <polygon
-                  :points="radarChart.polygonPoints"
-                  fill="url(#rg)"
-                  stroke="#E8845A"
-                  stroke-width="1.5"
-                  opacity=".9"
-                />
-                <circle
-                  v-for="point in radarChart.dataPoints"
-                  :key="point.key"
-                  :cx="point.x"
-                  :cy="point.y"
-                  r="3"
-                  :fill="point.color"
-                />
-                <text
-                  v-for="item in radarChart.labels"
-                  :key="item.key"
-                  :x="item.x"
-                  :y="item.y"
-                  :text-anchor="item.anchor"
-                  font-size="9"
-                  fill="#5A6B8A"
-                  font-family="sans-serif"
-                >
-                  {{ item.label }}
-                </text>
-              </svg>
-
-              <div style="flex: 1">
-                <div v-for="item in portraitMetrics" :key="item.key" class="rl-item">
-                  <div class="rl-dot" :style="{ background: item.color }" />
-                  <div class="rl-name">{{ item.label }}</div>
-                  <div class="rl-bar">
-                    <div class="rl-fill" :style="{ width: `${item.barPercent}%`, background: item.color }" />
-                  </div>
-                  <div class="rl-score">{{ item.displayScore }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="radar-note">
-              {{ portraitAdvice }}
-            </div>
-          </div>
-        </div>
-
-        <div class="ms-card profile-section profile-section--streak">
-          <div class="ms-hdr">
-            <div class="ms-hdr-title">🔥 连续打卡 · 本周练习</div>
-          </div>
-          <div class="ms-body">
-            <div class="ms-ring-center">
-              <div class="ms-ring-wrap">
-                <svg width="110" height="110" viewBox="0 0 110 110">
-                  <defs>
-                    <linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style="stop-color: rgba(5,150,105,0.85)" />
-                      <stop offset="100%" style="stop-color: #E8845A" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="55" cy="55" r="44" fill="none" stroke="#DDE3EE" stroke-width="9" />
-                  <circle
-                    cx="55"
-                    cy="55"
-                    r="44"
-                    fill="none"
-                    stroke="url(#rg2)"
-                    stroke-width="9"
-                    stroke-linecap="round"
-                    stroke-dasharray="276.5"
-                    :stroke-dashoffset="streakRingDashoffset"
-                    transform="rotate(-90 55 55)"
-                  />
-                  <text x="55" y="50" text-anchor="middle" font-size="26" font-weight="700" fill="#143164" font-family="sans-serif">
-                    {{ homeAnalytics.loading ? "--" : formatInteger(currentStreak) }}
-                  </text>
-                  <text x="55" y="64" text-anchor="middle" font-size="10" fill="#8CA0C0" font-family="sans-serif">
-                    / {{ currentGoalDays }} 天目标
-                  </text>
-                </svg>
-              </div>
-              <div class="ms-ring-n">{{ streakHeading }}</div>
-              <div class="ms-ring-sub">{{ streakSummary }}</div>
-            </div>
-
-            <div class="ms-dots-wrap">
-              <div class="ms-dots-row">
-                <div
-                  v-for="(item, index) in milestoneSteps"
-                  :key="item.key"
-                  class="ms-dot-wrap"
-                >
-                  <div
-                    v-if="index > 0"
-                    class="ms-dot-segment"
-                    :class="{ 'ms-dot-segment--done': milestoneSegments[index - 1]?.completed }"
-                  />
-                  <div class="ms-dot-item">
-                    <div class="ms-dot-circle" :class="item.state">{{ item.circle }}</div>
-                    <div class="ms-dot-days" :class="item.state">{{ item.daysLabel }}</div>
-                    <div class="ms-dot-reward">{{ item.reward }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="ms-tip">
-              <div style="font-size: 18px; flex-shrink: 0">{{ streakTip.icon }}</div>
+                <img v-if="modalAvatarPreview" :src="modalAvatarPreview" alt="头像预览" />
+                <span v-else>{{ userInitial }}</span>
+              </button>
               <div>
-                <div class="ms-tip-title">{{ streakTip.title }}</div>
-                <div class="ms-tip-sub">{{ streakTip.subtitle }}</div>
+                <button
+                  type="button"
+                  class="profile-edit-upload"
+                  :disabled="avatarUploading || profileSaving"
+                  @click="triggerAvatarPicker"
+                >
+                  {{ avatarUploading ? "处理中..." : "更换头像" }}
+                </button>
+                <p>{{ avatarDraftName || "JPG / PNG / WebP，2MB 以内" }}</p>
+                <p v-if="avatarUploadError" class="profile-modal-error">{{ avatarUploadError }}</p>
               </div>
             </div>
 
-            <div class="ms-week-title">本周每日题数</div>
-            <div class="ms-sparkline">
-              <div v-for="item in weeklyBars" :key="item.key" class="ms-spark-col">
-                <div
-                  class="ms-spark-bar"
-                  :class="{ has: item.has, 'today-bar': item.today }"
-                  :style="{ height: item.height }"
-                  :title="`${item.label} · ${item.count} 题${item.today ? ' · 今日' : ''}`"
+            <label class="profile-edit-field">
+              <span>昵称/用户名</span>
+              <input
+                v-model.trim="profileDraft.displayName"
+                type="text"
+                maxlength="32"
+                autocomplete="nickname"
+                :disabled="profileSaving"
+              />
+            </label>
+
+            <div class="profile-edit-grid">
+              <label class="profile-edit-field">
+                <span>目标分数</span>
+                <input
+                  v-model="profileDraft.targetScore"
+                  type="number"
+                  min="10"
+                  max="90"
+                  step="1"
+                  :disabled="profileSaving"
                 />
-                <div class="ms-spark-label" :class="{ today: item.today }">{{ item.label }}</div>
-              </div>
+              </label>
+
+              <label class="profile-edit-field">
+                <span>考试日期</span>
+                <input v-model="profileDraft.examDate" type="date" :min="todayDateKey" :disabled="profileSaving" />
+              </label>
             </div>
-          </div>
-        </div>
 
-        </div>
+            <label class="profile-edit-field">
+              <span>当前阶段</span>
+              <select v-model="profileDraft.currentStage" :disabled="profileSaving">
+                <option v-for="stage in stageOptions" :key="stage" :value="stage">{{ stage }}</option>
+              </select>
+            </label>
 
-        <div class="content-column content-column--secondary">
-        <div class="sec profile-section profile-section--progress">
-          <div class="sec-hdr">
-            <div class="sec-title">📈 各题型进度</div>
-          </div>
-          <div class="sec-body" style="padding: 4px 18px">
-            <div class="prog-list">
-              <div v-for="item in liveProgressItems" :key="item.name" class="prog-row">
-                <div class="prog-icon" :style="{ background: item.iconBg }">{{ item.icon }}</div>
-                <div class="prog-meta">
-                  <div class="prog-name">{{ item.name }}</div>
-                  <div class="prog-bar">
-                    <div class="prog-fill" :style="{ width: item.width, background: item.fill }" />
-                  </div>
-                </div>
-                <div class="prog-right">
-                  <div class="prog-count">{{ item.count }}</div>
-                  <div class="prog-pct" :style="{ color: item.pctColor || undefined }">{{ item.pct }}</div>
-                </div>
-              </div>
+            <div class="profile-locked-fields" aria-label="不可修改资料">
+              <label class="profile-edit-field profile-edit-field--locked">
+                <span>邮箱</span>
+                <input :value="userEmail || '邮箱未绑定'" type="text" disabled />
+              </label>
+              <label class="profile-edit-field profile-edit-field--locked">
+                <span>VIP 权限/套餐状态</span>
+                <input :value="membershipPill.label" type="text" disabled />
+              </label>
             </div>
-          </div>
-        </div>
 
-        <div class="sec profile-section profile-section--settings">
-          <div class="sec-hdr">
-            <div class="sec-title">⚙️ 设置</div>
+            <p v-if="profileSaveError" class="profile-modal-error" role="alert">{{ profileSaveError }}</p>
           </div>
-          <div class="sec-body" style="padding: 0 18px">
-            <div v-for="item in settingsItems" :key="item.label" class="menu-item">
-              <div class="mi-icon" :style="{ background: item.iconBg }">{{ item.icon }}</div>
-              <div class="mi-body">
-                <div class="menu-label">{{ item.label }}</div>
-                <div v-if="item.sub" class="menu-sub">{{ item.sub }}</div>
-              </div>
-              <div style="display: flex; align-items: center">
-                <div v-if="item.value" class="menu-val">{{ item.value }}</div>
-                <div v-if="item.badge" class="menu-badge">{{ item.badge }}</div>
-                <div class="menu-arr">›</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <button type="button" class="logout-btn profile-section profile-section--logout" @click="handleLogout">退出登录</button>
-        </div>
-        <div class="pb" />
+          <footer class="profile-modal-actions">
+            <button type="button" class="profile-modal-secondary" :disabled="profileSaving" @click="closeProfileModal">
+              取消
+            </button>
+            <button type="button" class="profile-modal-primary" :disabled="profileSaving" @click="saveProfileDraft">
+              {{ profileSaving ? "保存中..." : "保存" }}
+            </button>
+          </footer>
+        </section>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-* {
+*,*::before,*::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-.profile-page {
-  --navy: #0F2444;
-  --navy2: #1A3A6E;
-  --navy3: #243F75;
-  --orange: #E8845A;
-  --og-bg: #FEF3ED;
-  --og-mid: #F5C4A8;
-  --bg: #EEF1F7;
-  --card: #FFFFFF;
-  --bd: #DDE3EE;
-  --tx: #0A1628;
-  --mu: #5A6B8A;
-  --hi: #A8B5CB;
-  --navy-soft: #EDF1F8;
-  --green: #059669;
-  --blue: #2563EB;
-  --purple: #6941C6;
-  --r: 16px;
+button {
+  font: inherit;
+}
+
+.personal-center-page {
+  --c0: #1e1208;
+  --c1: #3a2510;
+  --c2: #7c5c3e;
+  --c3: #a07850;
+  --bg0: #f5efe4;
+  --bg1: #ede8dc;
+  --bg2: #e5dfd4;
+  --bg3: #d9cfbd;
+  --card: #faf6ef;
+  --card2: #f2ebe0;
+  --bdr: #d4c8b4;
+  --bdr2: #c4b49c;
+  --mute: #8f8477;
+  --soft: #9a8f80;
+  --content-max: 1320px;
+  --layout-gap: 16px;
+  --card-radius: 14px;
   min-height: 100vh;
-  font-family: -apple-system, "SF Pro Text", "DM Sans", "PingFang SC", sans-serif;
-  background:
-    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 22%),
-    linear-gradient(180deg, #eef4fb 0, #f6f8fc 220px, #f7f9fc 100%);
-  -webkit-font-smoothing: antialiased;
-  color: var(--tx);
-}
-
-.nav {
-  background: rgba(255, 255, 255, 0.92);
-  height: 52px;
   display: flex;
-  align-items: center;
-  padding: 0 24px;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  border-bottom: 1px solid #dbe4f0;
-  backdrop-filter: blur(10px);
-}
-
-.nav-back {
-  padding: 0;
-  border: none;
-  background: none;
-  font-size: 13px;
-  color: #6c7a93;
-  cursor: pointer;
-}
-
-.nav-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #143164;
-}
-
-.nav-spacer {
-  width: 60px;
-}
-
-.wrap {
-  width: min(100%, 1240px);
-  margin: 0 auto;
-  padding: 24px 20px 56px;
-}
-
-.hero {
-  background: linear-gradient(180deg, var(--navy) 0%, var(--navy2) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
-  box-shadow: 0 18px 40px rgba(15, 36, 68, 0.12);
-  padding: 28px 24px 30px;
-  position: relative;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 10%, rgba(255, 249, 238, 0.86), transparent 32%),
+    var(--bg1);
+  color: var(--c0);
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.hero-glow {
-  position: absolute;
-  right: -40px;
-  top: -40px;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: rgba(232, 132, 90, 0.08);
-  pointer-events: none;
+.profile-sidebar {
+  display: flex;
+  flex: 0 0 200px;
+  width: 200px;
+  flex-direction: column;
+  background: #e5dfd4;
+  border-right: 0.5px solid #d4cdbf;
 }
 
-.hero-top {
+.profile-logo {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 24px;
-  position: relative;
+  gap: 9px;
+  height: 64px;
+  flex: 0 0 64px;
+  padding: 0 18px;
+  text-decoration: none;
+  border-bottom: 0.5px solid #d4cdbf;
 }
 
-.av-wrap {
-  width: 58px;
-  height: 58px;
-  position: relative;
+.profile-logo-icon {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #7c5c3e;
   flex-shrink: 0;
 }
 
-.av {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #5b79b3 0%, #344f80 34%, #1b315d 72%, #13274b 100%);
+.profile-logo-name {
+  color: #2c1f0e;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.profile-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 12px 24px;
+}
+
+.profile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 0.5px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #9a8f80;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13.8px;
+  line-height: 1.3;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.13s, border-color 0.13s, color 0.13s;
+}
+
+.profile-nav-item:hover {
+  background: #ede8df;
+  color: #6b5a44;
+}
+
+.profile-nav-item--active {
+  border-color: #cabdaa;
+  background: #d9cfbd;
+  color: #7c5c3e;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(245, 239, 228, 0.5);
+}
+
+.profile-nav-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: #fff;
-  border: 3px solid #dce6f8;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+.profile-nav-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.profile-sidebar-footer {
+  padding: 16px 12px 18px;
+  border-top: 0.5px solid #d4cdbf;
+}
+
+.profile-promo {
+  padding: 12px;
+  border: 0.5px solid #c4baa8;
+  border-radius: 10px;
+  background: #d8cebc;
+}
+
+.profile-promo-title {
+  margin-bottom: 2px;
+  color: #7c5c3e;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.profile-promo-sub {
+  margin-bottom: 9px;
+  color: #9a8f80;
+  font-size: 10.5px;
+}
+
+.profile-promo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: #7c5c3e;
+  color: #f5efe4;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  padding: 6px 13px;
   cursor: pointer;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
-  padding: 0;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 6px 12px rgba(19, 39, 75, 0.1);
+}
+
+.profile-shell {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-topbar {
+  height: 64px;
+  flex: 0 0 64px;
+  background: var(--bg2);
+  border-bottom: 0.5px solid #d7cfc0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.hello {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.hello-sub {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--soft);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vip-pill {
+  height: 28px;
+  padding: 0 13px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #d5ad55;
+  background: #fff1c9;
+  color: var(--c2);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.vip-pill--trial {
+  background: #fff7dd;
+}
+
+.vip-pill--locked {
+  background: var(--card2);
+  border-color: var(--bdr);
+}
+
+.user-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid #d9cdbb;
+  border-radius: 8px;
+  background: rgba(246, 241, 232, 0.82);
+  color: #76563a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.logout-btn:hover:not(:disabled) {
+  border-color: #b99f80;
+  color: #5f3f27;
+}
+
+.logout-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.mini-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   overflow: hidden;
+  background: var(--c2);
+  color: #fff8ee;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
 }
 
-.av:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(8, 20, 38, 0.2);
-}
-
-.av:disabled {
-  cursor: progress;
-  opacity: 0.88;
-}
-
-.av__img {
+.mini-avatar img,
+.avatar-large img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.av-crown {
-  position: absolute;
-  top: -8px;
-  left: 11px;
-  width: 20px;
-  height: 20px;
-  color: #f4b53f;
-  filter: drop-shadow(0 2px 2px rgba(167, 109, 0, 0.18));
-  pointer-events: none;
+.profile-main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 22px 28px 24px;
 }
 
-.av-spark {
-  position: absolute;
-  top: 6px;
-  right: -1px;
-  width: 12px;
-  height: 12px;
-  color: #7e96c9;
-  pointer-events: none;
+.profile-main::-webkit-scrollbar {
+  width: 4px;
 }
 
-.av-crown__icon,
-.av-spark__icon {
-  width: 100%;
+.profile-main::-webkit-scrollbar-thumb {
+  background: var(--bdr);
+  border-radius: 99px;
+}
+
+.page-heading {
+  width: min(100%, var(--content-max));
+  margin: 0 auto var(--layout-gap);
+}
+
+.page-heading h1 {
+  display: inline-block;
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.page-heading span {
+  margin-left: 14px;
+  color: var(--soft);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.page-heading p {
+  margin: 7px 0 0;
+  color: #8b8073;
+  font-size: 14px;
+}
+
+.dashboard-grid {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.9fr);
+  gap: var(--layout-gap);
+  align-items: stretch;
+}
+
+.dashboard-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--layout-gap);
   height: 100%;
+}
+
+.dashboard-column:first-child .profile-card {
+  flex: 0 0 auto;
+}
+
+.dashboard-column:first-child .membership-card {
+  flex: 1 1 auto;
+}
+
+.pc-card {
+  min-width: 0;
+  background: rgba(250, 246, 238, 0.82);
+  border: 1px solid #d8d0c3;
+  border-radius: var(--card-radius);
+  box-shadow:
+    0 10px 24px rgba(124, 92, 62, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  padding: 12px 16px 0;
+}
+
+.card-title.with-note {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-title.with-note > span {
+  font-weight: 900;
+}
+
+.card-title.with-note em {
+  font-style: normal;
+  color: var(--mute);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.title-icon {
+  color: var(--c2);
+  font-size: 14px;
+}
+
+.title-icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-icon-svg :deep(svg) {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.1;
+}
+
+.profile-card {
+  min-height: 275px;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-body {
+  display: grid;
+  grid-template-columns: 34% 1fr;
+  min-height: 228px;
+  flex: 1;
+  padding: 12px 28px 18px;
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #dfd6c9;
+  min-width: 0;
+}
+
+.avatar-large {
+  width: 86px;
+  height: 86px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, #9b734c, #6d4d30);
+  color: #fff8ee;
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(109, 77, 48, 0.16);
+}
+
+.avatar-large:disabled {
+  cursor: progress;
+  opacity: 0.82;
 }
 
 .avatar-input {
   display: none;
 }
 
-.hero-avatar-error {
-  margin-top: 6px;
+.profile-name {
+  margin-top: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.icon-edit {
+  border: 0;
+  background: transparent;
+  color: var(--c2);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+}
+
+.profile-vip {
+  margin-top: 13px;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d5ad55;
+  background: #fff1c9;
+  color: var(--c2);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.avatar-error {
+  margin-top: 8px;
+  max-width: 170px;
+  color: #b42318;
   font-size: 11px;
-  color: rgba(255, 211, 201, 0.95);
-  font-weight: 600;
+  text-align: center;
 }
 
-.hero-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.3px;
+.profile-info {
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.hero-email {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.38);
-  margin-top: 2px;
+.info-row {
+  min-height: 41px;
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #dfd6c9;
+  font-size: 14px;
 }
 
-.trial-pill {
+.info-row:last-of-type {
+  border-bottom: 0;
+}
+
+.row-label {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 7px;
-  background: rgba(232, 132, 90, 0.15);
-  border: 1px solid rgba(232, 132, 90, 0.28);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 11px;
-  color: #E8845A;
-  font-weight: 500;
+  gap: 10px;
+  color: #5a5046;
+  font-weight: 700;
 }
 
-.trial-pill__dot {
-  width: 5px;
-  height: 5px;
-  background: var(--orange);
-  border-radius: 50%;
+.row-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(154, 113, 73, 0.24);
+  border-radius: 8px;
+  background: rgba(154, 113, 73, 0.08);
+  color: #8a6744;
 }
 
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+.row-icon :deep(svg) {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.hero-study-rail {
-  display: none;
+.info-row strong {
+  color: #121212;
+  font-size: 15px;
 }
 
-.hs {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 16px 12px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.hs-icon {
-  display: none;
-}
-
-.hs-copy {
+.email-value {
+  color: #2f2720;
+  font-size: 13px;
   min-width: 0;
 }
 
-.hs-n {
-  font-size: 24px;
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.3px;
-}
-
-.hs-l {
+.verified {
+  padding: 3px 7px;
+  border-radius: 999px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
-  margin-top: 5px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.hero-study-card,
-.hero-week-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 16px 15px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.hero-study-card__title,
-.hero-week-card__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.hero-study-card__ring {
-  --hero-study-progress: 0deg;
-  width: 132px;
-  height: 132px;
-  margin: 14px auto 12px;
-  border-radius: 50%;
-  padding: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    conic-gradient(from -90deg, #3C82FF 0deg var(--hero-study-progress), rgba(226, 234, 246, 0.26) var(--hero-study-progress) 360deg);
-}
-
-.hero-study-card__ring-inner {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(19, 40, 77, 0.98) 0%, rgba(16, 32, 65, 0.98) 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.hero-study-card__ring-value {
-  font-size: 30px;
   font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.04em;
+  white-space: nowrap;
 }
 
-.hero-study-card__ring-label {
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(222, 233, 247, 0.6);
+.verified--ok {
+  background: #dff0e4;
+  color: #4c9862;
 }
 
-.hero-study-card__message {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
+.verified--warn {
+  background: #fff2cf;
+  color: #9b6b16;
 }
 
-.hero-study-card__facts {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.primary-btn,
+.ghost-btn {
+  border-radius: 8px;
+  min-height: 31px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 800;
 }
 
-.hero-study-card__facts li {
-  position: relative;
-  padding-left: 14px;
-  font-size: 12px;
-  color: rgba(219, 229, 245, 0.72);
+.primary-btn {
+  background: linear-gradient(180deg, #8a6744 0%, #755335 100%);
+  color: #fff8ee;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.hero-study-card__facts li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(94, 186, 255, 0.9);
-  transform: translateY(-50%);
+.primary-btn:hover {
+  filter: brightness(1.04);
 }
 
-.hero-week-card__summary {
-  margin: 7px 0 0;
-  font-size: 12px;
-  color: rgba(219, 229, 245, 0.56);
+.ghost-btn {
+  background: rgba(246, 241, 232, 0.78);
+  border-color: #d9cdbb;
+  color: var(--c2);
 }
 
-.hero-week-card__days {
-  margin-top: 14px;
+.ghost-btn:hover {
+  border-color: #b99f80;
+  color: #65472f;
+}
+
+.profile-btn {
+  margin-top: 10px;
+  width: min(226px, 100%);
+  align-self: start;
+}
+
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
+  place-items: center;
+  padding: 24px;
+  background: rgba(40, 29, 18, 0.38);
+  backdrop-filter: blur(9px);
 }
 
-.hero-week-card__day {
+.profile-modal {
+  width: min(560px, calc(100vw - 36px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid rgba(199, 180, 153, 0.9);
+  border-radius: 18px;
+  background: rgba(250, 246, 239, 0.94);
+  box-shadow: 0 24px 70px rgba(53, 35, 18, 0.28);
+  color: #2b2119;
+}
+
+.profile-modal-head {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid rgba(216, 204, 187, 0.8);
 }
 
-.hero-week-card__label {
-  font-size: 12px;
-  color: rgba(219, 229, 245, 0.64);
-}
-
-.hero-week-card__dot {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(219, 229, 245, 0.28);
-  background: rgba(9, 23, 49, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-}
-
-.hero-week-card__dot--active {
-  background: linear-gradient(180deg, #51D38D 0%, #1DAA6A 100%);
-  border-color: rgba(146, 255, 199, 0.72);
-  box-shadow: 0 10px 20px rgba(29, 170, 106, 0.2);
-}
-
-.hero-week-card__dot-core {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  display: block;
-}
-
-.hero-week-card__dot-core--today {
-  width: auto;
-  height: auto;
-  background: transparent;
+.profile-modal-head p {
+  margin: 0 0 5px;
+  color: #9a8f80;
   font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.profile-modal-head h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.profile-modal-close {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d9cdbb;
+  border-radius: 10px;
+  background: rgba(246, 241, 232, 0.78);
+  color: #7c5c3e;
+  cursor: pointer;
+  font-size: 24px;
   line-height: 1;
 }
 
-.hero-week-card__legend {
-  margin-top: 14px;
+.profile-modal-body {
+  padding: 18px 24px 8px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 14px;
-  flex-wrap: wrap;
 }
 
-.hero-week-card__legend-item {
-  display: inline-flex;
+.profile-edit-avatar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: rgba(219, 229, 245, 0.62);
+  gap: 15px;
+  padding: 14px;
+  border: 1px solid rgba(216, 204, 187, 0.8);
+  border-radius: 14px;
+  background: rgba(255, 252, 247, 0.54);
 }
 
-.hero-week-card__legend-dot {
-  width: 10px;
-  height: 10px;
+.profile-edit-avatar-btn {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(219, 229, 245, 0.28);
-  background: rgba(9, 23, 49, 0.35);
+  background: #9a7149;
+  color: #fff8ee;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(120, 82, 45, 0.24);
 }
 
-.hero-week-card__legend-dot--active {
-  background: linear-gradient(180deg, #51D38D 0%, #1DAA6A 100%);
-  border-color: rgba(146, 255, 199, 0.72);
-}
-
-.hero-atmosphere {
-  display: none;
-}
-
-.hero-atmosphere__svg {
+.profile-edit-avatar-btn img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-.content {
-  margin-top: 18px;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.profile-edit-avatar-btn:disabled,
+.profile-edit-upload:disabled,
+.profile-modal-primary:disabled,
+.profile-modal-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
-.profile-section {
-  min-width: 0;
-}
-
-.content-column {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-}
-
-.vip-card {
-  background: linear-gradient(135deg, var(--navy2) 0%, var(--navy) 100%);
-  border-radius: var(--r);
-  margin-bottom: 0;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 16px 32px rgba(15, 36, 68, 0.12);
-}
-
-.vip-top {
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.vip-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 3px;
-}
-
-.vip-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.vip-plans {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 14px 14px 16px;
-}
-
-.plan {
-  border-radius: 12px;
-  padding: 14px 10px;
-  text-align: center;
+.profile-edit-upload {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #cbbba2;
+  border-radius: 9px;
+  background: rgba(246, 241, 232, 0.86);
+  color: #6f4d30;
   cursor: pointer;
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  font-weight: 800;
+}
+
+.profile-edit-avatar p {
+  margin: 7px 0 0;
+  color: #8f8477;
+  font-size: 12px;
+}
+
+.profile-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-edit-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.profile-edit-field span {
+  color: #6e5840;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-edit-field input,
+.profile-edit-field select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #d2c4ae;
+  border-radius: 10px;
+  background: rgba(255, 252, 247, 0.82);
+  color: #2b2119;
+  font: 700 14px/1.2 inherit;
+  outline: none;
+  padding: 0 12px;
+}
+
+.profile-edit-field input:focus,
+.profile-edit-field select:focus {
+  border-color: #8a6744;
+  box-shadow: 0 0 0 3px rgba(124, 92, 62, 0.12);
+}
+
+.profile-edit-field--locked input {
+  background: rgba(234, 226, 215, 0.58);
+  color: #7d7268;
+  cursor: not-allowed;
+}
+
+.profile-locked-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(216, 204, 187, 0.82);
+}
+
+.profile-modal-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 22px;
+}
+
+.profile-modal-primary,
+.profile-modal-secondary {
+  min-width: 112px;
+  min-height: 39px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: 900 14px/1 inherit;
+}
+
+.profile-modal-primary {
+  border: 0;
+  background: linear-gradient(180deg, #8a6744 0%, #755335 100%);
+  color: #fff8ee;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.profile-modal-secondary {
+  border: 1px solid #d9cdbb;
+  background: rgba(246, 241, 232, 0.82);
+  color: #6f4d30;
+}
+
+.status-card {
+  min-height: 154px;
+  display: flex;
+  flex-direction: column;
+}
+
+.status-list {
+  padding: 8px 18px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.status-row,
+.config-row {
+  display: grid;
+  grid-template-columns: 21px minmax(86px, 0.66fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 21px;
+  font-size: 12px;
+}
+
+.status-label,
+.config-row > span:nth-child(2) {
+  color: #4f463f;
+  font-weight: 700;
+}
+
+.status-value,
+.config-row strong {
+  color: #6b6258;
+  font-weight: 500;
+  text-align: left;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soft-icon,
+.tile-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.status-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.status-icon :deep(svg) {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.15;
+}
+
+.soft-icon.purple { background: #efe8ff; color: #7c4dff; }
+.soft-icon.gold { background: #fff0cf; color: #da8b18; }
+.soft-icon.green { background: #dff0e4; color: #4c9862; }
+.soft-icon.blue { background: #e6efff; color: #3f74d9; }
+.soft-icon.teal { background: #dff5ef; color: #18a679; }
+.soft-icon.cyan { background: #e4f6ff; color: #3a93c7; }
+.soft-icon.red { background: #ffe7ec; color: #db4a63; }
+
+.membership-card {
+  min-height: 236px;
+  display: flex;
+  flex-direction: column;
+}
+
+.plans {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px 14px 0;
+}
+
+.plan-card {
+  min-height: 126px;
+  height: auto;
+  padding: 13px 12px 11px;
   position: relative;
-  transition: 0.15s;
+  border: 1px solid #d9cdbb;
+  border-radius: 10px;
+  background: rgba(255, 252, 247, 0.58);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--c0);
 }
 
-.plan:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+.plan-card.selected,
+.plan-card.recommended {
+  border-color: #f28a43;
+  box-shadow: 0 0 0 1px rgba(242, 138, 67, 0.2);
 }
 
-.plan.featured {
-  background: var(--orange);
-  border-color: var(--orange);
-  box-shadow: 0 4px 18px rgba(232, 132, 90, 0.35);
+.plan-card.value {
+  overflow: hidden;
 }
 
 .plan-badge {
   position: absolute;
-  top: -9px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #FFD166;
-  color: #7A3F00;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
-  letter-spacing: 0.3px;
+  top: -1px;
+  right: -1px;
+  min-width: 47px;
+  height: 22px;
+  border-radius: 0 10px 0 10px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff8a3d, #f06d2f);
+}
+
+.plan-card.value .plan-badge {
+  background: linear-gradient(135deg, #a679ff, #8d5ee9);
 }
 
 .plan-name {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 8px;
-}
-
-.plan.featured .plan-name {
-  color: rgba(255, 255, 255, 0.88);
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .plan-price {
-  font-size: 26px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-  line-height: 1;
+  margin-top: 8px;
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
 }
 
-.plan.featured .plan-price {
-  color: #fff;
-}
-
-.plan-unit {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-top: 4px;
-}
-
-.plan.featured .plan-unit {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.plan-per {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.3);
-  margin-top: 3px;
-}
-
-.plan.featured .plan-per {
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.vip-cta {
-  margin: 0 14px 16px;
-  padding: 13px;
-  background: var(--orange);
-  border: none;
-  border-radius: 10px;
-  color: #fff;
+.plan-price small {
   font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  width: calc(100% - 28px);
-  display: block;
-  transition: 0.15s;
+  font-weight: 500;
+  color: #5f574e;
 }
 
-.vip-cta:hover {
-  background: #D4754E;
-}
-
-.vip-features {
+.plan-tags {
+  margin-top: auto;
+  padding-top: 12px;
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  padding: 0 14px 16px;
+  gap: 6px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-.vf {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.plan-tags span {
+  border: 1px solid #d9cdbb;
+  border-radius: 999px;
+  background: rgba(246, 241, 232, 0.78);
+  color: #5c5146;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.vf-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--orange);
-}
-
-.sec {
-  background: var(--card);
-  border: 1px solid var(--bd);
-  border-radius: var(--r);
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-
-.sec-hdr {
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid var(--bd);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sec-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tx);
-}
-
-.sec-action {
-  font-size: 11px;
-  color: var(--navy2);
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.sec-body {
-  padding: 16px 18px;
-}
-
-.radar-wrap {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.portrait-radar {
-  overflow: visible;
-}
-
-.rl-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.rl-item:last-child {
-  margin-bottom: 0;
-}
-
-.rl-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.rl-name {
-  font-size: 12px;
-  color: var(--tx);
-  font-weight: 500;
-  width: 76px;
-  flex-shrink: 0;
+  padding: 4px 8px;
+  line-height: 1;
   white-space: nowrap;
 }
 
-.rl-bar {
-  flex: 1;
-  height: 4px;
-  background: var(--bd);
-  border-radius: 4px;
-  overflow: hidden;
+.mini-chip {
+  border: 1px solid #d9cdbb;
+  border-radius: 999px;
+  background: rgba(246, 241, 232, 0.78);
+  color: #5c5146;
+  font-size: 10px;
+  padding: 4px 7px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.rl-fill {
-  height: 100%;
-  border-radius: 4px;
+.membership-footer {
+  margin-top: 0;
+  padding: 10px 14px 13px;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 9px;
 }
 
-.rl-score {
+.charge-btn {
+  width: 100%;
+  min-height: 40px;
+}
+
+.safe-text {
+  color: var(--mute);
+  font-size: 12px;
+  text-align: center;
+}
+
+.identity-card {
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.config-list {
+  padding: 12px 14px 15px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.identity-card .config-row {
+  min-height: 56px;
+  padding: 8px;
+  border: 1px solid rgba(217, 205, 187, 0.76);
+  border-radius: 8px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  background: rgba(255, 252, 247, 0.55);
+}
+
+.identity-card .soft-icon {
+  grid-row: 1 / 3;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--tx);
-  min-width: 32px;
-  text-align: right;
 }
 
-.radar-note {
+.identity-card .config-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.identity-card .config-icon :deep(svg) {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.05;
+}
+
+.identity-card .config-row > span:nth-child(2) {
+  color: #5c5146;
   font-size: 11px;
-  color: var(--mu);
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: var(--navy-soft);
-  border-radius: 9px;
-  line-height: 1.6;
-  border: 1px solid var(--bd);
+  line-height: 1.15;
 }
 
-.ms-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-  border: 1px solid var(--bd);
-  border-radius: var(--r);
-  margin-bottom: 0;
+.identity-card .config-row strong {
+  color: #2f2720;
+  font-size: 13px;
+  line-height: 1.18;
+}
+
+.favorites-card {
+  grid-column: 1 / -1;
+  min-height: 188px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 16px 32px rgba(15, 36, 68, 0.05);
 }
 
-.ms-hdr {
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid var(--bd);
+.favorite-hero {
+  padding: 15px 20px 13px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(217, 205, 187, 0.78);
+  background:
+    linear-gradient(135deg, rgba(255, 244, 219, 0.72), rgba(246, 251, 247, 0.58) 52%, rgba(232, 240, 255, 0.48));
 }
 
-.ms-hdr-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tx);
+.favorite-heading {
+  min-width: 0;
 }
 
-.ms-body {
-  padding: 18px;
-}
-
-.ms-ring-center {
-  display: flex;
-  flex-direction: column;
+.favorite-eyebrow {
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid rgba(196, 180, 156, 0.82);
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 18px;
-}
-
-.ms-ring-wrap {
-  width: 110px;
-  height: 110px;
-  margin-bottom: 10px;
-}
-
-.ms-ring-n {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--tx);
-  text-align: center;
-  margin-bottom: 3px;
-}
-
-.ms-ring-sub {
+  background: rgba(255, 252, 247, 0.78);
+  color: #7a5b3b;
   font-size: 11px;
-  color: var(--mu);
-  text-align: center;
+  font-weight: 900;
 }
 
-.ms-dots-wrap {
-  position: relative;
-  margin-bottom: 16px;
-  padding: 0 4px;
+.favorite-heading h2 {
+  margin: 7px 0 4px;
+  color: #241a12;
+  font-size: 24px;
+  line-height: 1.08;
 }
 
-.ms-dots-row {
+.favorite-heading p {
+  margin: 0;
+  color: #6f655a;
+  font-size: 13px;
+}
+
+.favorite-total-pill {
+  width: 96px;
+  min-height: 62px;
+  border: 1px solid rgba(185, 159, 128, 0.72);
+  border-radius: 8px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  position: relative;
-  z-index: 1;
-  column-gap: 8px;
+  place-items: center;
+  align-content: center;
+  background: rgba(255, 252, 247, 0.72);
+  color: #7a5b3b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
-.ms-dot-wrap {
-  position: relative;
+.favorite-total-pill strong {
+  color: #241a12;
+  font-size: 25px;
+  line-height: 1;
 }
 
-.ms-dot-item {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.ms-dot-segment {
-  position: absolute;
-  top: 12px;
-  left: calc(-50% + 13px);
-  right: calc(50% - 13px);
-  height: 2px;
-  background: #E3EAF4;
-  border-radius: 2px;
-  z-index: 0;
-}
-
-.ms-dot-segment--done {
-  background: rgba(52, 211, 153, 0.92);
-  box-shadow: 0 0 8px rgba(52, 211, 153, 0.28);
-}
-
-.ms-dot-circle {
-  position: relative;
-  z-index: 1;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  border: 2px solid #DBE4F0;
-  background: #F6F9FD;
-  color: #9AACBF;
-}
-
-.ms-dot-circle.done {
-  background: var(--green);
-  border-color: var(--green);
-  color: #fff;
-}
-
-.ms-dot-circle.active {
-  background: var(--orange);
-  border-color: var(--orange);
-  color: #fff;
-  box-shadow: 0 0 10px rgba(232, 132, 90, 0.4);
-}
-
-.ms-dot-days {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--hi);
-}
-
-.ms-dot-days.done {
-  color: rgba(52, 211, 153, 0.9);
-}
-
-.ms-dot-days.active {
-  color: var(--orange);
-}
-
-.ms-dot-reward {
-  font-size: 13px;
-}
-
-.ms-tip {
-  background: var(--navy-soft);
-  border: 1px solid var(--bd);
-  border-radius: 10px;
-  padding: 11px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.ms-tip-title {
+.favorite-total-pill span {
+  margin-top: 6px;
   font-size: 12px;
-  font-weight: 500;
-  color: var(--tx);
-  margin-bottom: 2px;
+  font-weight: 900;
 }
 
-.ms-tip-sub {
-  font-size: 10px;
-  color: var(--mu);
+.favorites-content {
+  padding: 14px 16px 16px;
 }
 
-.ms-week-title {
-  font-size: 10px;
-  color: var(--mu);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+.device-panel {
+  border: 1px solid #d9cdbb;
+  border-radius: 8px;
+  background: rgba(255, 252, 247, 0.45);
+  padding: 6px 8px;
 }
 
-.ms-sparkline {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 60px;
-  margin-bottom: 0;
+.section-mini-title {
+  font-size: 12px;
+  color: #6e5840;
+  font-weight: 900;
 }
 
-.ms-spark-col {
-  flex: 1;
+.favorite-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+
+.favorite-tile {
+  position: relative;
+  min-height: 92px;
+  padding: 12px;
+  border: 1px solid rgba(217, 205, 187, 0.9);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  gap: 9px;
+  background: rgba(255, 252, 247, 0.62);
+  color: #2f2720;
+  text-align: left;
+  cursor: pointer;
+}
+
+.favorite-tile:focus-visible {
+  outline: 2px solid rgba(124, 92, 62, 0.35);
+  outline-offset: 2px;
+}
+
+.favorite-tile .tile-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.favorite-tile .favorite-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52);
+}
+
+.favorite-tile .favorite-icon :deep(svg) {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2.05;
+}
+
+.favorite-tile-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
-  height: 100%;
-  justify-content: flex-end;
 }
 
-.ms-spark-bar {
-  width: 100%;
-  border-radius: 4px 4px 0 0;
-  min-height: 3px;
-  background: #E2E9F2;
-}
-
-.ms-spark-bar.has {
-  background: rgba(232, 132, 90, 0.4);
-}
-
-.ms-spark-bar.today-bar {
-  background: linear-gradient(180deg, var(--orange), #C4622A);
-  box-shadow: 0 0 8px rgba(232, 132, 90, 0.35);
-}
-
-.ms-spark-label {
-  font-size: 9px;
-  color: #9AA7BB;
-}
-
-.ms-spark-label.today {
-  color: var(--orange);
-  font-weight: 600;
-}
-
-.prog-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.prog-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--bd);
-}
-
-.prog-row:last-child {
-  border-bottom: none;
-}
-
-.prog-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.favorite-tile-copy strong {
+  color: #2b2118;
   font-size: 14px;
 }
 
-.prog-meta {
-  flex: 1;
-}
-
-.prog-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--tx);
-  margin-bottom: 5px;
-}
-
-.prog-bar {
-  height: 4px;
-  background: var(--bd);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.prog-fill {
-  height: 100%;
-  border-radius: 4px;
-}
-
-.prog-right {
-  text-align: right;
-}
-
-.prog-count {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--tx);
-}
-
-.prog-pct {
-  font-size: 10px;
-  color: var(--mu);
-  margin-top: 2px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--bd);
-  cursor: pointer;
-}
-
-.menu-item:last-child {
-  border-bottom: none;
-}
-
-.mi-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  flex-shrink: 0;
-}
-
-.mi-body {
-  flex: 1;
-}
-
-.menu-label {
-  font-size: 13px;
-  color: var(--tx);
-}
-
-.menu-sub {
+.favorite-tile-copy em {
+  color: #81776b;
   font-size: 11px;
-  color: var(--mu);
-  margin-top: 1px;
+  font-style: normal;
+  line-height: 1.25;
 }
 
-.menu-val {
-  font-size: 12px;
-  color: var(--mu);
+.favorite-tile b {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #6e5840;
+  font-size: 21px;
+  line-height: 1;
 }
 
-.menu-arr {
-  color: var(--hi);
-  font-size: 16px;
-  margin-left: 4px;
+.tile-icon.gold { background: #fff0cf; color: #f5a623; }
+.tile-icon.orange { background: #ffe8d6; color: #d06f2a; }
+.tile-icon.green { background: #dff0e4; color: #50b86a; }
+.tile-icon.blue { background: #e6efff; color: #4f7bee; }
+.tile-icon.purple { background: #efe8ff; color: #7c4dff; }
+.tile-icon.cyan { background: #e5f7ff; color: #2b9fd8; }
+.tile-icon.indigo { background: #e6efff; color: #4f7bee; }
+
+.device-card {
+  grid-column: 1 / -1;
+  min-height: 180px;
 }
 
-.menu-badge {
-  font-size: 10px;
-  background: var(--og-bg);
-  color: #C4622A;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-weight: 500;
-  border: 1px solid var(--og-mid);
+.device-layout {
+  padding: 10px 14px 15px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap);
 }
 
-.logout-btn {
-  width: 100%;
-  padding: 13px;
-  background: var(--card);
-  border: 1.5px solid #FECACA;
-  border-radius: var(--r);
-  color: #D92D20;
+.device-panel {
+  min-height: 126px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.device-record {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid #e4dacd;
+}
+
+.device-record:last-child {
+  border-bottom: 0;
+}
+
+.device-image-wrap {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(196, 180, 156, 0.72);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(250, 246, 239, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.device-image-wrap.small {
+  width: 32px;
+  height: 32px;
+}
+
+.device-image {
+  width: 26px;
+  height: 26px;
+  display: block;
+  object-fit: contain;
+}
+
+.device-image-wrap.small .device-image {
+  width: 24px;
+  height: 24px;
+}
+
+.device-copy {
+  min-width: 0;
+}
+
+.device-copy strong,
+.login-row strong {
+  display: block;
+  color: #2f2720;
   font-size: 13px;
-  font-weight: 500;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.device-copy p {
+  margin: 3px 0 0;
+  color: #8a8075;
+  font-size: 12px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.device-side {
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.current-device {
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #dff0e4;
+  color: #4c9862;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.current-device.compact {
+  padding: 4px 8px;
+}
+
+.device-time {
+  color: #7f756a;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.login-row {
+  font-size: 12px;
+  color: #7a7066;
+}
+
+.login-row em {
+  font-style: normal;
+  color: #7a7066;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.login-empty {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  color: #8a8075;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.login-empty--error {
+  color: #b86045;
+}
+
+.link-btn {
+  display: block;
+  margin: 12px 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--c2);
   cursor: pointer;
-  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.pb {
-  padding-bottom: 40px;
-}
-
-.plan.selected {
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-@media (max-width: 620px) {
-  .wrap {
-    padding: 20px 16px 40px;
+@media (max-width: 1320px) {
+  .profile-sidebar {
+    width: 200px;
+    flex-basis: 200px;
   }
 
-  .hero {
-    padding: 24px 18px 26px;
+  .profile-main {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
-  .hero-top {
-    gap: 14px;
-    margin-bottom: 22px;
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(350px, 0.9fr);
   }
 
-  .hero-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+  .profile-body {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
-  .hs {
-    padding: 12px 8px;
-  }
-
-  .hs-n {
-    font-size: 20px;
-  }
-
-  .hs-l {
-    font-size: 8px;
-    margin-top: 3px;
+  .profile-info {
+    padding-left: 22px;
   }
 }
 
-@media (max-width: 520px) {
-  .hero-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
+@media (max-width: 1180px) {
+  .personal-center-page {
+    overflow-x: auto;
   }
 
-  .hs {
-    padding: 10px 6px;
-  }
-
-  .hs-n {
-    font-size: 17px;
-  }
-
-  .hs-l {
-    font-size: 7px;
-    margin-top: 2px;
+  .profile-shell {
+    min-width: 1000px;
   }
 }
 
-@media (max-width: 430px) {
-  .hero-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
-  }
-
-  .hs {
-    padding: 9px 5px;
-  }
-
-  .hs-n {
-    font-size: 15px;
-  }
-
-  .hs-l {
-    font-size: 6px;
-    margin-top: 2px;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .hs {
-    padding: 14px 12px;
-  }
-
-  .hs-n {
-    font-size: 19px;
-  }
-
-  .hs-l {
-    font-size: 9px;
-    margin-top: 3px;
-  }
-}
-
-@media (min-width: 960px) {
-  .profile-page {
-    background:
-      radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.72) 0, rgba(255, 255, 255, 0) 22%),
-      radial-gradient(circle at 82% 8%, rgba(232, 132, 90, 0.12) 0, rgba(232, 132, 90, 0) 18%),
-      linear-gradient(180deg, #edf3fb 0, #eaf0f9 220px, #f6f8fc 220px, #f6f8fc 100%);
-  }
-
-  .nav {
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 10px 30px rgba(10, 22, 40, 0.08);
-  }
-
-  .wrap {
-    max-width: 1320px;
-    padding: 28px 24px 72px;
-  }
-
-  .content {
-    margin-top: 26px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-    gap: 24px;
-    align-items: start;
-  }
-
-  .content-column {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    min-width: 0;
-  }
-
-  .profile-section--vip {
-    grid-column: 1 / -1;
-    margin-bottom: 0;
-  }
-
-  .content-column > .profile-section {
-    margin-bottom: 0;
-  }
-
-  .vip-card,
-  .sec,
-  .ms-card,
-  .logout-btn {
-    box-shadow: 0 18px 42px rgba(15, 36, 68, 0.08);
-  }
-
-  .profile-section--portrait .sec-body,
-  .profile-section--progress .sec-body {
-    padding-top: 18px;
-    padding-bottom: 18px;
-  }
-
-  .radar-wrap {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 18px;
-  }
-
-  .portrait-radar {
-    align-self: center;
-    width: 272px;
-    height: 248px;
-  }
-
-  .sec-body {
-    padding: 18px 20px;
-  }
-
-  .ms-body {
-    padding: 22px 24px;
-  }
-
-  .ms-sparkline {
-    height: 72px;
-  }
-
-  .logout-btn {
-    margin-top: 0;
-  }
-}
-
-@media (min-width: 1080px) {
-  .nav {
-    background: rgba(15, 36, 68, 0.96);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: none;
-  }
-
-  .nav-back {
-    color: rgba(255, 255, 255, 0.72);
-  }
-
-  .nav-title {
-    color: #fff;
-  }
-
-  .wrap {
-    width: min(calc(100vw - 48px), 1720px);
-    max-width: 1720px;
-    padding: 28px 16px 72px;
-    display: grid;
-    grid-template-columns: 340px minmax(0, 1fr);
-    gap: 28px;
-    align-items: stretch;
-  }
-
-  .hero {
-    height: 100%;
-    min-height: 100%;
-    padding: 22px 18px 22px;
-    border-radius: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .hero-top {
-    gap: 14px;
+@media (max-width: 640px) {
+  .profile-modal-overlay {
+    padding: 16px;
     align-items: center;
-    margin-bottom: 0;
   }
 
-  .hero-stats {
+  .profile-modal {
+    width: calc(100vw - 28px);
+  }
+
+  .profile-modal-head,
+  .profile-modal-body,
+  .profile-modal-actions {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .profile-edit-grid {
     grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .hero-study-rail {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 1;
-  }
-
-  .hs {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-align: left;
-    padding: 16px 16px;
-    border-radius: 18px;
-  }
-
-  .hs-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    font-size: 18px;
-    flex: none;
-  }
-
-  .hs-copy {
-    flex: 1;
-  }
-
-  .hs-n {
-    font-size: 28px;
-    line-height: 1;
-  }
-
-  .hs-l {
-    font-size: 12px;
-    margin-top: 8px;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .hero-study-card,
-  .hero-week-card {
-    padding: 18px 16px;
-    border-radius: 22px;
-  }
-
-  .hero-atmosphere {
-    position: relative;
-    display: flex;
-    flex: 1;
-    align-items: flex-start;
-    min-height: 338px;
-    margin: 6px -18px -22px;
-    padding: 26px 28px 0;
-    overflow: hidden;
-  }
-
-  .hero-atmosphere::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 72% 26%, rgba(125, 167, 255, 0.12) 0, rgba(125, 167, 255, 0) 26%),
-      linear-gradient(180deg, rgba(33, 70, 131, 0.02) 0%, rgba(19, 45, 89, 0.08) 22%, rgba(12, 31, 64, 0.18) 100%);
-    z-index: 0;
-  }
-
-  .hero-atmosphere::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(18, 41, 80, 0) 0%, rgba(18, 41, 80, 0.12) 12%, rgba(8, 24, 50, 0.42) 100%);
-    z-index: 0;
-  }
-
-  .hero-atmosphere__copy {
-    position: relative;
-    z-index: 2;
-    width: min(69%, 194px);
-    padding-left: 2px;
-    padding-top: 8px;
-  }
-
-  .hero-atmosphere__line {
-    margin: 0;
-    font-size: 18px;
-    line-height: 1.62;
-    font-weight: 670;
-    color: rgba(255, 255, 255, 0.95);
-    letter-spacing: 0.012em;
-    text-shadow: 0 3px 10px rgba(4, 14, 29, 0.22);
-  }
-
-  .hero-atmosphere__scene {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    opacity: 0.98;
-  }
-
-  .content {
-    margin-top: 0;
-  }
-
-  .vip-card {
-    box-shadow: 0 18px 42px rgba(15, 36, 68, 0.08);
-  }
-
-  .ms-card {
-    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
-    border: 1px solid var(--bd);
-    box-shadow: 0 18px 42px rgba(15, 36, 68, 0.08);
-  }
-
-  .ms-hdr {
-    border-bottom: 1px solid var(--bd);
-  }
-
-  .ms-hdr-title,
-  .ms-ring-n {
-    color: var(--tx);
-  }
-
-  .ms-ring-sub {
-    color: var(--mu);
-  }
-
-  .ms-dot-segment {
-    background: #E3EAF4;
-  }
-
-  .ms-dot-circle {
-    border: 2px solid #DBE4F0;
-    background: #F6F9FD;
-    color: #9AACBF;
-  }
-
-  .ms-dot-days {
-    color: var(--hi);
-  }
-
-  .ms-tip {
-    background: var(--navy-soft);
-    border: 1px solid var(--bd);
-  }
-
-  .ms-tip-title {
-    color: var(--tx);
-  }
-
-  .ms-tip-sub,
-  .ms-week-title,
-  .ms-spark-label {
-    color: var(--mu);
-  }
-
-  .ms-spark-bar {
-    background: #E2E9F2;
   }
 }
 </style>
-
-
-
-
-

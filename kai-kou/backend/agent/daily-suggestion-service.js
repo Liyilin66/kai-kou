@@ -5,6 +5,14 @@ const DAILY_TASK_TYPES = ["RA", "WFD", "WE", "DI", "RTS"];
 const RECENT_LOG_LIMIT = 100;
 const PROVIDER_MAX_TOKENS = 500;
 const PROVIDER_TEMPERATURE = 0.5;
+const DAILY_SUGGESTION_CACHE_LIMIT = 200;
+const DAILY_SUMMARY_CACHE_TTL_MS = 45 * 1000;
+const DAILY_SUMMARY_CACHE_LIMIT = 300;
+const dailySuggestionCache = new Map();
+const dailySuggestionInFlight = new Map();
+const dailySuggestionGenerationTokens = new Map();
+const dailySummaryCache = new Map();
+const dailySummaryInFlight = new Map();
 
 const TASK_META = {
   RA: { title: "RA 朗读句子", method: "重点保持不断句，卡顿超过 3 秒就重读一遍。" },
@@ -14,9 +22,12 @@ const TASK_META = {
   RTS: { title: "RTS 复述句子", method: "先抓场景和任务，再复述关键动作。" }
 };
 
-export async function buildDailySuggestionResponse({ supabase, user, requestId = "", force = false } = {}) {
+export async function buildDailySuggestionResponse({ supabase, user, requestId = "", force = false, practiceSignature = "" } = {}) {
   const startedAt = nowMs();
-  const summary = await loadDailyPracticeSummary({ supabase, user });
+  const summary = await loadDailyPracticeSummary({ supabase, user, practiceSignature });
+  const userId = normalizeText(user?.id);
+  const effectivePracticeSignature = summary.practice_signature || normalizeText(practiceSignature);
+  const cacheKey = buildDailySuggestionCacheKey({ userId, practiceSignature: effectivePracticeSignature });
 
   if (summary.total_attempts <= 0) {
     const response = {
@@ -24,17 +35,75 @@ export async function buildDailySuggestionResponse({ supabase, user, requestId =
       suggestion: createNewUserSuggestion(),
       generated_at: new Date().toISOString(),
       source: "new_user",
-      practice_signature: summary.practice_signature,
+      practice_signature: effectivePracticeSignature || summary.practice_signature,
       summary,
       model: "",
       provider: "local_fallback",
       reason_code: "new_user",
       request_id: requestId
     };
-    logDailySuggestion({ requestId, summary, response, totalMs: elapsedMs(startedAt), reasonCode: "new_user" });
+    logDailySuggestion({ requestId, summary, response, totalMs: elapsedMs(startedAt), reasonCode: "new_user", cacheKey });
     return response;
   }
 
+  if (cacheKey && !force) {
+    const cached = dailySuggestionCache.get(cacheKey);
+    if (cached) {
+      const response = cloneDailySuggestionResponse(cached, {
+        requestId,
+        reasonCode: "cached"
+      });
+      logDailySuggestion({ requestId, summary, response, totalMs: elapsedMs(startedAt), reasonCode: "cached", cacheKey });
+      return response;
+    }
+  }
+
+  if (cacheKey && !force && dailySuggestionInFlight.has(cacheKey)) {
+    const joined = await dailySuggestionInFlight.get(cacheKey);
+    const response = cloneDailySuggestionResponse(joined, {
+      requestId,
+      reasonCode: "in_flight_joined"
+    });
+    logDailySuggestion({ requestId, summary, response, totalMs: elapsedMs(startedAt), reasonCode: "in_flight_joined", cacheKey });
+    return response;
+  }
+
+  const generatePromise = generateDailySuggestionResponse({
+    summary,
+    requestId,
+    force,
+    practiceSignature: effectivePracticeSignature,
+    startedAt,
+    cacheKey
+  });
+
+  if (!cacheKey) return generatePromise;
+
+  const generationToken = Symbol(cacheKey);
+  dailySuggestionGenerationTokens.set(cacheKey, generationToken);
+  dailySuggestionInFlight.set(cacheKey, generatePromise);
+  try {
+    const response = await generatePromise;
+    if (response?.source === "agent" && dailySuggestionGenerationTokens.get(cacheKey) === generationToken) {
+      dailySuggestionCache.set(cacheKey, cloneDailySuggestionResponse(response, {
+        requestId: response.request_id,
+        source: response.source,
+        reasonCode: response.reason_code
+      }));
+      trimDailySuggestionCache();
+    }
+    return response;
+  } finally {
+    if (dailySuggestionGenerationTokens.get(cacheKey) === generationToken) {
+      dailySuggestionGenerationTokens.delete(cacheKey);
+    }
+    if (dailySuggestionInFlight.get(cacheKey) === generatePromise) {
+      dailySuggestionInFlight.delete(cacheKey);
+    }
+  }
+}
+
+async function generateDailySuggestionResponse({ summary, requestId = "", force = false, practiceSignature = "", startedAt = nowMs(), cacheKey = "" } = {}) {
   const config = getOpenAICompatibleConfig();
   let providerResult = null;
   let suggestion = null;
@@ -51,20 +120,25 @@ export async function buildDailySuggestionResponse({ supabase, user, requestId =
       temperature: PROVIDER_TEMPERATURE,
       messages: buildDailySuggestionMessages(compactSummaryForPrompt(summary))
     });
-    suggestion = sanitizeSuggestion(parseSuggestionJson(providerResult?.raw_text), summary);
+    const parsedSuggestion = parseSuggestionJson(providerResult?.raw_text);
+    if (!parsedSuggestion) {
+      throw createDailyProviderFailure("provider_parse_failed", providerResult);
+    }
+    suggestion = sanitizeSuggestion(parsedSuggestion, summary);
   } catch (error) {
-    reasonCode = normalizeText(error?.raw_error_type || error?.message || "provider_error") || "provider_error";
+    reasonCode = normalizeDailyProviderReasonCode(error);
+    suggestion = createFallbackSuggestion(summary);
     const response = {
-      ok: false,
-      suggestion: null,
-      message: "今日 AI 建议暂时不可用，请稍后刷新。",
+      ok: true,
+      suggestion,
       generated_at: new Date().toISOString(),
-      source: "unavailable",
-      practice_signature: summary.practice_signature,
+      source: "fallback",
+      practice_signature: practiceSignature || summary.practice_signature,
       summary,
       model: normalizeText(config.model),
-      provider: "openai_compatible",
+      provider: "local_fallback",
       usage: {},
+      provider_reason_code: reasonCode,
       reason_code: reasonCode,
       request_id: requestId
     };
@@ -74,8 +148,9 @@ export async function buildDailySuggestionResponse({ supabase, user, requestId =
       summary,
       response,
       totalMs: elapsedMs(startedAt),
-      providerRequestMs: providerResult?.provider_request_ms || 0,
-      reasonCode
+      providerRequestMs: error?.provider_request_ms || providerResult?.provider_request_ms || 0,
+      reasonCode,
+      cacheKey
     });
 
     return response;
@@ -86,7 +161,7 @@ export async function buildDailySuggestionResponse({ supabase, user, requestId =
     suggestion,
     generated_at: new Date().toISOString(),
     source,
-    practice_signature: summary.practice_signature,
+    practice_signature: practiceSignature || summary.practice_signature,
     summary,
     model: normalizeText(providerResult?.model || config.model),
     provider: normalizeText(providerResult?.provider_used || (source === "agent" ? "openai_compatible" : "local_fallback")),
@@ -101,18 +176,58 @@ export async function buildDailySuggestionResponse({ supabase, user, requestId =
     response,
     totalMs: elapsedMs(startedAt),
     providerRequestMs: providerResult?.provider_request_ms || 0,
-    reasonCode
+    reasonCode,
+    cacheKey
   });
 
   return response;
 }
 
-async function loadDailyPracticeSummary({ supabase, user } = {}) {
+export async function loadDailyPracticeSummary({ supabase, user, practiceSignature = "" } = {}) {
   const userId = normalizeText(user?.id);
   if (!supabase || !userId) {
     return createEmptySummary();
   }
 
+  const expectedPracticeSignature = normalizeText(practiceSignature);
+  const now = Date.now();
+  pruneDailySummaryCache(now);
+
+  const cached = dailySummaryCache.get(userId);
+  if (
+    cached
+    && cached.expiresAt > now
+    && (!expectedPracticeSignature || normalizeText(cached.summary?.practice_signature) === expectedPracticeSignature)
+  ) {
+    return cloneJsonValue(cached.summary, createEmptySummary());
+  }
+
+  const inFlight = dailySummaryInFlight.get(userId);
+  if (inFlight) {
+    const summary = await inFlight;
+    if (!expectedPracticeSignature || normalizeText(summary?.practice_signature) === expectedPracticeSignature) {
+      return cloneJsonValue(summary, createEmptySummary());
+    }
+  }
+
+  const loadPromise = loadFreshDailyPracticeSummary({ supabase, userId });
+  dailySummaryInFlight.set(userId, loadPromise);
+  try {
+    const summary = await loadPromise;
+    dailySummaryCache.set(userId, {
+      summary: cloneJsonValue(summary, createEmptySummary()),
+      expiresAt: now + DAILY_SUMMARY_CACHE_TTL_MS
+    });
+    trimDailySummaryCache();
+    return cloneJsonValue(summary, createEmptySummary());
+  } finally {
+    if (dailySummaryInFlight.get(userId) === loadPromise) {
+      dailySummaryInFlight.delete(userId);
+    }
+  }
+}
+
+async function loadFreshDailyPracticeSummary({ supabase, userId } = {}) {
   const countPromise = supabase
     .from("practice_logs")
     .select("id", { count: "exact", head: true })
@@ -489,22 +604,118 @@ function logDailySuggestion({
   response,
   totalMs,
   providerRequestMs = 0,
-  reasonCode = ""
+  reasonCode = "",
+  cacheKey = ""
 }) {
   try {
+    const normalizedReasonCode = normalizeText(reasonCode || response?.reason_code);
     console.info("[daily-suggestion]", JSON.stringify({
       request_id: requestId,
       user_has_logs: Number(summary?.total_attempts || 0) > 0,
       practice_signature: normalizeText(response?.practice_signature || summary?.practice_signature),
-      regenerated: response?.source === "agent",
+      cache_key: cacheKey ? hashCacheKey(cacheKey) : null,
+      source: normalizeText(response?.source),
+      regenerated: response?.source === "agent" && !["cached", "in_flight_joined"].includes(normalizedReasonCode),
       model: normalizeText(response?.model),
       provider_request_ms: Math.round(Number(providerRequestMs || 0)),
       total_ms: Math.round(Number(totalMs || 0)),
-      reason_code: normalizeText(reasonCode || response?.reason_code)
+      provider_reason_code: normalizeText(response?.provider_reason_code),
+      reason_code: normalizedReasonCode
     }));
   } catch {
     // Logging must never affect the user-facing dashboard.
   }
+}
+
+function buildDailySuggestionCacheKey({ userId, practiceSignature, date = new Date() } = {}) {
+  const normalizedUserId = normalizeText(userId);
+  const normalizedSignature = normalizeText(practiceSignature);
+  if (!normalizedUserId || !normalizedSignature) return "";
+  return `${normalizedUserId}:${toDateKey(date)}:${normalizedSignature}`;
+}
+
+function cloneDailySuggestionResponse(response, overrides = {}) {
+  const cloned = {
+    ...(response && typeof response === "object" ? response : {}),
+    suggestion: cloneJsonValue(response?.suggestion, null),
+    summary: cloneJsonValue(response?.summary, null),
+    usage: cloneJsonValue(response?.usage, {})
+  };
+
+  if (Object.prototype.hasOwnProperty.call(overrides, "requestId")) {
+    cloned.request_id = normalizeText(overrides.requestId);
+  }
+  if (Object.prototype.hasOwnProperty.call(overrides, "source")) {
+    cloned.source = normalizeText(overrides.source) || cloned.source;
+  }
+  if (Object.prototype.hasOwnProperty.call(overrides, "reasonCode")) {
+    cloned.reason_code = normalizeText(overrides.reasonCode) || cloned.reason_code;
+  }
+
+  return cloned;
+}
+
+function cloneJsonValue(value, fallback) {
+  if (!isPlainObject(value) && !Array.isArray(value)) return fallback;
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch {
+    return Array.isArray(value) ? [...value] : { ...value };
+  }
+}
+
+function trimDailySuggestionCache() {
+  while (dailySuggestionCache.size > DAILY_SUGGESTION_CACHE_LIMIT) {
+    const oldestKey = dailySuggestionCache.keys().next().value;
+    if (!oldestKey) return;
+    dailySuggestionCache.delete(oldestKey);
+  }
+}
+
+function pruneDailySummaryCache(now = Date.now()) {
+  for (const [key, value] of dailySummaryCache.entries()) {
+    if (!value?.expiresAt || value.expiresAt <= now) {
+      dailySummaryCache.delete(key);
+    }
+  }
+}
+
+function trimDailySummaryCache() {
+  while (dailySummaryCache.size > DAILY_SUMMARY_CACHE_LIMIT) {
+    const oldestKey = dailySummaryCache.keys().next().value;
+    if (!oldestKey) return;
+    dailySummaryCache.delete(oldestKey);
+  }
+}
+
+function createDailyProviderFailure(reasonCode, providerResult = null) {
+  const error = new Error(reasonCode);
+  error.raw_error_type = reasonCode;
+  error.provider_request_ms = providerResult?.provider_request_ms || 0;
+  return error;
+}
+
+function normalizeDailyProviderReasonCode(error) {
+  const raw = normalizeText(error?.raw_error_type || error?.code || error?.message).toLowerCase();
+  const status = Number(error?.status);
+  if (raw.includes("api_key_missing")) return "missing_api_key";
+  if (raw.includes("base_url_missing")) return "provider_base_url_missing";
+  if (raw.includes("model_missing")) return "provider_model_missing";
+  if (raw.includes("connect_timeout") || raw.includes("und_err_connect_timeout") || raw.includes("network_error")) return "provider_connect_timeout";
+  if (raw.includes("response_timeout") || raw.includes("timeout")) return "provider_response_timeout";
+  if ((Number.isFinite(status) && status >= 500 && status <= 599) || /http_5\d\d/.test(raw)) return "provider_http_5xx";
+  if (raw.includes("empty_content")) return "provider_empty_content";
+  if (raw.includes("parse_failed") || raw.includes("invalid_json")) return "provider_parse_failed";
+  return raw || "provider_error";
+}
+
+function hashCacheKey(value) {
+  const text = normalizeText(value);
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
+  }
+  return Math.abs(hash).toString(36);
 }
 
 function elapsedMs(startedAt) {

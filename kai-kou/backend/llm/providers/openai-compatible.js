@@ -133,9 +133,9 @@ export async function callOpenAICompatibleChat({
       providerRequestMs = elapsedMs(providerRequestStartedAt);
       if (isAbortError(error)) {
         throw createProviderError(PROVIDER_NAME, {
-          message: "provider_timeout",
+          message: "provider_response_timeout",
           status: 504,
-          raw_error_type: `${PROVIDER_NAME}_timeout`,
+          raw_error_type: `${PROVIDER_NAME}_response_timeout`,
           fallback_allowed: true,
           cause: error
         });
@@ -151,6 +151,15 @@ export async function callOpenAICompatibleChat({
       throw createProviderError(PROVIDER_NAME, {
         message: extractProviderErrorMessage(data) || `OpenAI-compatible request failed with status ${response.status}`,
         status: response.status
+      });
+    }
+    if (!data || typeof data !== "object") {
+      providerParseMs = elapsedMs(providerParseStartedAt);
+      throw createProviderError(PROVIDER_NAME, {
+        message: "OpenAI-compatible provider returned invalid JSON",
+        status: 502,
+        raw_error_type: `${PROVIDER_NAME}_parse_failed`,
+        fallback_allowed: false
       });
     }
 
@@ -259,7 +268,6 @@ export async function callScoringOpenAICompatible({
       throw createProviderError(SCORING_PROVIDER_NAME, {
         message: extractProviderErrorMessage(data) || `OpenAI-compatible request failed with status ${response.status}`,
         status: response.status,
-        fallback_allowed: true,
         model: resolvedModel,
         timeout_ms: resolvedTimeoutMs,
         sanitized_error_body: sanitizedBody

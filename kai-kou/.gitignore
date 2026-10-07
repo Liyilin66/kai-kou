@@ -28,25 +28,16 @@ db/*.db-*
 *.sw?
 .vercel
 .agents/
+.claude/
 .codex/
+.omc/
 .omx/
 .playwright-cli/
 .tmp-opinion/
 .playwright-cli/*.png
 .playwright-cli/*.yml
-output/*.tmp
-output/*.json
-output/*.jsonl
-output/*.txt
-output/*.js
-output/*.ps1
-output/dev-server/
-output/playwright/results/*.json
-output/playwright/*.log
-output/playwright/*.err.log
-output/playwright/*.png
-output/playwright/*.js
-output/playwright/*.json
+output/
+test-results/
 
 # Generated script reports
 scripts/reports/*.json

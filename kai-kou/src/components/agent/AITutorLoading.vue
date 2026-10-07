@@ -39,7 +39,19 @@ const props = defineProps({
   },
   userId: {
     type: String,
-    default: "yli71641"
+    default: "同学"
+  },
+  userInitial: {
+    type: String,
+    default: "同"
+  },
+  userAvatarUrl: {
+    type: String,
+    default: ""
+  },
+  showUserAvatar: {
+    type: Boolean,
+    default: false
   },
   navItems: {
     type: Array,
@@ -87,7 +99,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["disabled-nav", "primary-action", "secondary-action"]);
+const emit = defineEmits(["disabled-nav", "primary-action", "secondary-action", "avatar-error"]);
 
 const navIconMap = {
   home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
@@ -110,6 +122,7 @@ const displaySteps = computed(() => (
 ));
 const isFailedMode = computed(() => props.mode === "failed");
 const isAccessMode = computed(() => props.mode === "locked" || props.mode === "unavailable");
+const userLetter = computed(() => normalizeText(props.userInitial) || normalizeText(props.userId).charAt(0).toUpperCase() || "同");
 const cardTitle = computed(() => (
   props.title || (isAccessMode.value ? "AI 私教为 VIP 专属功能" : (isFailedMode.value ? "暂时没能恢复 AI 私教聊天" : "正在进入 AI 私教工作台"))
 ));
@@ -144,6 +157,11 @@ const insightPlanText = computed(() => (isAccessMode.value ? "VIP 后解锁训�
 const insightNoteText = computed(() => (
   isAccessMode.value ? "升级后解锁今日洞察、计划和推荐追问。" : "恢复聊天完成后显示可追问的问题。"
 ));
+
+function normalizeText(value) {
+  if (typeof value !== "string" && typeof value !== "number") return "";
+  return `${value}`.trim();
+}
 </script>
 
 <template>
@@ -208,6 +226,10 @@ const insightNoteText = computed(() => (
         <div class="ai-tutor-loading-top-right">
           <span class="ai-tutor-loading-live-dot" :class="{ 'ai-tutor-loading-live-dot--failed': isFailedMode }" aria-hidden="true"></span>
           <span class="ai-tutor-loading-live-text">{{ topStatusText }}</span>
+          <span class="ai-tutor-loading-user-avatar">
+            <img v-if="showUserAvatar" :src="userAvatarUrl" alt="" @error="emit('avatar-error')" />
+            <b v-else>{{ userLetter }}</b>
+          </span>
           <span class="ai-tutor-loading-user-id">{{ userId }}</span>
         </div>
       </header>
@@ -386,7 +408,10 @@ const insightNoteText = computed(() => (
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 18px 18px 16px;
+  box-sizing: border-box;
+  height: 64px;
+  flex: 0 0 64px;
+  padding: 0 18px;
   border-bottom: .5px solid #d4cdbf;
   text-decoration: none;
 }
@@ -519,8 +544,9 @@ const insightNoteText = computed(() => (
 
 .ai-tutor-loading-topbar {
   display: flex;
-  height: 50px;
-  flex: 0 0 50px;
+  box-sizing: border-box;
+  height: 64px;
+  flex: 0 0 64px;
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
@@ -583,6 +609,32 @@ const insightNoteText = computed(() => (
 
 .ai-tutor-loading-shell--access .ai-tutor-loading-live-text {
   color: #9b6642;
+}
+
+.ai-tutor-loading-user-avatar {
+  width: 24px;
+  height: 24px;
+  margin-left: 8px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #7c5c3e;
+  color: #f5efe4;
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ai-tutor-loading-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ai-tutor-loading-user-avatar b {
+  font: inherit;
 }
 
 .ai-tutor-loading-user-id {

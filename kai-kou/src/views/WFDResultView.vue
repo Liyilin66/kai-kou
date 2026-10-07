@@ -65,7 +65,7 @@
           <button
             type="button"
             class="w-full rounded-xl bg-orange py-4 text-lg font-bold text-white shadow-md hover:opacity-90"
-            @click="router.push('/wfd')"
+            @click="router.push('/wfd/practice')"
           >
             再练一题 →
           </button>

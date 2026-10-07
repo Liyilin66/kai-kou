@@ -29,6 +29,9 @@ const uiStore = useUIStore();
 const recorder = useRecorder();
 const timer = useTimer();
 
+const RA_PREP_SECONDS = 40;
+const RA_RECORDING_MAX_SECONDS = 40;
+
 const questionIndex = ref(1);
 const phase = computed(() => practiceStore.phase);
 const questionLoading = ref(true);
@@ -1043,7 +1046,7 @@ function startPreparing() {
   clearAttemptScopedUIState();
   prepareStartedAtMs.value = getNowMs();
   practiceStore.setPhase("preparing");
-  timer.start(30, startRecording);
+  timer.start(RA_PREP_SECONDS, startRecording);
 }
 
 async function startRecording() {
@@ -1055,7 +1058,7 @@ async function startRecording() {
       const elapsedPrepareMs = prepareStartedAtMs.value
         ? Math.max(0, getNowMs() - Number(prepareStartedAtMs.value || 0))
         : 0;
-      prepareElapsedSec.value = Math.min(30, Math.max(0, Math.round(elapsedPrepareMs / 1000)));
+      prepareElapsedSec.value = Math.min(RA_PREP_SECONDS, Math.max(0, Math.round(elapsedPrepareMs / 1000)));
     }
     if (phase.value === "preparing") {
       timer.stop();
@@ -1132,7 +1135,7 @@ async function startRecording() {
     finalizedTranscript.value = "";
     submitCallCount = 0;
     startRecordingTicker();
-    timer.start(40, handleSubmit);
+    timer.start(RA_RECORDING_MAX_SECONDS, handleSubmit);
   } catch (err) {
     const fallbackMessage = ERROR_TEXT.GENERIC_START_FAILED;
     resetToRetryableState(fallbackMessage);
@@ -1496,8 +1499,8 @@ async function startRecordingNow() {
             </div>
             <div class="info-row"><span>词数</span><strong>{{ wordCount }} 词</strong></div>
             <div class="info-row"><span>预计用时</span><strong>约 {{ estimatedDurationSeconds }} 秒</strong></div>
-            <div class="info-row"><span>准备时间</span><strong>30 秒</strong></div>
-            <div class="info-row"><span>录音时长</span><strong>最长 40 秒</strong></div>
+            <div class="info-row"><span>准备时间</span><strong>{{ RA_PREP_SECONDS }} 秒</strong></div>
+            <div class="info-row"><span>录音时长</span><strong>最长 {{ RA_RECORDING_MAX_SECONDS }} 秒</strong></div>
             <div class="rhythm-note">📖 阅读节奏：{{ readingRhythmHint }}</div>
           </div>
         </section>
@@ -1690,7 +1693,7 @@ async function startRecordingNow() {
             <div class="ai-hd-title">✦ AI 私教实时指导</div>
             <button class="ai-hd-link" type="button" data-testid="ra-agent" @click="goAgent">进入私教 →</button>
           </div>
-          <div class="ai-suggest"><span>💡</span><span>{{ currentAiTip }}</span></div>
+          <div class="ai-suggest"><span class="ai-suggest-icon">💡</span><span>{{ currentAiTip }}</span></div>
           <div class="ai-msgs">
             <div v-for="msg in aiCoachMessages" :key="msg.text" class="ai-msg">
               <div class="ai-avatar">AI</div>
@@ -1701,8 +1704,8 @@ async function startRecordingNow() {
             </div>
           </div>
           <div class="ai-actions">
-            <button type="button" @click="goAgent">🎯 帮我分析这题节奏</button>
-            <button type="button" @click="showHistoryFromCard">📊 查看我的 RA 趋势</button>
+            <button type="button" @click="goAgent"><span>🎯</span><span>节奏分析</span></button>
+            <button type="button" @click="showHistoryFromCard"><span>📊</span><span>RA 趋势</span></button>
           </div>
         </section>
 
@@ -1760,13 +1763,13 @@ async function startRecordingNow() {
 .step-label.act{color:var(--c2);}.step-label.done{color:var(--green);}.step-label.wait{color:var(--muted);}
 .step-sep{width:22px;height:1px;background:var(--bdr);}
 .step-q-info{margin-left:auto;font-size:11px;color:var(--muted);}
-.practice-body{flex:1;min-height:0;display:grid;grid-template-columns:276px minmax(640px,1fr) 272px;overflow:hidden;}
+.practice-body{flex:1;min-height:0;display:grid;grid-template-columns:276px minmax(620px,1fr) 292px;overflow:hidden;}
 .left-col,.right-col{min-height:0;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;}
 .left-col{border-right:1px solid var(--bdr);padding:18px 14px;}
-.right-col{border-left:1px solid var(--bdr);padding:16px 13px;}
+.right-col{border-left:1px solid var(--bdr);padding:16px 14px 24px;}
 .left-col::-webkit-scrollbar,.right-col::-webkit-scrollbar,.main-col::-webkit-scrollbar{width:4px;}.left-col::-webkit-scrollbar-thumb,.right-col::-webkit-scrollbar-thumb,.main-col::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:99px;}
 .side-card,.ai-card,.timer-card,.article-card,.history-card,.recording-card,.processing-card,.loading-card,.error-card,.debug-card{background:var(--card);border:1px solid var(--bdr);border-radius:13px;}
-.side-card,.ai-card{overflow:hidden;}
+.side-card{overflow:hidden;}.ai-card{overflow:visible;}
 .card-hd{min-height:44px;padding:11px 14px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--c0);}
 .card-mark{color:var(--c2);font-size:12px;}.card-body{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
 .info-body{gap:9px;}.info-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);}.info-row strong{font-size:11.5px;color:var(--c0);}
@@ -1788,8 +1791,8 @@ async function startRecordingNow() {
 .article-card{padding:22px 26px;}.article-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;}.article-text{font-family:'Noto Serif SC','Georgia',serif;font-size:16px;line-height:2;color:#463829;letter-spacing:0;}
 .history-card{padding:0;overflow:hidden;}.history-head{min-height:56px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}.history-title{font-size:12.5px;font-weight:800;color:var(--c0);}.history-toggle{border:1px solid var(--bdr2);background:var(--card2);border-radius:8px;padding:7px 14px;font:inherit;font-size:11.5px;color:var(--c1);cursor:pointer;}.history-panel{border-top:1px solid var(--bdr);padding:12px 16px;display:flex;flex-direction:column;gap:10px;}.history-tools{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);}.history-tools button,.history-log button{border:1px solid var(--bdr2);background:var(--card2);border-radius:7px;padding:5px 9px;font:inherit;font-size:11px;color:var(--c1);cursor:pointer;}.history-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto;padding-right:4px;}.history-log{border:1px solid var(--bdr);background:#fffaf3;border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;}.history-log-top{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--c0);}.history-log p{margin:5px 0 7px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.score-mini{display:flex;gap:6px;font-size:10.5px;color:var(--c2);}.history-log audio{display:block;width:100%;height:30px;margin-top:8px;}
 .loading-card,.processing-card,.error-card,.debug-card{padding:18px;text-align:center;color:var(--muted);font-size:13px;}.loading-dot{width:26px;height:26px;margin:0 auto 8px;border:3px solid var(--orange);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}.error-card{border-color:#e3b0a8;background:#fff0ee;color:var(--red);}.debug-card{text-align:left;font-size:10px;line-height:1.5;}
-.ai-hd{padding:10px 13px 9px;background:var(--c2);display:flex;align-items:center;justify-content:space-between;gap:8px;}.ai-hd-title{font-size:12px;font-weight:900;color:#faf6ef;}.ai-hd-link{font-size:10.5px;color:rgba(250,246,239,.72);text-decoration:underline;text-underline-offset:2px;}.ai-suggest{padding:10px 12px;background:var(--orange2);border-bottom:1px solid var(--orange3);display:flex;gap:7px;font-size:11.5px;line-height:1.55;color:var(--orange);}.ai-msgs{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}.ai-msg{display:flex;gap:8px;align-items:flex-start;}.ai-avatar{width:22px;height:22px;border-radius:50%;background:var(--c2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex:0 0 auto;}.ai-bubble{background:var(--card2);border:1px solid var(--bdr);border-radius:0 8px 8px 8px;padding:8px 10px;}.ai-bubble p{margin:0 0 3px;font-size:11px;line-height:1.55;color:var(--c1);}.ai-bubble span{font-size:9px;color:var(--muted);}.ai-actions{padding:10px 12px 12px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:6px;}.ai-actions button{border:1px solid var(--bdr);background:var(--card2);border-radius:8px;padding:7px 10px;text-align:left;font:inherit;font-size:11px;color:var(--c1);cursor:pointer;}
+.ai-hd{padding:10px 13px 9px;background:var(--c2);border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;gap:8px;}.ai-hd-title{font-size:12px;font-weight:900;color:#faf6ef;white-space:nowrap;}.ai-hd-link{font-size:10.5px;color:rgba(250,246,239,.72);text-decoration:underline;text-underline-offset:2px;white-space:nowrap;}.ai-suggest{padding:10px 12px;background:var(--orange2);border-bottom:1px solid var(--orange3);display:flex;align-items:flex-start;gap:7px;font-size:11.5px;line-height:1.5;color:var(--orange);}.ai-suggest-icon{flex:0 0 auto;}.ai-suggest span:last-child{min-width:0;}.ai-msgs{padding:9px 10px;display:flex;flex-direction:column;gap:7px;}.ai-msg{display:flex;gap:7px;align-items:flex-start;}.ai-avatar{width:22px;height:22px;margin-top:1px;border-radius:50%;background:var(--c2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex:0 0 auto;}.ai-bubble{min-width:0;flex:1;background:var(--card2);border:1px solid var(--bdr);border-radius:0 8px 8px 8px;padding:7px 9px;}.ai-bubble p{margin:0 0 3px;font-size:10.8px;line-height:1.48;color:var(--c1);}.ai-bubble span{font-size:9px;color:var(--muted);}.ai-actions{padding:9px 10px 10px;border-top:1px solid var(--bdr);display:grid;grid-template-columns:1fr 1fr;gap:7px;}.ai-actions button{min-width:0;min-height:34px;border:1px solid var(--bdr);background:var(--card2);border-radius:8px;padding:7px 6px;display:flex;align-items:center;justify-content:center;gap:4px;text-align:center;font:inherit;font-size:11px;font-weight:700;line-height:1.2;color:var(--c1);cursor:pointer;}
 .progress-nums{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;gap:8px;align-items:stretch;text-align:center;}.progress-nums i{background:var(--bdr);}.progress-nums strong{display:block;font-size:17px;color:var(--c0);}.progress-nums span{display:block;margin-top:2px;font-size:9.5px;color:var(--muted);}.progress-track{height:6px;background:var(--bdr);border-radius:999px;overflow:hidden;}.progress-track span{display:block;height:100%;background:var(--c2);border-radius:999px;}.progress-copy{text-align:right;font-size:10px;color:var(--muted);}.quick-actions{gap:8px;}.quick-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}.quick-actions button{border:1px solid var(--bdr);background:var(--card2);border-radius:8px;padding:8px 9px;font:inherit;font-size:11.5px;color:var(--c1);cursor:pointer;}.quick-actions .random-btn{width:100%;border-color:var(--orange3);background:var(--orange2);color:var(--orange);font-weight:800;}.quick-actions .bank-btn{width:100%;}
-@media (min-width:1600px){.practice-body{grid-template-columns:300px minmax(760px,1fr) 300px;}.main-col{padding:26px 30px;}.article-text{font-size:17px;}.status-banner{min-height:116px;}}
-@media (max-width:1320px){.practice-body{grid-template-columns:258px minmax(560px,1fr) 252px;}.main-col{padding:18px 20px;}.article-text{font-size:15px;line-height:1.9;}.ra-topbar{padding:0 24px;}.step-bar{padding:0 24px;}.step-sep{width:16px;}}
+@media (min-width:1600px){.practice-body{grid-template-columns:300px minmax(760px,1fr) 320px;}.main-col{padding:26px 30px;}.article-text{font-size:17px;}.status-banner{min-height:116px;}}
+@media (max-width:1320px){.practice-body{grid-template-columns:250px minmax(540px,1fr) 272px;}.main-col{padding:18px 20px;}.article-text{font-size:15px;line-height:1.9;}.ra-topbar{padding:0 24px;}.step-bar{padding:0 24px;}.step-sep{width:16px;}}
 </style>

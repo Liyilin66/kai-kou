@@ -88,7 +88,7 @@
             <p class="hb-sub">节奏与流利度 · 发音清晰度 · 内容覆盖率</p>
             <div class="hb-tags">
               <span class="hb-tag">口语</span>
-              <span class="hb-tag">30 秒准备</span>
+              <span class="hb-tag">40 秒准备</span>
               <span class="hb-tag">40 秒录音</span>
               <span class="hb-tag">系统自动评分</span>
             </div>

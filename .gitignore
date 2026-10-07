@@ -1,4 +1,5 @@
 # Local agent/runtime state
+/.DS_Store
 /.agents/
 /.claude/
 /.codex/

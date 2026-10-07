@@ -7,8 +7,13 @@ const DEFAULT_MAX_OUTPUT_TOKENS = 1000;
 const DEFAULT_TEMPERATURE = 0.6;
 
 const GREETING_PATTERN = /^(?:\s*(?:hi|hello|hey|你好|您好|哈喽|嗨|在吗|在嘛|早上好|下午好|晚上好)[!！。？?\s]*)$/i;
+const THANKS_PATTERN = /^(?:\s*(?:谢谢|谢了|感谢|多谢|辛苦了|thank you|thanks|thx)[!！。？?\s]*)$/i;
+const CASUAL_PATTERN = /^(?:\s*(?:好|好的|可以|行|嗯|嗯嗯|收到|明白|知道了|ok|okay|好的呀|可以的)[!！。？?，,\s]*)$/i;
 const IDENTITY_PATTERN = /(你是谁|你是什么|你是干嘛的|你叫什么|你是做什么的|你是什么模型|你用的什么模型|你是gpt吗|你是不是大模型|你是谁开发的)/i;
 const CAPABILITY_PATTERN = /(你能做什么|你有什么功能|你可以帮我什么|你会什么|你能帮我什么)/i;
+const UNRELATED_SYMBOL_ONLY_PATTERN = /^[\s\p{P}\p{S}]+$/u;
+const UNRELATED_INSULT_OR_FRUSTRATION_PATTERN = /(你有病|有病吧|神经病|傻逼|傻子|蠢|脑子有问题|垃圾|废物|烦死|烦死了|气死|崩溃|无语|服了|滚|烂透|sb|shit|fuck)/i;
+const UNRELATED_VIOLENT_OR_SELF_HARM_PATTERN = /(杀人|杀了(?:他|她|它|他们|她们|别人|对方|人)|杀掉(?:他|她|它|他们|她们|别人|对方|人)|打死(?:他|她|它|他们|她们|别人|对方|人)|弄死(?:他|她|它|他们|她们|别人|对方|人)|捅死|砍死|伤害别人|伤害他人|伤害对方|报复社会|放火|爆炸|炸掉|自杀|想死|伤害自己|(?:我想|我要|想去|准备|打算)(?:杀|打死|弄死|伤害|捅|砍|揍|报复)|\b(?:kill|murder|hurt|stab|shoot|beat)\s+(?:someone|somebody|people|him|her|them|others)\b)/i;
 const DATA_ANALYSIS_PATTERN = /(我最近怎么样|我最近的(?:练习|表现)|最近记录|最近练得怎么样|哪项最弱|分析我的薄弱项|复盘最近|最近有没有退步|我的分数怎么样|我的练习记录|我的练习情况|最近表现|帮我分析|为什么这次.*分低|这次.*为什么.*分低|这次.*哪里有问题|主要问题|改进方向|最近一次.*分数|最新一次.*分数|上一次.*分数|最后一次.*分数|最近一条.*分数|具体分数|最近一次练习|最新一次练习|上一次练习|最后一次练习|完成了多少|做了多少|练了多少|多少道题|做题数量|练习数量|总共|累计|到现在|目前一共|均分|平均分|总平均|我的成绩|统计一下|数据统计|历史记录)/i;
 const PLAN_PATTERN = /(计划|规划|今天练什么|给我安排|学习安排|训练安排|7天计划|7 天计划|七天计划|冲刺计划|冲分计划|提分计划|备考计划|每天练什么|帮我制定计划|给我.*计划|下一步练什么|今日计划|训练计划|今天该练什么|今天该怎么练|安排训练)/i;
 const REGENERATE_PLAN_PATTERN = /(重新生成|换一版|再来一版|不满意|这个计划不好|换个计划|重新安排|再生成一份|不要这个|换一种安排|再换一版|重新来一份|换份计划)/i;
@@ -49,6 +54,43 @@ const PURE_STATISTICS_PATTERN = /(平均评分|平均分|均分|平均成绩|平
 const ANALYSIS_OR_PLAN_PATTERN = /(为什么|原因|建议|分析|复盘|计划|提高|怎么|如何|训练|安排|扣分点|薄弱项|改进|帮我做|表格)/i;
 const DEFAULT_MAX_RECENT_MESSAGES = 6;
 const DEFAULT_MAX_RECENT_MESSAGE_LENGTH = 500;
+const ANALYSIS_TASK_META = {
+  RA: {
+    title: "RA 朗读句子",
+    reason: "常见扣分点是停顿过长、断句不稳和发音清晰度不够。",
+    focus: "连续开口不断句，卡顿超过 3 秒就重读一遍。",
+    count: 4,
+    minutes: 12
+  },
+  WFD: {
+    title: "WFD 写作填空",
+    reason: "常见扣分点是主干听准了，但冠词、复数、时态和小词漏掉。",
+    focus: "先听主干，再逐句补冠词、复数和时态细节。",
+    count: 6,
+    minutes: 15
+  },
+  WE: {
+    title: "WE 学术短文写作",
+    reason: "常见扣分点是结构先后不清、观点展开不足或语法错误拖累整体分。",
+    focus: "先列结构和主题句，再限时写正文。",
+    count: 1,
+    minutes: 18
+  },
+  DI: {
+    title: "DI 描述图表",
+    reason: "常见扣分点是主图信息没先说清，细节堆叠但缺少顺序。",
+    focus: "先说主图信息，再补 2 个关键细节，最后总结一句。",
+    count: 3,
+    minutes: 15
+  },
+  RTS: {
+    title: "RTS 复述句子",
+    reason: "常见扣分点是只记住零散词，漏掉场景、动作和对象之间的关系。",
+    focus: "先抓场景和任务，再复述关键动作。",
+    count: 5,
+    minutes: 12
+  }
+};
 
 export class AgentChatServiceError extends Error {
   constructor(reasonCode, message, details = {}) {
@@ -70,16 +112,27 @@ export function detectAgentIntent(message, { recentMessages = [] } = {}) {
   const normalizedMessage = normalizeText(message);
   if (!normalizedMessage) return "pte_qa";
 
+  if (classifyUnrelatedMessage(normalizedMessage) === "violent_intent_or_threat") return "unrelated";
   if (IDENTITY_PATTERN.test(normalizedMessage)) return "identity";
   if (CAPABILITY_PATTERN.test(normalizedMessage)) return "capability";
   if (isRegeneratePlanIntentMessage(normalizedMessage, recentMessages)) return "regenerate_plan";
-  if (isContinuationIntentMessage(normalizedMessage)) return "continuation";
+  if (looksLikeContinuationFromRecentMessages(normalizedMessage, recentMessages)) return "continuation";
   if (matchesDataAnalysisIntent(normalizedMessage)) return "data_analysis";
   if (PLAN_PATTERN.test(normalizedMessage)) return "plan";
   if (PTE_QA_PATTERN.test(normalizedMessage)) return "pte_qa";
-  if (looksLikeContinuationFromRecentMessages(normalizedMessage, recentMessages)) return "continuation";
   if (GREETING_PATTERN.test(normalizedMessage)) return "greeting";
+  if (THANKS_PATTERN.test(normalizedMessage)) return "thanks";
+  if (CASUAL_PATTERN.test(normalizedMessage) || isContinuationIntentMessage(normalizedMessage)) return "casual";
   return "unrelated";
+}
+
+export function classifyUnrelatedMessage(message = "") {
+  const normalizedMessage = normalizeText(message);
+
+  if (isViolentIntentOrThreat(normalizedMessage)) return "violent_intent_or_threat";
+  if (isInsultOrFrustration(normalizedMessage)) return "insult_or_frustration";
+  if (isEmptyOrSymbolMessage(normalizedMessage)) return "empty_or_symbol";
+  return "normal_offtopic";
 }
 
 export function shouldUsePracticeData({ intent, message, recentMessages = [] } = {}) {
@@ -136,10 +189,132 @@ export function tryBuildFastPathAgentReply({ intent = "pte_qa", message = "", co
   const normalizedMessage = normalizeText(message);
   const summary = context?.summary || context?.lifetime_summary || null;
 
+  if (normalizedIntent === "greeting") {
+    return "你好，我在。你可以直接问我 PTE 练习、薄弱项分析或今日训练安排。";
+  }
+
+  if (normalizedIntent === "thanks") {
+    return "不客气。需要继续看练习记录、拆训练计划，或者解释某次低分时，直接发给我就行。";
+  }
+
+  if (normalizedIntent === "casual") {
+    return "收到。你可以继续问我具体题型、最近表现，或者让我帮你安排下一组训练。";
+  }
+
+  if (normalizedIntent === "identity") {
+    return "我是“开口”的 PTE AI 私教，主要帮你做 PTE 练习复盘、薄弱项分析和训练规划。";
+  }
+
+  if (normalizedIntent === "capability") {
+    return "我可以帮你分析最近练习表现、定位薄弱题型、解释低分原因，也可以把训练拆成今天可执行的任务。";
+  }
+
+  if (normalizedIntent === "unrelated") {
+    return buildUnrelatedFastPathReply(normalizedMessage);
+  }
+
   if (normalizedIntent !== "data_analysis") return null;
   if (!summary || !isPureStatisticsQuestion(normalizedMessage)) return null;
 
   return buildStatisticsFastPathReply(summary, normalizedMessage);
+}
+
+function buildUnrelatedFastPathReply(message) {
+  switch (classifyUnrelatedMessage(message)) {
+    case "violent_intent_or_threat":
+      return "我不能帮助伤害自己或别人。如果你现在很激动，先离开现场、不要靠近对方或危险物品，联系身边可信的人或当地紧急服务。等你冷静下来，我可以继续帮你回到 PTE 训练。";
+    case "insult_or_frustration":
+      return "可以骂，但别浪费训练时间。你可以直接说：分析弱项、生成计划，或者问某个题型怎么提分。";
+    case "empty_or_symbol":
+      return "我没看懂你的问题。你可以直接问：今天练什么、分析弱项、安排 20 分钟练习。";
+    case "normal_offtopic":
+    default:
+      return "这个问题不属于 PTE 备考范围。你可以让我分析练习记录、讲题型技巧，或生成训练计划。";
+  }
+}
+
+function isViolentIntentOrThreat(message) {
+  return Boolean(message) && UNRELATED_VIOLENT_OR_SELF_HARM_PATTERN.test(message);
+}
+
+function isInsultOrFrustration(message) {
+  return Boolean(message) && UNRELATED_INSULT_OR_FRUSTRATION_PATTERN.test(message);
+}
+
+function isEmptyOrSymbolMessage(message) {
+  return !message || UNRELATED_SYMBOL_ONLY_PATTERN.test(message);
+}
+
+export function buildPracticeAnalysisReplyFromSummary(summary, message = "") {
+  const totalAttempts = toNonNegativeNumber(summary?.total_attempts);
+  const recent7DaysAttempts = toNonNegativeNumber(summary?.recent_7_days_attempts);
+  const recent30DaysAttempts = toNonNegativeNumber(summary?.recent_30_days_attempts);
+  const recent7DaysAverage = normalizeNumeric(summary?.recent_7_days_average_score);
+  const requestedTaskType = extractRequestedTaskType(message);
+  const weakestTaskType = normalizeTaskType(summary?.weakest_task_type);
+  const latestTaskType = normalizeTaskType(summary?.latest_task_type);
+  const mainTaskType = requestedTaskType || weakestTaskType || latestTaskType || "DI";
+  const mainMeta = ANALYSIS_TASK_META[mainTaskType] || ANALYSIS_TASK_META.DI;
+  const taskStats = isPlainObject(summary?.task_stats) ? summary.task_stats : {};
+  const mainStats = isPlainObject(taskStats?.[mainTaskType]) ? taskStats[mainTaskType] : {};
+  const weakTop3 = Array.isArray(summary?.weak_top_3) ? summary.weak_top_3 : [];
+  const weakList = weakTop3
+    .filter((item) => normalizeTaskType(item?.task_type))
+    .slice(0, 3)
+    .map((item) => {
+      const taskType = normalizeTaskType(item.task_type);
+      const averageScore = normalizeNumeric(item.average_score);
+      const attempts = toNonNegativeNumber(item.attempts);
+      return `${taskType}${averageScore === null ? "" : ` ${formatScore(averageScore)}/90`}${attempts ? `（${attempts} 次）` : ""}`;
+    });
+
+  if (totalAttempts <= 0) {
+    return [
+      "我现在还没有看到足够的练习记录，所以不能判断真实弱项。",
+      "",
+      "建议先完成一轮测温：RA 2 道、DI 2 道、WFD 5 道。做完后我再按真实分数告诉你最低分题型、主要原因和当天训练顺序。"
+    ].join("\n");
+  }
+
+  const sampleInsufficient = Boolean(summary?.sample_insufficient) || totalAttempts < 5;
+  const lines = [
+    sampleInsufficient
+      ? `目前样本还偏少：我只看到 ${totalAttempts} 次练习，先按已有记录给你一个临时判断。`
+      : `我先按最近练习记录给你结论：当前最该优先看的题型是 ${mainTaskType}（${mainMeta.title}）。`
+  ];
+
+  lines.push("");
+  lines.push("**当前判断**");
+  lines.push(`- 最近 7 天练习 ${recent7DaysAttempts} 次，最近 30 天练习 ${recent30DaysAttempts} 次。`);
+  if (recent7DaysAverage !== null) {
+    lines.push(`- 最近 7 天均分约 ${formatScore(recent7DaysAverage)}/90。`);
+  }
+  if (weakList.length) {
+    lines.push(`- 低分优先级：${weakList.join("，")}。`);
+  }
+  if (normalizeNumeric(mainStats?.average_score) !== null) {
+    lines.push(`- ${mainTaskType} 当前均分约 ${formatScore(mainStats.average_score)}/90，练习 ${toNonNegativeNumber(mainStats.attempts)} 次。`);
+  }
+
+  lines.push("");
+  lines.push("**可能原因**");
+  lines.push(`- ${mainMeta.reason}`);
+  if (requestedTaskType && requestedTaskType !== weakestTaskType && weakestTaskType) {
+    lines.push(`- 你问的是 ${requestedTaskType}，但整体最低分信号更偏 ${weakestTaskType}；今天可以先把 ${requestedTaskType} 做短复盘，再补 ${weakestTaskType}。`);
+  }
+
+  lines.push("");
+  lines.push("**今天建议**");
+  lines.push(`- ${mainTaskType}：${mainMeta.count} 组，约 ${mainMeta.minutes} 分钟。${mainMeta.focus}`);
+  lines.push("- RA：2 组，约 6 分钟。用来稳定开口节奏。");
+  lines.push("- 复盘：约 5 分钟，只记一个最高频错误，下一组立即修正。");
+
+  if (sampleInsufficient) {
+    lines.push("");
+    lines.push("数据不足时先不要急着下长期结论；连续完成 2-3 天后，我会更准确地判断趋势。");
+  }
+
+  return lines.join("\n");
 }
 
 function isContinuationIntentMessage(message) {
@@ -589,14 +764,19 @@ function isTableLikeDivider(line) {
 
 function shouldRetryProviderCall(error) {
   const rawErrorType = normalizeText(error?.raw_error_type || error?.code || error?.message).toLowerCase();
-  return rawErrorType.includes("timeout") || rawErrorType.includes("network_error") || rawErrorType.includes("connect_timeout");
+  return rawErrorType.includes("timeout")
+    || rawErrorType.includes("network_error")
+    || rawErrorType.includes("connect_timeout")
+    || rawErrorType.includes("response_timeout")
+    || rawErrorType.includes("http_5");
 }
 
 function mapProviderErrorToAgentError(error) {
   const rawErrorType = normalizeText(error?.raw_error_type || error?.code || error?.message).toLowerCase();
+  const reasonCode = resolveProviderReasonCode(error, rawErrorType);
   const debugTiming = extractProviderDebugTiming(error);
   const errorName = resolveErrorName(error);
-  const errorMessageSafe = resolveSafeErrorMessage(error, rawErrorType);
+  const errorMessageSafe = resolveSafeErrorMessage(error, rawErrorType, reasonCode);
   const provider = normalizeText(error?.provider) || "openai_compatible";
 
   if (
@@ -615,8 +795,8 @@ function mapProviderErrorToAgentError(error) {
     });
   }
 
-  if (rawErrorType.includes("network_error") || rawErrorType.includes("connect_timeout")) {
-    return new AgentChatServiceError("provider_error", "AI 私教当前连接模型服务失败，请稍后再试。", {
+  if (reasonCode === "provider_connect_timeout") {
+    return new AgentChatServiceError(reasonCode, "AI 私教当前连接模型服务失败，请稍后再试。", {
       status: 502,
       raw_error_type: rawErrorType,
       provider,
@@ -627,8 +807,8 @@ function mapProviderErrorToAgentError(error) {
     });
   }
 
-  if (rawErrorType.includes("timeout")) {
-    return new AgentChatServiceError("provider_timeout", "AI 私教当前连接或响应超时了，请稍后再试，或换个更短的问题。", {
+  if (reasonCode === "provider_response_timeout") {
+    return new AgentChatServiceError(reasonCode, "AI 私教当前连接或响应超时了，请稍后再试，或换个更短的问题。", {
       status: 504,
       raw_error_type: rawErrorType,
       provider,
@@ -639,7 +819,31 @@ function mapProviderErrorToAgentError(error) {
     });
   }
 
-  return new AgentChatServiceError("provider_error", "AI 私教暂时不可用，请稍后再试。", {
+  if (reasonCode === "provider_http_5xx") {
+    return new AgentChatServiceError(reasonCode, "AI 私教当前连接模型服务失败，请稍后再试。", {
+      status: 502,
+      raw_error_type: rawErrorType,
+      provider,
+      latency_ms: error?.latency_ms,
+      debug_timing: debugTiming,
+      error_name: errorName,
+      error_message_safe: errorMessageSafe
+    });
+  }
+
+  if (reasonCode === "provider_empty_content" || reasonCode === "provider_parse_failed") {
+    return new AgentChatServiceError(reasonCode, "AI 私教暂时没有拿到可用回复，请稍后再试。", {
+      status: 502,
+      raw_error_type: rawErrorType,
+      provider,
+      latency_ms: error?.latency_ms,
+      debug_timing: debugTiming,
+      error_name: errorName,
+      error_message_safe: errorMessageSafe
+    });
+  }
+
+  return new AgentChatServiceError(reasonCode || "provider_error", "AI 私教暂时不可用，请稍后再试。", {
     status: 502,
     raw_error_type: rawErrorType || "provider_error_unknown",
     provider,
@@ -665,11 +869,30 @@ function extractProviderDebugTiming(error) {
   };
 }
 
+function resolveProviderReasonCode(error, rawErrorType = "") {
+  const status = Number(error?.status);
+  if (
+    rawErrorType.includes("api_key_missing")
+    || rawErrorType.includes("base_url_missing")
+    || rawErrorType.includes("model_missing")
+  ) {
+    return "missing_api_key";
+  }
+  if (rawErrorType.includes("connect_timeout") || rawErrorType.includes("und_err_connect_timeout")) return "provider_connect_timeout";
+  if (rawErrorType.includes("network_error")) return "provider_connect_timeout";
+  if (rawErrorType.includes("response_timeout") || rawErrorType.includes("timeout")) return "provider_response_timeout";
+  if ((Number.isFinite(status) && status >= 500 && status <= 599) || /http_5\d\d/.test(rawErrorType)) return "provider_http_5xx";
+  if (rawErrorType.includes("empty_content")) return "provider_empty_content";
+  if (rawErrorType.includes("parse_failed") || rawErrorType.includes("invalid_json")) return "provider_parse_failed";
+  return "provider_error";
+}
+
 function resolveErrorName(error) {
   return normalizeText(error?.cause?.name || error?.name || "Error");
 }
 
-function resolveSafeErrorMessage(error, rawErrorType = "") {
+function resolveSafeErrorMessage(error, rawErrorType = "", reasonCode = "") {
+  if (reasonCode) return reasonCode;
   const normalizedRawErrorType = normalizeText(rawErrorType).toLowerCase();
   if (normalizedRawErrorType.includes("timeout")) return "provider_timeout";
   if (normalizedRawErrorType.includes("network_error") || normalizedRawErrorType.includes("connect_timeout")) {
@@ -693,6 +916,22 @@ function normalizeNumeric(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return null;
   return Number.isInteger(numeric) ? Math.round(numeric) : Number(numeric.toFixed(1));
+}
+
+function formatScore(value) {
+  const numeric = normalizeNumeric(value);
+  if (numeric === null) return "暂无";
+  return Number(numeric).toFixed(Number.isInteger(Number(numeric)) ? 0 : 1);
+}
+
+function normalizeTaskType(value) {
+  const normalized = normalizeText(value).toUpperCase();
+  return Object.prototype.hasOwnProperty.call(ANALYSIS_TASK_META, normalized) ? normalized : "";
+}
+
+function extractRequestedTaskType(message) {
+  const normalizedMessage = normalizeText(message).toUpperCase();
+  return Object.keys(ANALYSIS_TASK_META).find((taskType) => normalizedMessage.includes(taskType)) || "";
 }
 
 function waitMs(durationMs) {

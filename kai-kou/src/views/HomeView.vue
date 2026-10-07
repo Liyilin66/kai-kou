@@ -47,7 +47,10 @@
         </div>
         <div class="tb-right">
           <div class="vip-pill" :class="`vip-pill--${membershipPill.kind}`">{{ membershipPill.icon }} {{ membershipPill.label }}</div>
-          <div class="user-av">{{ userInitial }}</div>
+          <div class="user-av">
+            <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" />
+            <span v-else>{{ userInitial }}</span>
+          </div>
           <span class="user-name">{{ username }}</span>
         </div>
       </header>
@@ -426,6 +429,7 @@ const goalModalOpen = ref(false);
 const goalDraft = ref({});
 
 const username = computed(() => authStore.displayName || "同学");
+const userAvatarUrl = computed(() => `${authStore.avatarUrl || ""}`.trim());
 const userInitial = computed(() => {
   const first = `${username.value || ""}`.trim().charAt(0);
   return first ? first.toUpperCase() : "K";
@@ -1384,7 +1388,7 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
   color:var(--c0);overflow:hidden;
 }
 .home-agent-sidebar{display:flex;flex:0 0 200px;width:200px;flex-direction:column;background:#e5dfd4;border-right:.5px solid #d4cdbf;}
-.home-agent-logo{display:flex;align-items:center;gap:9px;padding:18px 18px 16px;border-bottom:.5px solid #d4cdbf;text-decoration:none;}
+.home-agent-logo{display:flex;align-items:center;gap:9px;height:64px;flex:0 0 64px;padding:0 18px;border-bottom:.5px solid #d4cdbf;text-decoration:none;}
 .home-agent-logo-icon{display:flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:#7c5c3e;flex-shrink:0;}
 .home-agent-logo-name{color:#2c1f0e;font-size:17px;font-weight:500;letter-spacing:.03em;}
 .home-agent-nav{display:flex;flex:1;flex-direction:column;gap:8px;padding:22px 12px 24px;}
@@ -1400,7 +1404,7 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
 .home-agent-promo-sub{margin-bottom:9px;color:#9a8f80;font-size:10.5px;}
 .home-agent-promo-button{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:#7c5c3e;color:#f5efe4;font-size:11px;line-height:1;padding:6px 13px;cursor:pointer;font-family:inherit;}
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
-.topbar{height:50px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 22px;}
+.topbar{height:64px;flex-shrink:0;background:var(--bg2);border-bottom:.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 22px;}
 .tb-greet{font-size:13.5px;font-weight:700;color:var(--c0);}
 .tb-sub{font-size:10px;color:var(--mute);}
 .tb-right{display:flex;align-items:center;gap:8px;}
@@ -1408,7 +1412,8 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
 .vip-pill--vip{background:#FFF4CF;border-color:#D7A84B;color:#7C5520;box-shadow:inset 0 1px 0 rgba(255,255,255,.58);}
 .vip-pill--trial{background:var(--org2);border-color:var(--org3);color:var(--org);}
 .vip-pill--locked,.vip-pill--loading{background:var(--card2);border-color:var(--bdr2);color:var(--mute);}
-.user-av{width:26px;height:26px;border-radius:50%;background:var(--c2);color:var(--bg0);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.user-av{width:26px;height:26px;border-radius:50%;background:var(--c2);color:var(--bg0);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.user-av img{width:100%;height:100%;object-fit:cover;display:block;}
 .user-name{font-size:12px;color:var(--c1);}
 .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 18px 20px;display:flex;flex-direction:column;gap:12px;}
 .scroll::-webkit-scrollbar{width:4px;}

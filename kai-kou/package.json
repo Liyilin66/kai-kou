@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
     "dev": "vite",
     "dev:api": "nodemon --watch server.js --watch api --watch backend --watch .env --ext js,mjs,cjs,json,env --exec node server.js",
     "dev:api:once": "node server.js",

@@ -26,15 +26,20 @@ const OPTIMISTIC_AGENT_SESSION_ID_PREFIX = "agent_local_";
 const router = useRouter();
 const authStore = useAuthStore();
 
+const AGENT_WORKSPACE_BOOT_PREFIX = "agent-workspace-booted";
+const AGENT_WORKSPACE_SNAPSHOT_PREFIX = "agent-workspace-snapshot-v1";
+const initialAgentBootLoading = shouldShowInitialAgentBootLoading();
+
 const draft = ref("");
 const pending = ref(false);
 const aiResponding = ref(false);
+const agentWorkspaceSyncing = ref(false);
 const agentSessionSyncing = ref(false);
 const messagesBodyRef = ref(null);
 const conversationId = ref(`agent_${Date.now().toString(36)}`);
 const messages = ref([]);
 const agentSessionState = ref({
-  loading: true,
+  loading: initialAgentBootLoading,
   session: null,
   error: "",
   reasonCode: "",
@@ -55,7 +60,9 @@ const dailySuggestionState = ref({
   suggestion: null,
   error: "",
   reasonCode: "",
-  updatedAt: 0
+  updatedAt: 0,
+  expiresAt: 0,
+  practiceSignature: ""
 });
 const planState = ref({
   loading: false,
@@ -65,14 +72,16 @@ const planState = ref({
   error: "",
   reasonCode: "",
   plan: null,
-  updatedAt: 0
+  updatedAt: 0,
+  expiresAt: 0,
+  practiceSignature: ""
 });
 const planAttachStatus = ref({});
 const avatarLoadFailed = ref(false);
 const agentToast = ref("");
 let agentToastTimer = 0;
 let agentSessionSyncPromise = null;
-const agentRestoreInProgress = ref(true);
+const agentRestoreInProgress = ref(initialAgentBootLoading);
 const agentInsightsBackgroundInProgress = ref(false);
 const agentRestoreStepStatus = ref({
   session: "going",
@@ -83,6 +92,10 @@ let agentInsightsBackgroundRequestSeq = 0;
 let dailySuggestionRequestSeq = 0;
 let executablePlanRequestSeq = 0;
 let lastAgentInsightRefreshAt = 0;
+let dailySuggestionInFlight = null;
+let executablePlanInFlight = null;
+let pendingForcedDailySuggestionRefresh = false;
+let pendingForcedExecutablePlanRefresh = false;
 
 const navItems = [
   { key: "home", label: "首页", icon: "home", target: "/home" },
@@ -101,14 +114,20 @@ const RESTORE_STEP_LABELS = {
   failed: "失败"
 };
 const AGENT_INSIGHT_CLIENT_TIMEOUT_MS = 45000;
-const AGENT_INSIGHT_REFRESH_DEBOUNCE_MS = 4000;
-const AGENT_DAILY_CACHE_TTL_MS = 2 * 60 * 1000;
+const AGENT_INSIGHT_REFRESH_DEBOUNCE_MS = 60 * 1000;
+const AGENT_INSIGHT_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const AGENT_RESTORE_INSIGHT_STEP_MS = 2400;
 const AGENT_RESTORE_COMPLETE_STEP_MS = 160;
 const AGENT_DAILY_TIMEOUT_MESSAGE = "今日 AI 结论生成超时，请稍后重试。";
 const AGENT_PLAN_TIMEOUT_MESSAGE = "今日计划加载超时，请稍后重试。";
 const PLAN_NO_PLAN_MESSAGE = "向 AI 说：帮我生成今日计划。";
-const AGENT_INSIGHTS_CACHE_PREFIX = "agent-insights-v2";
+const AGENT_INSIGHTS_CACHE_PREFIX = "agent-insights-v3";
+const AGENT_LEGACY_INSIGHTS_CACHE_PREFIX = "agent-insights-v2";
+const AGENT_EMPTY_PRACTICE_SIGNATURE = "no-practice-signature";
+const AGENT_INSIGHT_MODULES = {
+  daily: "daily_suggestion",
+  plan: "executable_plan"
+};
 
 const quickActions = [
   {
@@ -259,7 +278,7 @@ watch(
 
 const userDisplayName = computed(() => {
   if (!authStore.isLoggedIn && authStore.loaded) return "未登录";
-  return authStore.displayName || "yli71641";
+  return authStore.displayName || "同学";
 });
 const userAvatarUrl = computed(() => `${authStore.avatarUrl || ""}`.trim());
 const showUserAvatar = computed(() => Boolean(userAvatarUrl.value) && !avatarLoadFailed.value);
@@ -268,10 +287,32 @@ const userInitial = computed(() => {
   return first ? first.toUpperCase() : "Y";
 });
 
+watch(userAvatarUrl, () => {
+  avatarLoadFailed.value = false;
+});
+
+watch(
+  () => authStore.isLoggedIn,
+  (isLoggedIn) => {
+    if (!isLoggedIn) {
+      clearAgentWorkspaceSessionArtifacts();
+    }
+  }
+);
+
+watch(
+  () => agentSessionState.value.reasonCode,
+  (reasonCode) => {
+    if (isAgentBlockingSessionFailure(reasonCode)) {
+      clearAgentWorkspaceSessionArtifacts();
+    }
+  }
+);
+
 const recentTaskSnapshot = computed(() => agentOverview.value?.recentTaskSnapshot || null);
 const currentAgentSessionId = computed(() => normalizeText(agentSessionState.value.session?.id));
 const isAgentSessionLoading = computed(() => Boolean(agentSessionState.value.loading));
-const isAgentRestoring = computed(() => agentRestoreInProgress.value || isAgentSessionLoading.value);
+const isAgentRestoring = computed(() => agentRestoreInProgress.value);
 const isAgentLocked = computed(() => isAgentAccessFailure(agentSessionState.value.reasonCode));
 const isAgentMemoryNotReady = computed(() => normalizeText(agentSessionState.value.reasonCode) === "agent_memory_not_ready");
 const canUseAgent = computed(() => (
@@ -361,7 +402,7 @@ const agentFailedProgressNote = computed(() => (
   agentSessionState.value.error || "恢复中断，请稍后重试。"
 ));
 const isWarmShellState = computed(() => (
-  ["restoring", "failed", "locked", "unavailable"].includes(agentWorkspaceState.value)
+  ["restoring", "locked", "unavailable"].includes(agentWorkspaceState.value)
 ));
 const isAgentAccessState = computed(() => (
   agentWorkspaceState.value === "locked" || agentWorkspaceState.value === "unavailable"
@@ -411,6 +452,9 @@ const isBlockingWorkspaceState = computed(() => (
   ["restoring", "unavailable", "locked", "failed"].includes(agentWorkspaceState.value)
 ));
 const workspaceStatusLabel = computed(() => {
+  if (!agentRestoreInProgress.value && (agentWorkspaceSyncing.value || agentInsightsBackgroundInProgress.value)) {
+    return "正在同步";
+  }
   const labels = {
     restoring: "正在恢复",
     unavailable: "暂不可用",
@@ -671,25 +715,31 @@ const startTrainingLabel = computed(() => {
   if (!hasSavedExecutablePlan.value) return "接入计划并开始";
   return isPlanComplete.value ? "今日计划已完成" : "开始训练";
 });
+const dailyConclusionStatusNote = computed(() => {
+  if (!hasDailyConclusionData.value) return "";
+  if (dailySuggestionState.value.retrying) return "正在重试...";
+  if (dailySuggestionState.value.refreshing) return "同步中";
+  return formatInsightUpdatedAt(dailySuggestionState.value.updatedAt);
+});
 const planStatusMessage = computed(() => {
   if (planState.value.loading) return "正在加载今日计划...";
-  if (planState.value.refreshing) return "正在更新今日计划...";
+  if (planState.value.refreshing) return "同步中";
   if (planState.value.error) return planState.value.error;
-  if (isPlanNoPlan.value) return PLAN_NO_PLAN_MESSAGE;
+  if (isPlanNoPlan.value) return formatInsightUpdatedAt(planState.value.updatedAt) || PLAN_NO_PLAN_MESSAGE;
   if (!hasExecutablePlan.value) return "向 AI 说：帮我生成今日计划。";
   if (!hasSavedExecutablePlan.value) return "来自今日 AI 建议，接入后会用练习记录更新进度。";
-  return "";
+  return formatInsightUpdatedAt(planState.value.updatedAt);
 });
 
 const conclusionPanelState = computed(() => {
-  if (agentWorkspaceState.value === "restoring") return "loading";
+  if (agentWorkspaceState.value === "restoring" && !hasDailyConclusionData.value) return "loading";
   if (dailySuggestionState.value.loading && !hasDailyConclusionData.value) return "loading";
   return hasDailyConclusionData.value ? "ready" : "unavailable";
 });
 const planPanelState = computed(() => {
-  if (agentWorkspaceState.value === "restoring") return "loading";
   if (hasSavedExecutablePlan.value) return "ready";
   if (isPlanNoPlan.value) return "no_plan";
+  if (agentWorkspaceState.value === "restoring" && !hasExecutablePlan.value) return "loading";
   if (planState.value.loading && !hasExecutablePlan.value) return "loading";
   return hasExecutablePlan.value ? "ready" : "unavailable";
 });
@@ -739,39 +789,67 @@ function setAgentRestoreStep(id, status) {
   };
 }
 
-function hydrateCachedAgentInsights() {
+function hydrateCachedAgentInsights({ preferCurrentSignature = false } = {}) {
   if (typeof window === "undefined") return;
-  const cacheKey = getAgentInsightsCacheKey();
-  if (!cacheKey) return;
+  if (!getAgentInsightUserId()) return;
+  const allowLatest = !preferCurrentSignature;
+  const dailyCache = readAgentInsightModuleCache(AGENT_INSIGHT_MODULES.daily, {
+    allowLatest,
+    allowExpired: true
+  });
+  if (dailyCache) applyCachedDailySuggestion(dailyCache);
+
+  const planCache = readAgentInsightModuleCache(AGENT_INSIGHT_MODULES.plan, {
+    allowLatest,
+    allowExpired: true
+  });
+  if (planCache) applyCachedExecutablePlan(planCache);
+
+  if (!preferCurrentSignature && (!dailyCache || !planCache)) {
+    hydrateLegacyCachedAgentInsights({
+      includeDaily: !dailyCache,
+      includePlan: !planCache
+    });
+  }
+}
+
+function hydrateLegacyCachedAgentInsights({ includeDaily = true, includePlan = true } = {}) {
+  if (typeof window === "undefined") return;
+  const userId = getAgentInsightUserId();
+  if (!userId) return;
+  const cacheKey = `${AGENT_LEGACY_INSIGHTS_CACHE_PREFIX}:${userId}`;
 
   try {
     const cached = JSON.parse(window.sessionStorage.getItem(cacheKey) || "null");
     if (!isPlainObject(cached) || cached.dateKey !== getAgentInsightsCacheDateKey()) return;
 
-    if (isPlainObject(cached.daily) && isPlainObject(cached.daily.suggestion)) {
-      dailySuggestionState.value = {
-        loading: false,
-        refreshing: false,
-        retrying: false,
-        source: normalizeText(cached.daily.source) || "cache",
-        suggestion: cached.daily.suggestion,
-        error: "",
-        reasonCode: normalizeText(cached.daily.reasonCode) || "ok",
-        updatedAt: Number(cached.daily.updatedAt || 0)
-      };
+    if (includeDaily && isPlainObject(cached.daily) && isPlainObject(cached.daily.suggestion)) {
+      const updatedAt = Number(cached.daily.updatedAt || 0) || Date.now();
+      applyCachedDailySuggestion({
+        module: AGENT_INSIGHT_MODULES.daily,
+        practice_signature: normalizePracticeSignature(cached.daily.practiceSignature),
+        data: {
+          source: normalizeText(cached.daily.source) || "cache",
+          suggestion: cached.daily.suggestion,
+          reasonCode: normalizeText(cached.daily.reasonCode) || "ok"
+        },
+        updated_at: updatedAt,
+        expires_at: updatedAt + AGENT_INSIGHT_CACHE_TTL_MS
+      });
     }
 
-    if (isPlainObject(cached.plan) && (isPlainObject(cached.plan.plan) || normalizeText(cached.plan.reasonCode) === "no_plan")) {
-      planState.value = {
-        loading: false,
-        refreshing: false,
-        retrying: false,
-        saving: false,
-        error: "",
-        reasonCode: normalizeText(cached.plan.reasonCode) || (cached.plan.plan ? "ok" : ""),
-        plan: isPlainObject(cached.plan.plan) ? cached.plan.plan : null,
-        updatedAt: Number(cached.plan.updatedAt || 0)
-      };
+    if (includePlan && isPlainObject(cached.plan) && (isPlainObject(cached.plan.plan) || normalizeText(cached.plan.reasonCode) === "no_plan")) {
+      const updatedAt = Number(cached.plan.updatedAt || 0) || Date.now();
+      applyCachedExecutablePlan({
+        module: AGENT_INSIGHT_MODULES.plan,
+        practice_signature: normalizePracticeSignature(cached.plan.practiceSignature),
+        data: {
+          plan: isPlainObject(cached.plan.plan) ? cached.plan.plan : null,
+          reasonCode: normalizeText(cached.plan.reasonCode) || (cached.plan.plan ? "ok" : "no_plan")
+        },
+        updated_at: updatedAt,
+        expires_at: updatedAt + AGENT_INSIGHT_CACHE_TTL_MS
+      });
     }
   } catch {
     window.sessionStorage.removeItem(cacheKey);
@@ -779,44 +857,362 @@ function hydrateCachedAgentInsights() {
 }
 
 function persistCachedAgentInsights() {
-  if (typeof window === "undefined") return;
-  const cacheKey = getAgentInsightsCacheKey();
-  if (!cacheKey) return;
+  if (hasDailyConclusionData.value) {
+    persistAgentInsightModuleCache(AGENT_INSIGHT_MODULES.daily, {
+      source: dailySuggestionState.value.source,
+      suggestion: dailySuggestionState.value.suggestion,
+      reasonCode: dailySuggestionState.value.reasonCode || "ok"
+    }, {
+      practiceSignature: dailySuggestionState.value.practiceSignature,
+      updatedAt: dailySuggestionState.value.updatedAt || Date.now()
+    });
+  }
 
-  const cache = {
-    dateKey: getAgentInsightsCacheDateKey(),
-    daily: hasDailyConclusionData.value
-      ? {
-          source: dailySuggestionState.value.source,
-          suggestion: dailySuggestionState.value.suggestion,
-          reasonCode: dailySuggestionState.value.reasonCode || "ok",
-          updatedAt: dailySuggestionState.value.updatedAt || Date.now()
-        }
-      : null,
-    plan: activePlan.value || isPlanNoPlan.value
-      ? {
-          plan: activePlan.value,
-          reasonCode: isPlanNoPlan.value ? "no_plan" : (planState.value.reasonCode || "ok"),
-          updatedAt: planState.value.updatedAt || Date.now()
-        }
-      : null
-  };
-
-  try {
-    window.sessionStorage.setItem(cacheKey, JSON.stringify(cache));
-  } catch {
-    // Ignore storage quota/private-mode failures; the live state still works.
+  if (activePlan.value || isPlanNoPlan.value) {
+    persistAgentInsightModuleCache(AGENT_INSIGHT_MODULES.plan, {
+      plan: activePlan.value,
+      reasonCode: isPlanNoPlan.value ? "no_plan" : (planState.value.reasonCode || "ok")
+    }, {
+      practiceSignature: planState.value.practiceSignature,
+      updatedAt: planState.value.updatedAt || Date.now()
+    });
   }
 }
 
-function getAgentInsightsCacheKey() {
-  const userId = normalizeText(authStore.user?.id);
-  return userId ? `${AGENT_INSIGHTS_CACHE_PREFIX}:${userId}` : "";
+function persistAgentInsightModuleCache(module, data, { practiceSignature = "", updatedAt = Date.now() } = {}) {
+  if (typeof window === "undefined") return null;
+  const userId = getAgentInsightUserId();
+  const normalizedModule = normalizeText(module);
+  const normalizedSignature = normalizePracticeSignature(practiceSignature || getCurrentPracticeSignature());
+  if (!userId || !normalizedModule) return null;
+
+  const normalizedUpdatedAt = Number(updatedAt || 0) || Date.now();
+  const payload = {
+    module: normalizedModule,
+    user_id: userId,
+    date: getAgentInsightsCacheDateKey(),
+    practice_signature: normalizedSignature,
+    data,
+    updated_at: normalizedUpdatedAt,
+    expires_at: normalizedUpdatedAt + AGENT_INSIGHT_CACHE_TTL_MS
+  };
+
+  try {
+    window.localStorage.setItem(getAgentInsightModuleCacheKey(normalizedModule, normalizedSignature), JSON.stringify(payload));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function readAgentInsightModuleCache(module, { practiceSignature = getCurrentPracticeSignature(), allowLatest = false, allowExpired = false } = {}) {
+  if (typeof window === "undefined") return null;
+  const normalizedModule = normalizeText(module);
+  const normalizedSignature = normalizePracticeSignature(practiceSignature);
+  if (!normalizedModule) return null;
+
+  const exactKey = getAgentInsightModuleCacheKey(normalizedModule, normalizedSignature);
+  const exactCache = readAgentInsightCacheByKey(exactKey, { allowExpired });
+  if (exactCache) return exactCache;
+  if (!allowLatest) return null;
+  return findLatestAgentInsightModuleCache(normalizedModule, { allowExpired });
+}
+
+function readAgentInsightCacheByKey(cacheKey, { allowExpired = false } = {}) {
+  if (!cacheKey || typeof window === "undefined") return null;
+  try {
+    const cached = JSON.parse(window.localStorage.getItem(cacheKey) || "null");
+    if (!isValidAgentInsightCache(cached, { allowExpired })) return null;
+    return cached;
+  } catch {
+    window.localStorage.removeItem(cacheKey);
+    return null;
+  }
+}
+
+function findLatestAgentInsightModuleCache(module, { allowExpired = false } = {}) {
+  if (typeof window === "undefined") return null;
+  const userId = getAgentInsightUserId();
+  const dateKey = getAgentInsightsCacheDateKey();
+  const normalizedModule = normalizeText(module);
+  if (!userId || !normalizedModule) return null;
+
+  const prefix = `${AGENT_INSIGHTS_CACHE_PREFIX}:${userId}:${dateKey}:`;
+  let latest = null;
+  try {
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (!key || !key.startsWith(prefix) || !key.endsWith(`:${normalizedModule}`)) continue;
+      const cached = readAgentInsightCacheByKey(key, { allowExpired });
+      if (!cached) continue;
+      if (!latest || Number(cached.updated_at || 0) > Number(latest.updated_at || 0)) {
+        latest = cached;
+      }
+    }
+  } catch {
+    return latest;
+  }
+  return latest;
+}
+
+function getFreshAgentInsightModuleCache(module, practiceSignature = getCurrentPracticeSignature()) {
+  return readAgentInsightModuleCache(module, {
+    practiceSignature,
+    allowLatest: false,
+    allowExpired: false
+  });
+}
+
+function isValidAgentInsightCache(cached, { allowExpired = false } = {}) {
+  if (!isPlainObject(cached)) return false;
+  if (normalizeText(cached.user_id) !== getAgentInsightUserId()) return false;
+  if (normalizeText(cached.date) !== getAgentInsightsCacheDateKey()) return false;
+  if (!normalizeText(cached.module)) return false;
+  if (!normalizeText(cached.practice_signature)) return false;
+  if (!isPlainObject(cached.data)) return false;
+  if (!allowExpired && Number(cached.expires_at || 0) <= Date.now()) return false;
+  return true;
+}
+
+function applyCachedDailySuggestion(cache) {
+  const data = cache?.data || {};
+  if (!isPlainObject(data.suggestion)) return;
+  dailySuggestionState.value = {
+    loading: false,
+    refreshing: false,
+    retrying: false,
+    source: normalizeText(data.source) || "cache",
+    suggestion: data.suggestion,
+    error: "",
+    reasonCode: normalizeText(data.reasonCode) || "ok",
+    updatedAt: Number(cache.updated_at || 0),
+    expiresAt: Number(cache.expires_at || 0),
+    practiceSignature: normalizePracticeSignature(cache.practice_signature)
+  };
+}
+
+function applyCachedExecutablePlan(cache) {
+  const data = cache?.data || {};
+  const reasonCode = normalizeText(data.reasonCode) || (isPlainObject(data.plan) ? "ok" : "");
+  if (!isPlainObject(data.plan) && reasonCode !== "no_plan") return;
+  planState.value = {
+    loading: false,
+    refreshing: false,
+    retrying: false,
+    saving: false,
+    error: "",
+    reasonCode,
+    plan: isPlainObject(data.plan) ? data.plan : null,
+    updatedAt: Number(cache.updated_at || 0),
+    expiresAt: Number(cache.expires_at || 0),
+    practiceSignature: normalizePracticeSignature(cache.practice_signature)
+  };
+}
+
+function getAgentInsightModuleCacheKey(module, practiceSignature = getCurrentPracticeSignature()) {
+  const userId = getAgentInsightUserId();
+  const normalizedModule = normalizeText(module);
+  if (!userId || !normalizedModule) return "";
+  return [
+    AGENT_INSIGHTS_CACHE_PREFIX,
+    userId,
+    getAgentInsightsCacheDateKey(),
+    normalizePracticeSignature(practiceSignature),
+    normalizedModule
+  ].join(":");
+}
+
+function getAgentInsightUserId() {
+  return normalizeText(authStore.user?.id);
+}
+
+function getCurrentPracticeSignature() {
+  return normalizePracticeSignature(buildPracticeSignature());
+}
+
+function normalizePracticeSignature(value) {
+  return normalizeText(value) || AGENT_EMPTY_PRACTICE_SIGNATURE;
 }
 
 function getAgentInsightsCacheDateKey(date = new Date()) {
   const chinaLocalMs = date.getTime() + 8 * 60 * 60 * 1000;
   return new Date(chinaLocalMs).toISOString().slice(0, 10);
+}
+
+function shouldShowInitialAgentBootLoading() {
+  const userId = getAgentWorkspaceUserId();
+  if (!userId) return true;
+  if (isHardPageReload()) return true;
+  return !(hasAgentWorkspaceBooted(userId) && hasAgentWorkspaceSnapshot(userId));
+}
+
+function getAgentWorkspaceUserId() {
+  return normalizeText(authStore.user?.id);
+}
+
+function getAgentWorkspaceSessionFingerprint() {
+  return normalizeText(authStore.session?.user?.last_sign_in_at)
+    || normalizeText(authStore.user?.last_sign_in_at)
+    || normalizeText(authStore.session?.user?.created_at)
+    || getAgentWorkspaceUserId();
+}
+
+function getAgentWorkspaceBootKey(userId = getAgentWorkspaceUserId()) {
+  const normalizedUserId = normalizeText(userId);
+  return normalizedUserId ? `${AGENT_WORKSPACE_BOOT_PREFIX}:${normalizedUserId}` : "";
+}
+
+function getAgentWorkspaceSnapshotKey(userId = getAgentWorkspaceUserId()) {
+  const normalizedUserId = normalizeText(userId);
+  return normalizedUserId ? `${AGENT_WORKSPACE_SNAPSHOT_PREFIX}:${normalizedUserId}` : "";
+}
+
+function isHardPageReload() {
+  if (typeof window === "undefined" || typeof performance === "undefined") return false;
+  const navigationEntry = performance.getEntriesByType?.("navigation")?.[0];
+  if (navigationEntry?.type !== "reload") return false;
+  if (window.__agentWorkspaceReloadBootConsumed) return false;
+  window.__agentWorkspaceReloadBootConsumed = true;
+  return true;
+}
+
+function hasAgentWorkspaceBooted(userId = getAgentWorkspaceUserId()) {
+  const bootKey = getAgentWorkspaceBootKey(userId);
+  if (!bootKey || typeof window === "undefined") return false;
+  try {
+    const cached = JSON.parse(window.sessionStorage.getItem(bootKey) || "null");
+    return isPlainObject(cached)
+      && cached.booted === true
+      && normalizeText(cached.userId) === normalizeText(userId)
+      && normalizeText(cached.sessionFingerprint) === getAgentWorkspaceSessionFingerprint();
+  } catch {
+    window.sessionStorage.removeItem(bootKey);
+    return false;
+  }
+}
+
+function markAgentWorkspaceBooted(userId = getAgentWorkspaceUserId()) {
+  const bootKey = getAgentWorkspaceBootKey(userId);
+  if (!bootKey || typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(bootKey, JSON.stringify({
+      booted: true,
+      userId: normalizeText(userId),
+      sessionFingerprint: getAgentWorkspaceSessionFingerprint(),
+      bootedAt: Date.now()
+    }));
+  } catch {
+    // Losing this marker only affects whether the next route return shows the boot screen.
+  }
+}
+
+function hasAgentWorkspaceSnapshot(userId = getAgentWorkspaceUserId()) {
+  return Boolean(getValidAgentWorkspaceSnapshot(userId));
+}
+
+function persistAgentWorkspaceSnapshot() {
+  const userId = getAgentWorkspaceUserId();
+  const snapshotKey = getAgentWorkspaceSnapshotKey(userId);
+  if (!snapshotKey || typeof window === "undefined") return;
+  if (!agentSessionState.value.isVip || agentSessionState.value.error || !currentAgentSessionId.value) {
+    removeAgentWorkspaceSnapshot(userId);
+    return;
+  }
+  try {
+    window.sessionStorage.setItem(snapshotKey, JSON.stringify({
+      userId,
+      sessionFingerprint: getAgentWorkspaceSessionFingerprint(),
+      savedAt: Date.now(),
+      conversationId: conversationId.value,
+      messages: messages.value,
+      agentSessionState: agentSessionState.value,
+      agentSessionHistory: agentSessionHistory.value,
+      agentOverview: agentOverview.value,
+      dailySuggestionState: dailySuggestionState.value,
+      planState: planState.value,
+      planAttachStatus: planAttachStatus.value
+    }));
+  } catch {
+    // Snapshot is an optimization for route-return UX. It is safe to skip.
+  }
+}
+
+function hydrateAgentWorkspaceSnapshot() {
+  const userId = getAgentWorkspaceUserId();
+  const snapshot = getValidAgentWorkspaceSnapshot(userId);
+  if (!snapshot) return false;
+
+  conversationId.value = normalizeText(snapshot.conversationId) || conversationId.value;
+  messages.value = Array.isArray(snapshot.messages) ? snapshot.messages : [];
+  agentSessionState.value = {
+    loading: false,
+    session: isPlainObject(snapshot.agentSessionState?.session) ? snapshot.agentSessionState.session : null,
+    error: normalizeText(snapshot.agentSessionState?.error),
+    reasonCode: normalizeText(snapshot.agentSessionState?.reasonCode),
+    isVip: Boolean(snapshot.agentSessionState?.isVip)
+  };
+  agentSessionHistory.value = Array.isArray(snapshot.agentSessionHistory) ? snapshot.agentSessionHistory : [];
+  agentOverview.value = isPlainObject(snapshot.agentOverview) ? snapshot.agentOverview : null;
+  dailySuggestionState.value = {
+    ...dailySuggestionState.value,
+    ...(isPlainObject(snapshot.dailySuggestionState) ? snapshot.dailySuggestionState : {}),
+    loading: false,
+    refreshing: false,
+    retrying: false
+  };
+  planState.value = {
+    ...planState.value,
+    ...(isPlainObject(snapshot.planState) ? snapshot.planState : {}),
+    loading: false,
+    refreshing: false,
+    retrying: false,
+    saving: false
+  };
+  planAttachStatus.value = isPlainObject(snapshot.planAttachStatus) ? snapshot.planAttachStatus : {};
+  resetAgentRestoreProgress();
+  agentRestoreInProgress.value = false;
+  return Boolean(currentAgentSessionId.value || messages.value.length || hasDailyConclusionData.value || hasExecutablePlan.value || isPlanNoPlan.value);
+}
+
+function getValidAgentWorkspaceSnapshot(userId = getAgentWorkspaceUserId()) {
+  const normalizedUserId = normalizeText(userId);
+  const snapshotKey = getAgentWorkspaceSnapshotKey(normalizedUserId);
+  if (!snapshotKey || typeof window === "undefined") return null;
+  try {
+    const snapshot = JSON.parse(window.sessionStorage.getItem(snapshotKey) || "null");
+    if (!isPlainObject(snapshot)) return null;
+    if (normalizeText(snapshot.userId) !== normalizedUserId) return null;
+    if (normalizeText(snapshot.sessionFingerprint) !== getAgentWorkspaceSessionFingerprint()) return null;
+    return snapshot;
+  } catch {
+    removeAgentWorkspaceSnapshot(normalizedUserId);
+    return null;
+  }
+}
+
+function removeAgentWorkspaceSnapshot(userId = getAgentWorkspaceUserId()) {
+  const snapshotKey = getAgentWorkspaceSnapshotKey(userId);
+  if (!snapshotKey || typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(snapshotKey);
+  } catch {
+    // Storage cleanup is best effort; fall back to a normal boot.
+  }
+}
+
+function clearAgentWorkspaceSessionArtifacts() {
+  if (typeof window === "undefined") return;
+  try {
+    const prefixes = [`${AGENT_WORKSPACE_BOOT_PREFIX}:`, `${AGENT_WORKSPACE_SNAPSHOT_PREFIX}:`];
+    for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = window.sessionStorage.key(index);
+      if (key && prefixes.some((prefix) => key.startsWith(prefix))) {
+        window.sessionStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // Best-effort cleanup only.
+  }
 }
 
 onMounted(async () => {
@@ -829,20 +1225,32 @@ onMounted(async () => {
   }
   hydrateCachedAgentInsights();
 
+  const hydratedFromSnapshot = !agentRestoreInProgress.value
+    && hasAgentWorkspaceBooted()
+    && hasAgentWorkspaceSnapshot()
+    && hydrateAgentWorkspaceSnapshot();
+  if (hydratedFromSnapshot) {
+    void syncAgentWorkspaceInBackground();
+    return;
+  }
+
   await restoreAgentWorkspace();
 });
 
 onBeforeUnmount(() => {
+  persistAgentWorkspaceSnapshot();
+  persistCachedAgentInsights();
   window.removeEventListener("focus", handleWindowFocus);
   document.removeEventListener("visibilitychange", handleVisibilityChange);
   if (agentToastTimer) window.clearTimeout(agentToastTimer);
 });
 
 async function restoreAgentWorkspace() {
+  agentWorkspaceSyncing.value = false;
   agentRestoreInProgress.value = true;
   resetAgentRestoreProgress();
 
-  await loadAgentMemorySession();
+  await loadAgentMemorySession({ blocking: true, clearExisting: true });
   if (!canUseAgent.value) {
     agentRestoreInProgress.value = false;
     return;
@@ -859,20 +1267,41 @@ async function restoreAgentWorkspace() {
   await nextTick();
   await waitForRestoreDisplayPace(AGENT_RESTORE_COMPLETE_STEP_MS);
   agentRestoreInProgress.value = false;
+  markAgentWorkspaceBooted();
+  persistAgentWorkspaceSnapshot();
   await nextTick();
   if (messages.value.length) {
     scrollToBottom("auto");
   }
 }
 
-async function loadAgentMemorySession() {
-  messages.value = [];
-  planAttachStatus.value = {};
+async function syncAgentWorkspaceInBackground() {
+  if (agentWorkspaceSyncing.value) return;
+  agentWorkspaceSyncing.value = true;
+  try {
+    await loadAgentMemorySession({ blocking: false, clearExisting: false });
+    if (canUseAgent.value) {
+      startAgentInsightsBackgroundRefresh({ reflectRestoreStep: false });
+      markAgentWorkspaceBooted();
+      persistAgentWorkspaceSnapshot();
+    }
+  } finally {
+    agentWorkspaceSyncing.value = false;
+  }
+}
+
+async function loadAgentMemorySession({ blocking = true, clearExisting = true } = {}) {
+  if (clearExisting) {
+    messages.value = [];
+    planAttachStatus.value = {};
+  }
 
   if (!authStore.isLoggedIn) {
+    clearAgentWorkspaceSessionArtifacts();
     agentSessionHistory.value = [];
     agentHistoryError.value = "";
     agentHistoryLoading.value = false;
+    agentOverview.value = null;
     agentSessionState.value = {
       loading: false,
       session: null,
@@ -880,19 +1309,27 @@ async function loadAgentMemorySession() {
       reasonCode: "auth_failed",
       isVip: false
     };
-    agentRestoreInProgress.value = false;
+    dailySuggestionState.value = createEmptyDailySuggestionState();
+    planState.value = createEmptyPlanState();
+    if (blocking) agentRestoreInProgress.value = false;
     return;
   }
 
-  setAgentRestoreStep("session", "going");
-  setAgentRestoreStep("messages", "wait");
-  setAgentRestoreStep("insights", "wait");
+  if (blocking) {
+    setAgentRestoreStep("session", "going");
+    setAgentRestoreStep("messages", "wait");
+    setAgentRestoreStep("insights", "wait");
+  }
+  const previousConversationId = conversationId.value;
+  const previousMessages = messages.value;
+  const previousSessionHistory = agentSessionHistory.value;
+  const previousSessionState = agentSessionState.value;
   agentSessionState.value = {
-    loading: true,
-    session: null,
+    loading: blocking,
+    session: clearExisting ? null : previousSessionState.session,
     error: "",
-    reasonCode: "",
-    isVip: false
+    reasonCode: clearExisting ? "" : previousSessionState.reasonCode,
+    isVip: clearExisting ? false : previousSessionState.isVip
   };
 
   let sessionResult;
@@ -906,6 +1343,15 @@ async function loadAgentMemorySession() {
     };
   }
   if (!sessionResult?.ok || !sessionResult?.session?.id) {
+    if (!blocking) {
+      if (applyAgentBlockingSessionFailure(sessionResult)) return;
+      agentSessionState.value = {
+        ...previousSessionState,
+        loading: false
+      };
+      showAgentToast(normalizeText(sessionResult?.message) || "AI 私教会话同步失败，已保留当前页面。");
+      return;
+    }
     setAgentRestoreStep("session", "failed");
     setAgentRestoreStep("messages", "wait");
     setAgentRestoreStep("insights", "wait");
@@ -916,22 +1362,25 @@ async function loadAgentMemorySession() {
       reasonCode: normalizeText(sessionResult?.reason_code) || "session_error",
       isVip: false
     };
-    agentRestoreInProgress.value = false;
+    if (blocking) agentRestoreInProgress.value = false;
     return;
   }
 
   const session = sessionResult.session;
-  conversationId.value = session.id;
-  agentSessionHistory.value = normalizeSessionHistory(sessionResult.sessions);
-  setAgentRestoreStep("session", "done");
-  setAgentRestoreStep("messages", "going");
-  agentSessionState.value = {
-    loading: true,
-    session,
-    error: "",
-    reasonCode: "ok",
-    isVip: true
-  };
+  const nextSessionHistory = normalizeSessionHistory(sessionResult.sessions);
+  if (blocking) {
+    conversationId.value = session.id;
+    agentSessionHistory.value = nextSessionHistory;
+    setAgentRestoreStep("session", "done");
+    setAgentRestoreStep("messages", "going");
+    agentSessionState.value = {
+      loading: true,
+      session,
+      error: "",
+      reasonCode: "ok",
+      isVip: true
+    };
+  }
 
   let messagesResult;
   try {
@@ -944,6 +1393,18 @@ async function loadAgentMemorySession() {
     };
   }
   if (!messagesResult?.ok) {
+    if (!blocking) {
+      if (applyAgentBlockingSessionFailure(messagesResult)) return;
+      conversationId.value = previousConversationId;
+      messages.value = previousMessages;
+      agentSessionHistory.value = previousSessionHistory;
+      agentSessionState.value = {
+        ...previousSessionState,
+        loading: false
+      };
+      showAgentToast(normalizeText(messagesResult?.message) || "最近消息同步失败，已保留当前聊天。");
+      return;
+    }
     setAgentRestoreStep("messages", "failed");
     setAgentRestoreStep("insights", "wait");
     agentSessionState.value = {
@@ -953,16 +1414,18 @@ async function loadAgentMemorySession() {
       reasonCode: normalizeText(messagesResult?.reason_code) || "messages_error",
       isVip: true
     };
-    agentRestoreInProgress.value = false;
+    if (blocking) agentRestoreInProgress.value = false;
     return;
   }
 
+  conversationId.value = session.id;
+  agentSessionHistory.value = nextSessionHistory;
   messages.value = normalizeStoredMessages(messagesResult.messages);
   if (Array.isArray(messagesResult.sessions) && messagesResult.sessions.length) {
     agentSessionHistory.value = normalizeSessionHistory(messagesResult.sessions);
   }
   await loadAgentHistoryList({ silent: true });
-  setAgentRestoreStep("messages", "done");
+  if (blocking) setAgentRestoreStep("messages", "done");
   agentSessionState.value = {
     loading: false,
     session,
@@ -1039,28 +1502,53 @@ function startAgentInsightsBackgroundRefresh({ reflectRestoreStep = true } = {})
 }
 
 async function loadDailySuggestion({ manual = false, background = false } = {}) {
-  if (isDailySuggestionRequestInFlight() && !manual) return;
-  if (!manual && !background && isDailySuggestionCacheFresh()) return;
-
+  const requestPracticeSignature = buildPracticeSignature();
+  const practiceSignature = normalizePracticeSignature(requestPracticeSignature);
+  const cacheKey = getAgentInsightModuleCacheKey(AGENT_INSIGHT_MODULES.daily, practiceSignature);
+  if (dailySuggestionInFlight?.key === cacheKey && (!manual || dailySuggestionInFlight.manual)) {
+    return dailySuggestionInFlight.promise;
+  }
+  if (dailySuggestionInFlight?.key === cacheKey && manual && !dailySuggestionInFlight.manual) {
+    pendingForcedDailySuggestionRefresh = true;
+    dailySuggestionState.value = {
+      ...dailySuggestionState.value,
+      refreshing: false,
+      retrying: true,
+      error: ""
+    };
+    try {
+      await dailySuggestionInFlight.promise;
+    } catch {
+      // Continue with the explicit forced refresh even if the background attempt failed.
+    }
+    if (!pendingForcedDailySuggestionRefresh) return;
+  }
+  const freshCache = getFreshAgentInsightModuleCache(AGENT_INSIGHT_MODULES.daily, practiceSignature);
+  if (!manual && freshCache) {
+    applyCachedDailySuggestion(freshCache);
+    return;
+  }
   const requestSeq = ++dailySuggestionRequestSeq;
   const hasExistingSuggestion = hasDailyConclusionData.value;
   const previousState = dailySuggestionState.value;
+  const shouldShowLoading = !hasExistingSuggestion && !manual;
 
   dailySuggestionState.value = {
     ...previousState,
-    loading: !hasExistingSuggestion && !manual,
-    refreshing: hasExistingSuggestion || background,
+    loading: shouldShowLoading,
+    refreshing: !manual && (background || hasExistingSuggestion),
     retrying: manual,
     source: hasExistingSuggestion ? previousState.source : "loading",
     error: manual ? "" : previousState.error,
-    reasonCode: manual ? "" : previousState.reasonCode
+    reasonCode: manual ? "" : previousState.reasonCode,
+    practiceSignature
   };
 
-  try {
+  const requestPromise = (async () => {
     const result = await withClientTimeout(
       requestDailyAiSuggestion({
-        force: false,
-        practiceSignature: buildPracticeSignature()
+        force: manual,
+        practiceSignature: requestPracticeSignature
       }),
       AGENT_INSIGHT_CLIENT_TIMEOUT_MS,
       {
@@ -1074,6 +1562,23 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
     if (requestSeq !== dailySuggestionRequestSeq) return;
 
     if (result?.ok && result?.suggestion) {
+      const updatedAt = Date.now();
+      const cachePracticeSignature = normalizePracticeSignature(result.practice_signature || practiceSignature);
+      const cachePayload = {
+        source: normalizeText(result.source) || "backend",
+        suggestion: result.suggestion,
+        reasonCode: normalizeText(result.reason_code) || "ok"
+      };
+      const cache = persistAgentInsightModuleCache(AGENT_INSIGHT_MODULES.daily, cachePayload, {
+        practiceSignature: cachePracticeSignature,
+        updatedAt
+      });
+      if (cachePracticeSignature !== practiceSignature) {
+        persistAgentInsightModuleCache(AGENT_INSIGHT_MODULES.daily, cachePayload, {
+          practiceSignature,
+          updatedAt
+        });
+      }
       dailySuggestionState.value = {
         loading: false,
         refreshing: false,
@@ -1082,22 +1587,13 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
         suggestion: result.suggestion,
         error: "",
         reasonCode: normalizeText(result.reason_code) || "ok",
-        updatedAt: Date.now()
+        updatedAt,
+        expiresAt: Number(cache?.expires_at || 0) || updatedAt + AGENT_INSIGHT_CACHE_TTL_MS,
+        practiceSignature: cachePracticeSignature
       };
-      persistCachedAgentInsights();
       return;
     }
     if (!result?.ok && applyAgentAccessFailure(result)) {
-      dailySuggestionState.value = {
-        loading: false,
-        refreshing: false,
-        retrying: false,
-        source: normalizeText(result?.reason_code),
-        suggestion: hasExistingSuggestion ? previousState.suggestion : null,
-        error: "",
-        reasonCode: normalizeText(result?.reason_code),
-        updatedAt: previousState.updatedAt || 0
-      };
       return;
     }
 
@@ -1112,9 +1608,10 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
         refreshing: false,
         retrying: false,
         error: "",
-        reasonCode: normalizeText(result?.reason_code) || previousState.reasonCode
+        reasonCode: normalizeText(result?.reason_code) || previousState.reasonCode,
+        practiceSignature: previousState.practiceSignature || practiceSignature
       };
-      showAgentToast(errorMessage);
+      if (manual) showAgentToast(errorMessage);
       return;
     }
 
@@ -1126,8 +1623,20 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
       suggestion: null,
       error: errorMessage,
       reasonCode: normalizeText(result?.reason_code),
-      updatedAt: 0
+      updatedAt: 0,
+      expiresAt: 0,
+      practiceSignature
     };
+  })();
+
+  dailySuggestionInFlight = {
+    key: cacheKey,
+    manual,
+    promise: requestPromise
+  };
+
+  try {
+    await requestPromise;
   } catch {
     if (requestSeq !== dailySuggestionRequestSeq) return;
     if (hasExistingSuggestion) {
@@ -1136,9 +1645,10 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
         loading: false,
         refreshing: false,
         retrying: false,
-        error: ""
+        error: "",
+        practiceSignature: previousState.practiceSignature || practiceSignature
       };
-      showAgentToast("今日 AI 结论更新失败，请稍后重试。");
+      if (manual) showAgentToast("今日 AI 结论更新失败，请稍后重试。");
       return;
     }
     dailySuggestionState.value = {
@@ -1149,102 +1659,158 @@ async function loadDailySuggestion({ manual = false, background = false } = {}) 
       suggestion: null,
       error: resolveAgentReasonMessage("network_error", "网络连接不太稳定，请稍后重试。"),
       reasonCode: "network_error",
-      updatedAt: 0
+      updatedAt: 0,
+      expiresAt: 0,
+      practiceSignature
     };
+  } finally {
+    if (dailySuggestionInFlight?.promise === requestPromise) {
+      dailySuggestionInFlight = null;
+    }
+    if (manual) {
+      pendingForcedDailySuggestionRefresh = false;
+    }
   }
 }
 
 async function refreshExecutablePlan({ manual = false, background = false } = {}) {
-  if (isExecutablePlanRequestInFlight() && !manual) return;
-
+  const practiceSignature = getCurrentPracticeSignature();
+  const cacheKey = getAgentInsightModuleCacheKey(AGENT_INSIGHT_MODULES.plan, practiceSignature);
+  if (executablePlanInFlight?.key === cacheKey && (!manual || executablePlanInFlight.manual)) {
+    return executablePlanInFlight.promise;
+  }
+  if (executablePlanInFlight?.key === cacheKey && manual && !executablePlanInFlight.manual) {
+    pendingForcedExecutablePlanRefresh = true;
+    planState.value = {
+      ...planState.value,
+      refreshing: false,
+      retrying: true,
+      error: ""
+    };
+    try {
+      await executablePlanInFlight.promise;
+    } catch {
+      // Continue with the explicit retry even if the background attempt failed.
+    }
+    if (!pendingForcedExecutablePlanRefresh) return;
+  }
+  const freshCache = getFreshAgentInsightModuleCache(AGENT_INSIGHT_MODULES.plan, practiceSignature);
+  if (!manual && freshCache) {
+    applyCachedExecutablePlan(freshCache);
+    return;
+  }
   const requestSeq = ++executablePlanRequestSeq;
   const hasStablePlanState = Boolean(activePlan.value || isPlanNoPlan.value);
   const previousState = planState.value;
+  const shouldShowLoading = !hasStablePlanState && !hasExecutablePlan.value && !manual;
 
   planState.value = {
     ...previousState,
-    loading: !hasStablePlanState && !manual,
-    refreshing: hasStablePlanState || background,
+    loading: shouldShowLoading,
+    refreshing: !manual && (background || hasStablePlanState || hasExecutablePlan.value),
     retrying: manual,
     error: manual ? "" : previousState.error,
-    reasonCode: manual && previousState.reasonCode !== "no_plan" ? "" : previousState.reasonCode
+    reasonCode: manual && previousState.reasonCode !== "no_plan" ? "" : previousState.reasonCode,
+    practiceSignature
   };
 
-  const result = await withClientTimeout(
-    loadAgentPlan(),
-    AGENT_INSIGHT_CLIENT_TIMEOUT_MS,
-    {
-      ok: false,
-      timed_out: true,
-      plan: null,
-      message: AGENT_PLAN_TIMEOUT_MESSAGE,
-      reason_code: "client_timeout"
+  const requestPromise = (async () => {
+    const result = await withClientTimeout(
+      loadAgentPlan(),
+      AGENT_INSIGHT_CLIENT_TIMEOUT_MS,
+      {
+        ok: false,
+        timed_out: true,
+        plan: null,
+        message: AGENT_PLAN_TIMEOUT_MESSAGE,
+        reason_code: "client_timeout"
+      }
+    );
+
+    if (requestSeq !== executablePlanRequestSeq) return;
+
+    if (!result?.ok && applyAgentAccessFailure(result)) {
+      return;
     }
-  );
 
-  if (requestSeq !== executablePlanRequestSeq) return;
+    if (result?.ok) {
+      const reasonCode = normalizeText(result?.reason_code) || (result?.plan ? "ok" : "no_plan");
+      const updatedAt = Date.now();
+      const cache = persistAgentInsightModuleCache(AGENT_INSIGHT_MODULES.plan, {
+        plan: isPlainObject(result?.plan) ? result.plan : null,
+        reasonCode
+      }, {
+        practiceSignature,
+        updatedAt
+      });
+      planState.value = {
+        loading: false,
+        refreshing: false,
+        retrying: false,
+        saving: false,
+        error: "",
+        reasonCode,
+        plan: isPlainObject(result?.plan) ? result.plan : null,
+        updatedAt,
+        expiresAt: Number(cache?.expires_at || 0) || updatedAt + AGENT_INSIGHT_CACHE_TTL_MS,
+        practiceSignature
+      };
+      return;
+    }
 
-  if (!result?.ok && applyAgentAccessFailure(result)) {
-    planState.value = {
-      loading: false,
-      refreshing: false,
-      retrying: false,
-      saving: false,
-      error: "",
-      reasonCode: normalizeText(result?.reason_code),
-      plan: null,
-      updatedAt: previousState.updatedAt || 0
-    };
-    return;
-  }
-
-  if (result?.ok) {
-    const reasonCode = normalizeText(result?.reason_code) || (result?.plan ? "ok" : "no_plan");
-    planState.value = {
-      loading: false,
-      refreshing: false,
-      retrying: false,
-      saving: false,
-      error: "",
+    const reasonCode = result?.timed_out ? "provider_timeout" : normalizeText(result?.reason_code);
+    const errorMessage = resolveAgentReasonMessage(
       reasonCode,
-      plan: isPlainObject(result?.plan) ? result.plan : null,
-      updatedAt: Date.now()
-    };
-    persistCachedAgentInsights();
-    return;
-  }
+      normalizeText(result?.message) || "可执行计划加载失败，请稍后重试。"
+    );
 
-  const reasonCode = result?.timed_out ? "provider_timeout" : normalizeText(result?.reason_code);
-  const errorMessage = resolveAgentReasonMessage(
-    reasonCode,
-    normalizeText(result?.message) || "可执行计划加载失败，请稍后重试。"
-  );
+    if (hasStablePlanState || hasExecutablePlan.value) {
+      planState.value = {
+        ...previousState,
+        loading: false,
+        refreshing: false,
+        retrying: false,
+        saving: false,
+        error: "",
+        reasonCode: previousState.reasonCode || reasonCode,
+        updatedAt: previousState.updatedAt || 0,
+        expiresAt: previousState.expiresAt || 0,
+        practiceSignature: previousState.practiceSignature || practiceSignature
+      };
+      if (manual) showAgentToast(errorMessage);
+      return;
+    }
 
-  if (hasStablePlanState) {
     planState.value = {
-      ...previousState,
       loading: false,
       refreshing: false,
       retrying: false,
       saving: false,
-      error: "",
-      reasonCode: previousState.reasonCode || reasonCode,
-      updatedAt: previousState.updatedAt || 0
+      error: errorMessage,
+      reasonCode,
+      plan: null,
+      updatedAt: 0,
+      expiresAt: 0,
+      practiceSignature
     };
-    showAgentToast(errorMessage);
-    return;
-  }
+  })();
 
-  planState.value = {
-    loading: false,
-    refreshing: false,
-    retrying: false,
-    saving: false,
-    error: errorMessage,
-    reasonCode,
-    plan: null,
-    updatedAt: 0
+  executablePlanInFlight = {
+    key: cacheKey,
+    manual,
+    promise: requestPromise
   };
+
+  try {
+    await requestPromise;
+  } finally {
+    if (executablePlanInFlight?.promise === requestPromise) {
+      executablePlanInFlight = null;
+    }
+    if (manual) {
+      pendingForcedExecutablePlanRefresh = false;
+    }
+  }
 }
 
 function handleWindowFocus() {
@@ -1268,6 +1834,7 @@ function refreshAgentInsightsFromVisibility() {
 
 async function refreshAgentInsights({ background = false } = {}) {
   await loadOverview();
+  hydrateCachedAgentInsights({ preferCurrentSignature: true });
   await Promise.all([
     loadDailySuggestion({ background }),
     refreshExecutablePlan({ background })
@@ -1291,13 +1858,12 @@ function isExecutablePlanRequestInFlight() {
 }
 
 function isAgentInsightRequestInFlight() {
-  return Boolean(isDailySuggestionRequestInFlight() || isExecutablePlanRequestInFlight());
-}
-
-function isDailySuggestionCacheFresh() {
-  if (!hasDailyConclusionData.value) return false;
-  const updatedAt = Number(dailySuggestionState.value.updatedAt || 0);
-  return updatedAt > 0 && Date.now() - updatedAt < AGENT_DAILY_CACHE_TTL_MS;
+  return Boolean(
+    isDailySuggestionRequestInFlight()
+    || isExecutablePlanRequestInFlight()
+    || dailySuggestionInFlight
+    || executablePlanInFlight
+  );
 }
 
 function resolveAgentReasonMessage(reasonCode, fallback = "") {
@@ -1309,15 +1875,20 @@ function resolveAgentReasonMessage(reasonCode, fallback = "") {
     no_plan: "还没有可执行计划",
     plan_storage_not_ready: "可执行计划表还没有准备好，请检查 Supabase SQL",
     agent_memory_not_ready: "Agent 记忆表还没有准备好，请检查 Supabase SQL",
-    provider_timeout: "AI 生成超时，请稍后重试",
-    timeout: "AI 生成超时，请稍后重试",
-    client_timeout: "AI 生成超时，请稍后重试",
-    provider_error: "AI 服务暂时不可用，请稍后重试",
-    daily_suggestion_unavailable: "AI 服务暂时不可用，请稍后重试",
-    database_error: "数据读取失败，请稍后重试",
-    plan_storage_error: "数据读取失败，请稍后重试",
-    network_error: "网络连接不太稳定，请稍后重试",
-    unexpected_error: "发生未知错误，请稍后重试"
+    provider_timeout: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_connect_timeout: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_response_timeout: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_http_5xx: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_empty_content: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_parse_failed: "AI 私教暂时连接不稳定，请稍后重试。",
+    timeout: "AI 私教暂时连接不稳定，请稍后重试。",
+    client_timeout: "AI 私教暂时连接不稳定，请稍后重试。",
+    provider_error: "AI 私教暂时连接不稳定，请稍后重试。",
+    daily_suggestion_unavailable: "AI 私教暂时连接不稳定，请稍后重试。",
+    database_error: "AI 私教暂时连接不稳定，请稍后重试。",
+    plan_storage_error: "AI 私教暂时连接不稳定，请稍后重试。",
+    network_error: "AI 私教暂时连接不稳定，请稍后重试。",
+    unexpected_error: "AI 私教暂时连接不稳定，请稍后重试。"
   };
   return messages[normalized] || normalizeText(fallback) || "发生未知错误，请稍后重试";
 }
@@ -1359,33 +1930,94 @@ function isAgentAccessFailure(reasonCode) {
   return normalized === "vip_required" || normalized === "forbidden";
 }
 
-function applyAgentAccessFailure(result) {
-  const reasonCode = normalizeText(result?.reason_code);
-  if (!isAgentAccessFailure(reasonCode)) return false;
+function isAgentBlockingSessionFailure(reasonCode) {
+  const normalized = normalizeText(reasonCode);
+  return ["auth_failed", "vip_required", "forbidden", "agent_memory_not_ready"].includes(normalized);
+}
 
+function createEmptyDailySuggestionState() {
+  return {
+    loading: false,
+    refreshing: false,
+    retrying: false,
+    source: "idle",
+    suggestion: null,
+    error: "",
+    reasonCode: "",
+    updatedAt: 0,
+    expiresAt: 0,
+    practiceSignature: ""
+  };
+}
+
+function createEmptyPlanState() {
+  return {
+    loading: false,
+    refreshing: false,
+    retrying: false,
+    saving: false,
+    error: "",
+    reasonCode: "",
+    plan: null,
+    updatedAt: 0,
+    expiresAt: 0,
+    practiceSignature: ""
+  };
+}
+
+function applyAgentBlockingSessionFailure(result) {
+  const reasonCode = normalizeText(result?.reason_code);
+  if (!isAgentBlockingSessionFailure(reasonCode)) return false;
+
+  clearAgentWorkspaceSessionArtifacts();
+  agentSessionHistory.value = [];
+  agentHistoryError.value = "";
+  agentHistoryLoading.value = false;
+  agentOverview.value = null;
   agentSessionState.value = {
     loading: false,
     session: null,
-    error: normalizeText(result?.message) || "AI 私教为 VIP 专属功能。",
+    error: resolveAgentReasonMessage(reasonCode, normalizeText(result?.message) || "AI 私教暂时不可用，请稍后再试。"),
     reasonCode,
     isVip: false
   };
   conversationId.value = `agent_${Date.now().toString(36)}`;
   messages.value = [];
   planAttachStatus.value = {};
+  dailySuggestionState.value = createEmptyDailySuggestionState();
+  planState.value = createEmptyPlanState();
   agentRestoreInProgress.value = false;
   return true;
+}
+
+function applyAgentAccessFailure(result) {
+  const reasonCode = normalizeText(result?.reason_code);
+  if (!isAgentAccessFailure(reasonCode)) return false;
+  return applyAgentBlockingSessionFailure(result);
 }
 
 function buildPracticeSignature() {
   const snapshot = recentTaskSnapshot.value;
   if (!snapshot) return "";
   return [
+    snapshot.latestPracticeId,
+    snapshot.latestPracticeAt,
     snapshot.recentAttempts,
     snapshot.recent7DayAttempts,
     snapshot.averageScore,
     snapshot.weakTaskType
   ].map((item) => normalizeText(item)).join(":");
+}
+
+function shouldSendAgentSessionId(message) {
+  const text = normalizeText(message);
+  if (!text) return false;
+  if (/^(?:hi|hello|hey|你好|您好|哈喽|嗨|在吗|在嘛|早上好|下午好|晚上好)[!！。？?\s]*$/i.test(text)) return false;
+  if (/^(?:谢谢|谢了|感谢|多谢|辛苦了|thank you|thanks|thx)[!！。？?\s]*$/i.test(text)) return false;
+  if (/(你是谁|你是什么|你是干嘛的|你叫什么|你是做什么的|你是什么模型|你用的什么模型|你是gpt吗|你是不是大模型|你是谁开发的)/i.test(text)) return false;
+  if (/(你能做什么|你有什么功能|你可以帮我什么|你会什么|你能帮我什么)/i.test(text)) return false;
+  if (!/(pte|ra|rs|rl|rts|wfd|we|swt|di|口语|写作|听力|阅读|发音|流利度|模板|题型|考试|备考|提分|练习|记录|分数|成绩|薄弱|弱项|复盘|分析|计划|训练|安排|今天练什么|最近表现|继续|按这个来)/i.test(text)) return false;
+  return true;
 }
 
 async function handleSubmit(rawMessage = draft.value) {
@@ -1417,7 +2049,8 @@ async function handleSubmit(rawMessage = draft.value) {
 
     aiResponding.value = true;
     const result = await sendAgentMessage(message, conversationId.value, recentMessages, {
-      sessionId: currentAgentSessionId.value
+      sessionId: shouldSendAgentSessionId(message) ? currentAgentSessionId.value : "",
+      practiceSignature: buildPracticeSignature()
     });
     if (result.ok) {
       messages.value.push(
@@ -1436,14 +2069,17 @@ async function handleSubmit(rawMessage = draft.value) {
     if (applyAgentAccessFailure(result)) return;
 
     messages.value.push(
-      createMessage("assistant", normalizeText(result?.message) || "AI 私教暂时不可用，请稍后再试。", {
+      createMessage("assistant", resolveAgentReasonMessage(
+        normalizeText(result?.reason_code),
+        normalizeText(result?.message) || "AI 私教暂时连接不稳定，请稍后重试。"
+      ), {
         metaLabel: "AI 私教",
         tone: "error"
       })
     );
   } catch {
     messages.value.push(
-      createMessage("assistant", "网络连接不太稳定，请稍后再试。", {
+      createMessage("assistant", "AI 私教暂时连接不稳定，请稍后重试。", {
         metaLabel: "AI 私教",
         tone: "error"
       })
@@ -1469,6 +2105,7 @@ function handleRetryExecutablePlan() {
 }
 
 function handleGeneratePlanFromPlanCard() {
+  void refreshExecutablePlan({ manual: true });
   void handleSubmit(PLAN_GENERATION_PROMPT);
 }
 
@@ -1813,6 +2450,7 @@ async function saveDraftSuggestionPlan() {
 
   const result = await saveAgentPlan(draftPlanSuggestion.value);
   if (result?.ok && result?.plan) {
+    const updatedAt = Date.now();
     planState.value = {
       loading: false,
       refreshing: false,
@@ -1821,7 +2459,9 @@ async function saveDraftSuggestionPlan() {
       error: "",
       reasonCode: normalizeText(result.reason_code),
       plan: result.plan,
-      updatedAt: Date.now()
+      updatedAt,
+      expiresAt: updatedAt + AGENT_INSIGHT_CACHE_TTL_MS,
+      practiceSignature: getCurrentPracticeSignature()
     };
     persistCachedAgentInsights();
     return result.plan;
@@ -1860,6 +2500,7 @@ async function handleAttachPlan(message) {
 
   const result = await saveAgentPlan(message.planSuggestion);
   if (result?.ok && result?.plan) {
+    const updatedAt = Date.now();
     planState.value = {
       loading: false,
       refreshing: false,
@@ -1868,7 +2509,9 @@ async function handleAttachPlan(message) {
       error: "",
       reasonCode: normalizeText(result.reason_code),
       plan: result.plan,
-      updatedAt: Date.now()
+      updatedAt,
+      expiresAt: updatedAt + AGENT_INSIGHT_CACHE_TTL_MS,
+      practiceSignature: getCurrentPracticeSignature()
     };
     persistCachedAgentInsights();
     planAttachStatus.value = {
@@ -1882,23 +2525,6 @@ async function handleAttachPlan(message) {
   }
 
   if (applyAgentAccessFailure(result)) {
-    planState.value = {
-      loading: false,
-      refreshing: false,
-      retrying: false,
-      saving: false,
-      error: "",
-      reasonCode: normalizeText(result?.reason_code),
-      plan: null,
-      updatedAt: planState.value.updatedAt || 0
-    };
-    planAttachStatus.value = {
-      ...planAttachStatus.value,
-      [message.id]: {
-        state: "error",
-        message: normalizeText(result?.message) || "AI 私教为 VIP 专属功能。"
-      }
-    };
     return;
   }
 
@@ -2059,6 +2685,12 @@ function formatCurrentTime(date = new Date()) {
   return `${hour}:${minute}`;
 }
 
+function formatInsightUpdatedAt(value) {
+  const date = new Date(Number(value || 0));
+  if (!Number.isFinite(date.getTime())) return "";
+  return `上次更新于 ${formatCurrentTime(date)}`;
+}
+
 function formatMessageTime(value) {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return formatCurrentTime();
@@ -2129,6 +2761,9 @@ function normalizeText(value) {
     v-if="isWarmShellState"
     :mode="agentWorkspaceState"
     :user-id="userDisplayName"
+    :user-initial="userInitial"
+    :user-avatar-url="userAvatarUrl"
+    :show-user-avatar="showUserAvatar"
     :nav-items="agentLoadingNavItems"
     :steps="agentWarmShellSteps"
     :feature-items="agentWarmShellFeatures"
@@ -2140,6 +2775,7 @@ function normalizeText(value) {
     :primary-action-loading-label="agentWarmPrimaryActionLoadingLabel"
     :primary-action-loading="pending"
     :secondary-action-label="agentWarmSecondaryActionLabel"
+    @avatar-error="handleAvatarError"
     @primary-action="handleWarmShellPrimaryAction"
     @secondary-action="handleWarmShellSecondaryAction"
   />
@@ -2174,6 +2810,7 @@ function normalizeText(value) {
     :conclusion-unavailable-message="conclusionUnavailableMessage"
     :conclusion-refreshing="dailySuggestionState.refreshing"
     :conclusion-retrying="dailySuggestionState.retrying"
+    :conclusion-status-note="dailyConclusionStatusNote"
     :display-plan-items="displayPlanItems"
     :display-plan-total-minutes="displayPlanTotalMinutes"
     :has-executable-plan="hasExecutablePlan"
@@ -2559,7 +3196,7 @@ function normalizeText(value) {
                 type="button"
                 class="agent-inline-action agent-inline-action--compact"
                 :disabled="dailySuggestionState.loading"
-                @click="loadDailySuggestion"
+                @click="handleRetryDailySuggestion"
               >
                 重试今日洞察
               </button>
@@ -2630,7 +3267,7 @@ function normalizeText(value) {
                 type="button"
                 class="agent-inline-action agent-inline-action--compact"
                 :disabled="planState.loading"
-                @click="refreshExecutablePlan"
+                @click="handleRetryExecutablePlan"
               >
                 重试今日计划
               </button>

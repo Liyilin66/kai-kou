@@ -1,6 +1,6 @@
 import { createProviderError, toProviderError } from "../provider-error.js";
 
-const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
+const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
 const DEFAULT_TIMEOUT_MS = 8000;
 const SAFE_ERROR_BODY_KEYS = new Set(["error", "message", "type", "code", "param", "status", "status_code", "statusCode"]);
 
@@ -16,7 +16,7 @@ export async function callGroq({ prompt, apiKey, model, timeoutMs } = {}) {
       message: "Groq API key is missing",
       status: 500,
       raw_error_type: "groq_api_key_missing",
-      fallback_allowed: false,
+      fallback_allowed: true,
       model: resolvedModel,
       timeout_ms: resolvedTimeoutMs
     });
@@ -60,7 +60,7 @@ export async function callGroq({ prompt, apiKey, model, timeoutMs } = {}) {
         message: "Groq returned empty content",
         status: 502,
         raw_error_type: "groq_empty_content",
-        fallback_allowed: false,
+        fallback_allowed: true,
         model: resolvedModel,
         timeout_ms: resolvedTimeoutMs
       });

@@ -106,18 +106,21 @@
 
       <!-- 顶栏 -->
       <header class="topbar">
-        <div class="topbar-left">
-          <div class="page-eyebrow">AI TUTOR WORKSPACE</div>
-          <h1 class="page-title">AI 私教工作台</h1>
-          <div class="page-sub">围绕你的练习记录，恢复主聊天、生成今日洞察，并把建议变成可执行训练。</div>
+        <div class="topbar-main">
+          <div class="topbar-heading">
+            <div class="topbar-meta-row">
+              <span class="page-eyebrow">AI TUTOR</span>
+              <span class="status-pill status-pill--inline">
+                <span class="status-dot"></span>
+                {{ workspaceStatusLabel }}
+              </span>
+            </div>
+            <h1 class="page-title">AI 私教</h1>
+          </div>
         </div>
         <div class="topbar-actions">
-          <div class="status-pill">
-            <span class="status-dot"></span>
-            {{ workspaceStatusLabel }}
-          </div>
-          <button class="action-btn" @click="newSession">＋ 新对话</button>
-          <button class="action-btn action-btn--ghost" @click="clearHistory">清空历史</button>
+          <button class="action-btn" @click="newSession">新对话</button>
+          <button class="action-btn action-btn--ghost" @click="clearHistory">清空</button>
           <div class="user-chip">
             <div class="user-avatar">
               <img v-if="showUserAvatar" :src="userAvatarUrl" alt="" @error="emit('avatar-error')" />
@@ -133,35 +136,6 @@
 
         <!-- ── 左侧：主对话区 ── -->
         <div class="chat-column">
-
-          <!-- 欢迎横幅 -->
-          <div class="welcome-banner">
-            <div class="welcome-content">
-              <div class="welcome-text">
-                <div class="welcome-tag">✦ 准备就绪 · SESSION READY</div>
-                <h2 class="welcome-title">从一个问题开始，生成今天的训练动作。</h2>
-                <p class="welcome-desc">输入问题或点击快捷入口，AI 会结合练习记录给出优先级、顺序和下一步。</p>
-                <div class="welcome-steps" aria-label="AI 私教工作流程">
-                  <span>读取练习记录</span>
-                  <span>定位今日重点</span>
-                  <span>拆成训练动作</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 三大功能入口 -->
-          <div class="feature-row">
-            <div v-for="feat in features" :key="feat.title"
-              class="feature-card" @click="selectFeature(feat)">
-              <div class="feat-icon-wrap" :style="{ background: feat.iconBg }">
-                <span class="feat-icon" v-html="feat.icon"></span>
-              </div>
-              <div class="feat-title">{{ feat.title }}</div>
-              <div class="feat-desc">{{ feat.desc }}</div>
-              <div class="feat-arrow">→</div>
-            </div>
-          </div>
 
           <!-- 对话消息区 -->
           <div class="messages-area" ref="messagesRef">
@@ -268,12 +242,43 @@
 
         <!-- ── 右侧：简报面板 ── -->
         <aside class="insight-panel">
+          <!-- 私教工具 -->
+          <div class="insight-section tutor-tools-section">
+            <div class="insight-section-hd">
+              <span class="insight-icon insight-icon--tools">✦</span>
+              <span class="insight-section-title">私教工具</span>
+            </div>
+            <div class="tutor-tool-grid" aria-label="AI 私教能力入口">
+              <button
+                v-for="feat in features"
+                :key="feat.title"
+                class="tutor-tool"
+                type="button"
+                :aria-label="`${feat.title}：${feat.desc}`"
+                @click="selectFeature(feat)"
+              >
+                <span class="tutor-tool-icon" :style="{ background: feat.iconBg }" aria-hidden="true">
+                  <span v-html="feat.icon"></span>
+                </span>
+                <span class="tutor-tool-title">{{ feat.title }}</span>
+                <span class="tutor-tool-desc">{{ feat.shortDesc }}</span>
+              </button>
+            </div>
+          </div>
+
           <!-- 今日 AI 结论 -->
           <div class="insight-section">
             <div class="insight-section-hd">
               <span class="insight-icon insight-icon--star">✦</span>
               <span class="insight-section-title">今日 AI 结论</span>
-              <span class="insight-badge insight-badge--mute">AI 聚焦</span>
+              <button
+                class="insight-badge insight-badge--mute insight-badge--button"
+                type="button"
+                :disabled="conclusionRefreshing || conclusionRetrying"
+                @click="retryInsight"
+              >
+                AI 聚焦
+              </button>
             </div>
             <div v-if="conclusionPanelState === 'loading'" class="insight-empty-card">
               <div class="insight-empty-title">正在分析</div>
@@ -283,8 +288,9 @@
               <div class="insight-empty-title">{{ dailyConclusion.title }}</div>
               <div class="insight-empty-desc">{{ dailyConclusion.summary }}</div>
               <div v-if="conclusionRefreshing || conclusionRetrying" class="insight-refresh-note">
-                {{ conclusionRetrying ? "正在重试..." : "正在更新..." }}
+                {{ conclusionRetrying ? "正在重试..." : "同步中" }}
               </div>
+              <div v-else-if="conclusionStatusNote" class="insight-refresh-note">{{ conclusionStatusNote }}</div>
               <button v-if="dailyConclusion.cta" class="retry-btn" @click="emit('conclusion-detail')">{{ dailyConclusion.cta }}</button>
             </div>
             <div v-else class="insight-empty-card">
@@ -335,7 +341,7 @@
                 {{ startTrainingLabel }}
               </button>
               <div v-if="planRefreshing || planRetrying" class="insight-refresh-note">
-                {{ planRetrying ? "正在重试..." : "正在更新..." }}
+                {{ planRetrying ? "正在重试..." : "同步中" }}
               </div>
             </div>
             <div v-else-if="planPanelState === 'loading'" class="plan-empty">
@@ -358,7 +364,7 @@
                 去生成计划
               </button>
               <div v-if="planRefreshing || planRetrying" class="insight-refresh-note">
-                {{ planRetrying ? "正在重试..." : "正在更新..." }}
+                {{ planRetrying ? "正在重试..." : "同步中" }}
               </div>
             </div>
             <div v-else class="plan-empty">
@@ -376,18 +382,18 @@
           </div>
 
           <!-- 推荐追问 -->
-          <div class="insight-section">
+          <div class="insight-section followup-section">
             <div class="insight-section-hd">
               <span class="insight-icon insight-icon--chat">💬</span>
-              <span class="insight-section-title">推荐追问</span>
+              <span class="insight-section-title">继续问 AI</span>
             </div>
-            <div class="followup-intro">继续把建议问到可执行</div>
+            <div class="followup-intro">把建议继续问到具体动作</div>
             <div class="followup-list">
-              <div v-for="q in followupQuestions" :key="q"
-                class="followup-item" @click="handleFollowup(q)">
+              <button v-for="q in followupQuestions" :key="q"
+                class="followup-item" type="button" @click="handleFollowup(q)">
+                <span class="followup-mark">问</span>
                 <span class="followup-text">{{ q }}</span>
-                <span class="followup-arrow">›</span>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -403,7 +409,7 @@ import { parseAgentContent } from "@/lib/agent-rich-content";
 
 const props = defineProps({
   navItems: { type: Array, default: () => [] },
-  userDisplayName: { type: String, default: "yli71641" },
+  userDisplayName: { type: String, default: "同学" },
   userInitial: { type: String, default: "Y" },
   userAvatarUrl: { type: String, default: "" },
   showUserAvatar: { type: Boolean, default: false },
@@ -430,6 +436,7 @@ const props = defineProps({
   conclusionUnavailableMessage: { type: String, default: "今日洞察暂未完成，可稍后重试。" },
   conclusionRefreshing: { type: Boolean, default: false },
   conclusionRetrying: { type: Boolean, default: false },
+  conclusionStatusNote: { type: String, default: "" },
   displayPlanItems: { type: Array, default: () => [] },
   displayPlanTotalMinutes: { type: Number, default: 0 },
   hasExecutablePlan: { type: Boolean, default: false },
@@ -496,6 +503,11 @@ const quickIconMap = {
   heart: "💪"
 };
 const featureColorMap = ["#EED8C8", "#D4EDD4", "#D4D4EE"];
+const featureShortDescMap = {
+  diagnose: "看弱项",
+  plan: "排训练",
+  coach: "继续聊"
+};
 
 const navItems = computed(() => props.navItems.map((item) => ({
   ...item,
@@ -523,7 +535,8 @@ const features = computed(() => {
     ...item,
     icon: navIconMap[item.icon] || navIconMap.trend,
     iconBg: featureColorMap[index] || "#EED8C8",
-    desc: item.text || item.desc || ""
+    desc: item.text || item.desc || "",
+    shortDesc: item.shortText || item.short || featureShortDescMap[item.id] || item.title
   }));
 });
 const inputText = computed({
@@ -549,7 +562,7 @@ const quickCmds = computed(() => (props.quickActions.length ? props.quickActions
 const followupQuestions = computed(() => props.recommendedQuestions.length
   ? props.recommendedQuestions.map((item) => normalizeText(item.text || item.prompt || item)).filter(Boolean)
   : ["我今天最应该练哪个题型？", "DI 如何快速提高信息覆盖率？", "RTS 复述流畅度怎么练？", "WFD 总丢冠词和复数怎么办？"]);
-const userName = computed(() => normalizeText(props.userDisplayName) || "yli71641");
+const userName = computed(() => normalizeText(props.userDisplayName) || "同学");
 const userLetter = computed(() => normalizeText(props.userInitial) || userName.value.charAt(0).toUpperCase() || "Y");
 
 watch(
@@ -705,6 +718,7 @@ function normalizeText(value) {
   --text-mute:  #B8AFA0;
   --green:      #6BAA6B;
   --orange:     #C8854A;
+  --workspace-header-height: 64px;
   display: flex;
   width: 100vw;
   height: 100vh;
@@ -731,7 +745,8 @@ function normalizeText(value) {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 18px 18px 16px;
+  height: var(--workspace-header-height);
+  padding: 0 18px;
   border-bottom: 0.5px solid var(--border);
   flex-shrink: 0;
   text-decoration: none;
@@ -962,24 +977,76 @@ function normalizeText(value) {
   flex-shrink: 0;
   background: var(--cream-3);
   border-bottom: 0.5px solid var(--border);
-  padding: 14px 28px 12px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+  height: var(--workspace-header-height);
+  min-height: var(--workspace-header-height);
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: stretch;
 }
 
+.topbar-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 28px 7px;
+  border-right: 0.5px solid var(--border);
+}
+.topbar-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  max-width: 520px;
+}
+.topbar-meta-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 16px;
+}
 .page-eyebrow {
-  font-size: 9.5px; letter-spacing: .14em; color: var(--text-mute);
-  text-transform: uppercase; margin-bottom: 3px;
+  font-size: 8.5px;
+  letter-spacing: .16em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
 }
-.page-title { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -.01em; line-height: 1; margin-bottom: 4px; }
-.page-sub   { font-size: 12px; color: var(--text-soft); }
+.page-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
 
-.topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.topbar-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 0 18px;
+}
 
 .status-pill {
   display: flex; align-items: center; gap: 6px;
   background: #D4EDD4; border: 0.5px solid #A8D4A8;
   border-radius: 99px; padding: 4px 11px;
   font-size: 11.5px; color: #2D6A2D; font-weight: 500;
+}
+.status-pill--inline {
+  padding: 2px 7px;
+  font-size: 9.5px;
+  line-height: 1;
+  white-space: nowrap;
 }
 .status-dot {
   width: 6px; height: 6px; border-radius: 50%; background: var(--green);
@@ -988,22 +1055,27 @@ function normalizeText(value) {
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
 .action-btn {
-  background: var(--brown); color: var(--cream); border: none;
-  border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 500;
-  cursor: pointer; font-family: inherit; transition: background .14s;
+  min-height: 31px;
+  background: var(--brown); color: var(--cream); border: 0.5px solid rgba(124, 92, 62, .22);
+  border-radius: 999px; padding: 0 13px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .14s, border-color .14s, color .14s;
+  box-shadow: 0 1px 3px rgba(44, 31, 14, .08);
 }
 .action-btn:hover { background: #6A4D32; }
 .action-btn--ghost {
-  background: transparent; color: var(--orange); border: 0.5px solid var(--orange);
+  background: rgba(245, 239, 228, .44); color: var(--brown-lt); border-color: rgba(124, 92, 62, .18);
+  box-shadow: none;
 }
-.action-btn--ghost:hover { background: #FFF0E8; }
+.action-btn--ghost:hover { background: rgba(238, 216, 200, .58); color: var(--brown); }
 .user-chip {
   display: flex; align-items: center; gap: 7px;
-  padding: 5px 11px; border: 0.5px solid var(--border-2);
-  border-radius: 99px; font-size: 12px; color: var(--text-mid);
+  min-height: 31px;
+  padding: 4px 10px; border: 0.5px solid rgba(124, 92, 62, .16);
+  border-radius: 99px; font-size: 11.5px; color: var(--text-mid);
+  background: rgba(245, 239, 228, .36);
 }
 .user-avatar {
-  width: 22px; height: 22px; border-radius: 50%;
+  width: 21px; height: 21px; border-radius: 50%;
   background: var(--brown); color: var(--cream);
   font-size: 11px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
@@ -1027,118 +1099,6 @@ function normalizeText(value) {
   border-right: 0.5px solid var(--border);
 }
 
-/* 欢迎横幅 */
-.welcome-banner {
-  flex-shrink: 0;
-  margin: 18px 20px 0;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255,255,255,.48), transparent 46%),
-    linear-gradient(135deg, #EDE8DF 0%, #E5DFD4 72%, #DDD7CC 100%);
-  border: 0.5px solid var(--border-2);
-  border-radius: 16px;
-  min-height: 132px;
-  padding: 20px 24px;
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.welcome-content {
-  width: min(760px, 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.welcome-text { min-width: 0; }
-
-.welcome-tag {
-  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--brown); margin-bottom: 7px; font-weight: 600;
-}
-
-.welcome-title {
-  font-size: 21px; font-weight: 700; color: var(--text-main);
-  letter-spacing: 0; line-height: 1.28; margin-bottom: 7px;
-}
-
-.welcome-desc { font-size: 12.5px; color: var(--text-mid); line-height: 1.6; margin: 0 auto 11px; max-width: 620px; }
-.welcome-steps {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 7px;
-}
-.welcome-steps span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 0 10px;
-  border: 0.5px solid rgba(124, 92, 62, .22);
-  border-radius: 999px;
-  background: rgba(245, 239, 228, .66);
-  color: var(--brown);
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.deco-card {
-  background: rgba(255,255,255,.65); border: 0.5px solid var(--border);
-  border-radius: 10px; padding: 10px 14px;
-  backdrop-filter: blur(4px);
-}
-
-.deco-card-label { font-size: 9.5px; color: var(--text-mute); margin-bottom: 7px; }
-
-.deco-bars { display: flex; align-items: flex-end; gap: 4px; }
-.deco-bar {
-  width: 10px; background: var(--brown); border-radius: 3px 3px 0 0; opacity: .5;
-}
-.deco-bars .deco-bar:nth-child(2) { opacity: .8; }
-.deco-bars .deco-bar:nth-child(4) { opacity: 1; }
-
-.deco-bot { display: flex; flex-direction: column; align-items: center; }
-.bot-face { font-size: 32px; animation: float 3s ease-in-out infinite; }
-@keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
-
-/* 功能入口 */
-.feature-row {
-  flex-shrink: 0;
-  display: flex; gap: 10px;
-  padding: 14px 20px 0;
-}
-
-.feature-card {
-  flex: 1;
-  background: var(--cream); border: 0.5px solid var(--border);
-  border-radius: 12px; padding: 14px;
-  cursor: pointer; transition: transform .13s, box-shadow .13s;
-  position: relative;
-}
-.feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(44,31,14,.08);
-}
-
-.feat-icon-wrap {
-  width: 32px; height: 32px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 9px;
-}
-.feat-icon { display: flex; align-items: center; color: var(--brown); }
-
-.feat-title { font-size: 13.5px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
-.feat-desc  { font-size: 11.5px; color: var(--text-soft); line-height: 1.5; }
-.feat-arrow {
-  position: absolute; right: 12px; bottom: 12px;
-  font-size: 14px; color: var(--text-mute);
-  transition: transform .13s, color .13s;
-}
-.feature-card:hover .feat-arrow { transform: translateX(3px); color: var(--brown); }
-
 /* 消息区 */
 .messages-area {
   flex: 1; overflow-y: auto; padding: 14px 20px;
@@ -1157,7 +1117,7 @@ function normalizeText(value) {
 .empty-sub   { font-size: 14px; color: var(--text-mute); }
 
 .message { display: flex; align-items: flex-end; gap: 9px; }
-.message--user { flex-direction: row-reverse; }
+.message--user { justify-content: flex-end; }
 .message--thinking { align-items: center; }
 
 .msg-avatar {
@@ -1346,6 +1306,7 @@ function normalizeText(value) {
   margin-bottom: 10px;
 }
 .insight-icon { font-size: 13px; }
+.insight-icon--tools { color: var(--brown); }
 .insight-icon--star  { color: var(--brown); }
 .insight-icon--plan  {}
 .insight-icon--chat  {}
@@ -1355,10 +1316,27 @@ function normalizeText(value) {
 }
 
 .insight-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 9.5px; padding: 2px 7px; border-radius: 4px;
 }
 .insight-badge--mute { background: var(--cream-2); color: var(--text-mute); border: 0.5px solid var(--border); }
 .insight-badge--wait { background: #EED8C8; color: var(--orange); border: 0.5px solid #D4BAA0; }
+.insight-badge--button {
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .13s, color .13s, border-color .13s;
+}
+.insight-badge--button:hover:not(:disabled) {
+  background: #EED8C8;
+  border-color: #D4BAA0;
+  color: var(--brown);
+}
+.insight-badge--button:disabled {
+  cursor: wait;
+  opacity: .58;
+}
 
 /* 空状态卡 */
 .insight-empty-card {
@@ -1382,7 +1360,70 @@ function normalizeText(value) {
 .insight-refresh-note {
   margin-top: 7px;
   font-size: 10.5px;
-  color: var(--text-muted);
+  color: var(--text-mute);
+}
+
+/* 私教工具 */
+.tutor-tools-section {
+  padding-bottom: 13px;
+}
+.tutor-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.tutor-tool {
+  min-width: 0;
+  min-height: 66px;
+  padding: 8px 6px 7px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--cream-2);
+  color: var(--text-main);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background .13s, border-color .13s, transform .13s, box-shadow .13s;
+}
+.tutor-tool:hover {
+  transform: translateY(-1px);
+  background: var(--cream);
+  border-color: #D4BAA0;
+  box-shadow: 0 4px 12px rgba(44,31,14,.06);
+}
+.tutor-tool-icon {
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brown);
+}
+.tutor-tool-icon span {
+  display: flex;
+  align-items: center;
+}
+.tutor-tool-title {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tutor-tool-desc {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 计划空状态 */
@@ -1469,26 +1510,77 @@ function normalizeText(value) {
 .skel--w70 { width: 70%; }
 
 /* 追问 */
-.followup-intro { font-size: 11px; color: var(--text-mute); margin-bottom: 8px; }
-.followup-list  { display: flex; flex-direction: column; gap: 5px; }
-.followup-item {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 9px 11px; background: var(--cream); border: 0.5px solid var(--border);
-  border-radius: 9px; cursor: pointer; transition: background .13s, border-color .13s;
+.followup-section {
+  background: linear-gradient(180deg, rgba(245,239,228,.26), transparent 68%);
 }
-.followup-item:hover { background: #EED8C8; border-color: #D4BAA0; }
-.followup-text  { font-size: 12px; color: var(--text-mid); line-height: 1.4; }
-.followup-arrow { font-size: 15px; color: var(--text-mute); flex-shrink: 0; }
+.followup-intro {
+  margin: -2px 0 9px;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.followup-list  { display: flex; flex-direction: column; gap: 7px; }
+.followup-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 9px;
+  border: 0.5px solid rgba(124, 92, 62, .16);
+  border-radius: 8px;
+  background: rgba(245, 239, 228, .72);
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .13s, border-color .13s, transform .13s;
+}
+.followup-item:hover {
+  transform: translateX(1px);
+  background: var(--cream);
+  border-color: #D4BAA0;
+}
+.followup-mark {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EED8C8;
+  color: var(--brown);
+  font-size: 10px;
+  font-weight: 700;
+}
+.followup-text  {
+  color: var(--text-mid);
+  font-size: 11.5px;
+  line-height: 1.42;
+}
 
 /* ═══════════════════════════════════════════════════
    响应式
 ═══════════════════════════════════════════════════ */
 @media (max-width: 1200px) {
   .insight-panel { width: 270px; }
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
 }
 @media (max-width: 1000px) {
   .insight-panel { display: none; }
   .sidebar { display: none; }
+  .topbar {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: var(--workspace-header-height);
+  }
+  .topbar-main {
+    border-right: 0;
+    min-height: var(--workspace-header-height);
+  }
   .shell {
     width: 100%;
     min-height: 100vh;
@@ -1510,14 +1602,21 @@ function normalizeText(value) {
 }
 @media (max-width: 768px) {
   .topbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 14px 20px 12px;
+    padding: 0;
   }
+  .topbar-main,
   .topbar-actions {
     width: 100%;
     min-width: 0;
+  }
+  .topbar-main {
+    padding: 8px 16px;
+  }
+  .topbar-actions {
+    justify-content: center;
+  }
+  .topbar-actions {
+    padding: 0 16px 10px;
     flex-shrink: 1;
     flex-wrap: wrap;
   }
@@ -1527,7 +1626,8 @@ function normalizeText(value) {
   .user-chip {
     max-width: 100%;
   }
-  .feature-row { flex-wrap: wrap; }
-  .feature-card { flex: 1 1 40%; }
+  .tutor-tool-grid {
+    grid-template-columns: repeat(3, minmax(88px, 1fr));
+  }
 }
 </style>
