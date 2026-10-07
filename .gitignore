@@ -21,3 +21,6 @@
 # Local HTML design drafts generated outside the app
 /ra-project-aligned-design.html
 /ra-warm-paper-redesign.html
+
+# Local browser verification logs
+.playwright-cli/
