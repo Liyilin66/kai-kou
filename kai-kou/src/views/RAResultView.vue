@@ -1919,4 +1919,35 @@ function inferNextQuestionId(id) {
     padding: 18px 32px;
   }
 }
+@media (max-width: 767px) {
+  .ra-result-shell { width: 100%; height: auto; min-height: 100dvh; overflow: visible; }
+  .topbar { height: auto; min-height: 52px; padding: 6px 12px; gap: 8px; flex-wrap: wrap; }
+  .tb-title { position: static; transform: none; font-size: 13px; }
+  .tb-right { gap: 6px; }
+  .vip-pill { padding: 4px 7px; }
+  .tb-back, .exit-btn { min-height: 44px; }
+  .exit-btn { min-width: 44px; }
+  .step-bar { height: auto; min-height: 40px; padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+  .step-wrap { flex-wrap: wrap; gap: 4px; }
+  .step-item { padding: 0 3px; gap: 4px; }
+  .step-sep { width: 8px; }
+  .step-q-info { width: 100%; margin-left: 0; overflow-wrap: anywhere; }
+  .page-body { flex: none; display: flex; flex-direction: column; overflow: visible; }
+  .main-col { order: 0; overflow: visible; padding: 12px; }
+  .left-col, .right-col { min-width: 0; overflow: visible; padding: 12px; border: 0; }
+  .left-col { order: 1; }
+  .right-col { order: 2; }
+  .rb-top { padding: 16px; gap: 12px; flex-wrap: wrap; }
+  .rb-top > div { min-width: 0; }
+  .rb-sub, .source-pill, .ir-v, .sug-text, .ai-bubble-text, .coach-feedback { overflow-wrap: anywhere; }
+  .rb-score { font-size: 42px; }
+  .dim-item { padding: 10px 8px; }
+  .transcript-card { padding: 12px; }
+  .tc-header { flex-direction: column; gap: 8px; }
+  .tc-legend { justify-content: flex-start; }
+  .tc-word, .source-text { overflow-wrap: anywhere; max-width: 100%; }
+  .bottom-actions { grid-template-columns: minmax(0, 1fr); }
+  .ba-primary, .ba-ghost, .ai-hd-link, .ai-q-item { min-height: 44px; }
+  .ai-hd { flex-wrap: wrap; gap: 8px; }
+}
 </style>

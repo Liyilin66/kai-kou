@@ -876,4 +876,36 @@ button:disabled{cursor:not-allowed;opacity:.58;}
   .search-bar{gap:10px;}
   .qc-right{gap:7px;}
 }
+@media (max-width: 767px) {
+  .shell { width: 100%; height: auto; min-height: 100dvh; overflow: visible; }
+  .topbar { height: auto; min-height: 52px; padding: 6px 12px; gap: 8px; flex-wrap: wrap; }
+  .tb-title { font-size: 13px; }
+  .tb-right { gap: 6px; }
+  .vip-pill { padding: 4px 7px; }
+  .tb-back, .exit-btn { min-height: 44px; }
+  .exit-btn { min-width: 44px; }
+  .page-body { flex: none; flex-direction: column; overflow: visible; }
+  /* Keep status filters before questions and secondary recommendations below. */
+  .filter-col { display: contents; }
+  .fc-section { order: 2; padding: 12px; background: var(--bg2); }
+  .fc-section:first-child { order: 0; padding-bottom: 0; }
+  .fc-opts { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .fc-opt { width: auto; min-height: 44px; background: var(--card2); }
+  .main-area { order: 1; flex: none; overflow: visible; padding: 12px; }
+  .guide-col { order: 3; width: 100%; overflow: visible; padding: 12px; border: 0; }
+  .search-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .sb-input-wrap { min-width: 0; min-height: 44px; padding: 0 10px; }
+  .sb-input { min-width: 0; font-size: 16px; }
+  .sb-clear { min-width: 44px; min-height: 44px; }
+  .sb-stats { white-space: normal; }
+  .dt-item, .arc-item, .sr-opt, .start-all-btn { min-height: 44px; }
+  .q-card { padding: 12px; }
+  .qc-top { flex-wrap: wrap; }
+  .qc-meta { min-width: 0; }
+  .qc-right { width: 100%; justify-content: flex-end; }
+  .qc-fav { width: 44px; height: 44px; }
+  .qc-go { min-height: 44px; padding: 8px 16px; }
+  .qc-text { overflow-wrap: anywhere; }
+  .state-card { padding: 20px 12px; }
+}
 </style>
