@@ -1278,4 +1278,33 @@ function normalizeText(value) {
 .mi-meta{font-size:9.5px;color:var(--mute);}
 .mi-action{font-size:10.5px;color:var(--c2);font-weight:700;flex-shrink:0;}
 .misread-empty{border:1px dashed var(--bdr);border-radius:8px;background:var(--card2);padding:12px 10px;font-size:11px;color:var(--mute);line-height:1.6;text-align:center;}
+@media (max-width: 767px) {
+  .shell { width: 100%; height: auto; min-height: 100dvh; overflow: visible; }
+  .topbar { height: auto; min-height: 52px; padding: 6px 12px; gap: 8px; flex-wrap: wrap; }
+  .tb-title { font-size: 13px; }
+  .tb-right { gap: 6px; }
+  .vip-pill { padding: 4px 7px; }
+  .tb-back, .exit-btn { min-height: 44px; }
+  .exit-btn { min-width: 44px; }
+  .page-body { flex: none; flex-direction: column; overflow: visible; }
+  .main-area { order: 0; flex: none; overflow: visible; padding: 12px; }
+  .left-panel, .right-panel { width: 100%; overflow: visible; border: 0; padding: 12px; }
+  .left-panel { order: 1; }
+  .right-panel { order: 2; }
+  .hero-banner { padding: 18px 16px; }
+  .hb-title { font-size: 23px; }
+  .hb-deco { display: none; }
+  .entry-cards, .diff-grid { grid-template-columns: minmax(0, 1fr); }
+  .entry-card { min-width: 0; padding: 14px 12px; gap: 10px; flex-wrap: wrap; }
+  .ec-sub { overflow-wrap: anywhere; }
+  .dc-btn, .aal-item, .hist-item, .misread-item { min-height: 44px; }
+  .today-rec { flex: none; min-height: 0; }
+  .tr-header { flex-wrap: wrap; gap: 6px; }
+  .tr-list { overflow: visible; }
+  .tr-item { min-height: 44px; padding: 12px; flex-wrap: wrap; }
+  .tri-left { flex-basis: 100%; }
+  .tri-left > div { min-width: 0; }
+  .tri-text { white-space: normal; overflow-wrap: anywhere; }
+  .tri-right { margin-left: auto; }
+}
 </style>

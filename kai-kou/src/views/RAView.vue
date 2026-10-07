@@ -1795,4 +1795,52 @@ async function startRecordingNow() {
 .progress-nums{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;gap:8px;align-items:stretch;text-align:center;}.progress-nums i{background:var(--bdr);}.progress-nums strong{display:block;font-size:17px;color:var(--c0);}.progress-nums span{display:block;margin-top:2px;font-size:9.5px;color:var(--muted);}.progress-track{height:6px;background:var(--bdr);border-radius:999px;overflow:hidden;}.progress-track span{display:block;height:100%;background:var(--c2);border-radius:999px;}.progress-copy{text-align:right;font-size:10px;color:var(--muted);}.quick-actions{gap:8px;}.quick-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}.quick-actions button{border:1px solid var(--bdr);background:var(--card2);border-radius:8px;padding:8px 9px;font:inherit;font-size:11.5px;color:var(--c1);cursor:pointer;}.quick-actions .random-btn{width:100%;border-color:var(--orange3);background:var(--orange2);color:var(--orange);font-weight:800;}.quick-actions .bank-btn{width:100%;}
 @media (min-width:1600px){.practice-body{grid-template-columns:300px minmax(760px,1fr) 320px;}.main-col{padding:26px 30px;}.article-text{font-size:17px;}.status-banner{min-height:116px;}}
 @media (max-width:1320px){.practice-body{grid-template-columns:250px minmax(540px,1fr) 272px;}.main-col{padding:18px 20px;}.article-text{font-size:15px;line-height:1.9;}.ra-topbar{padding:0 24px;}.step-bar{padding:0 24px;}.step-sep{width:16px;}}
+
+@media (max-width: 767px) {
+  .ra-practice-shell { width: 100%; height: auto; min-height: 100dvh; overflow: visible; }
+  .ra-topbar { height: auto; min-height: 52px; flex-basis: auto; padding: 4px 12px; gap: 8px; flex-wrap: wrap; }
+  .tb-title { position: static; transform: none; font-size: 13px; }
+  .vip-pill { display: none; }
+  .tb-back, .exit-btn { min-width: 44px; min-height: 44px; }
+  .step-bar { height: auto; flex-basis: auto; min-height: 44px; padding: 8px 12px; gap: 8px; flex-wrap: wrap; }
+  .step-wrap { flex: 1; min-width: 0; }
+  .step-item { padding: 0; gap: 4px; }
+  .step-num { flex-shrink: 0; width: 20px; height: 20px; }
+  .step-label { font-size: 10px; }
+  .step-sep { display: none; }
+  .step-q-info { width: 100%; margin-left: 0; text-align: right; }
+  .practice-body { display: flex; flex-direction: column; flex: none; min-height: auto; overflow: visible; }
+  .main-col, .left-col, .right-col { min-width: 0; min-height: auto; overflow: visible; padding: 12px; border: 0; }
+  .main-col { order: 0; gap: 12px; }
+  .left-col { order: 1; padding-top: 0; }
+  .right-col { order: 2; padding-top: 0; }
+  .main-col > * { min-width: 0; }
+  .status-banner { order: 0; min-height: auto; padding: 12px; gap: 10px; }
+  .sb-title { font-size: 13px; }
+  .sb-sub { font-size: 11px; }
+  .countdown-wrap { flex-shrink: 0; }
+  .countdown-num { font-size: 28px; }
+  .timer-card { display: contents; }
+  .timer-row { order: 1; flex-wrap: wrap; gap: 8px; }
+  .timer-track { min-width: 60px; }
+  .timer-skip { min-height: 44px; }
+  .article-card { order: 2; padding: 16px; }
+  .article-meta { flex-wrap: wrap; gap: 6px; }
+  .article-text { font-size: 17px; line-height: 1.8; overflow-wrap: anywhere; }
+  .primary-action { order: 3; min-height: 48px; background: var(--card); }
+  .recording-card, .processing-card, .error-card { order: 4; padding: 12px; }
+  .history-card, .debug-card { order: 5; }
+  .audio-preview { padding: 8px; gap: 6px; }
+  .audio-preview audio { min-width: 0; flex: 1; }
+  .play-preview { flex-shrink: 0; }
+  .play-preview, .ghost-action, .submit-action, .history-toggle,
+  .inline-history-btn, .history-tools button, .history-log button,
+  .ai-actions button, .quick-actions button { min-width: 44px; min-height: 44px; }
+  .history-head, .history-tools { flex-wrap: wrap; }
+  .history-list { max-height: none; overflow: visible; padding-right: 0; }
+  .history-log { grid-template-columns: minmax(0, 1fr); }
+  .history-log p { white-space: normal; overflow-wrap: anywhere; }
+  .history-log-top, .score-mini { flex-wrap: wrap; }
+  .info-row strong, .debug-card, .ai-bubble p { overflow-wrap: anywhere; }
+}
 </style>
