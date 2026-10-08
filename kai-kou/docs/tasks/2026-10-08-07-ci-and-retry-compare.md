@@ -62,3 +62,28 @@
 新增根目录 `.github/workflows/test.yml`，push 和 PR 覆盖 lyl/main，Node 24，工作目录 kai-kou，npm 缓存依据 app lockfile，npm ci / npm test / on-off 矩阵构建，不配置密钥。测试现有数据和服务调用均走本地 fixture 或 mock。
 
 GitHub Actions 的实际运行状态待推送后验证并记录，不以本地构建替代远端绿色检查。
+
+### A 的远端验收
+
+CI 提交 `de6d257` 的 GitHub Actions 实际运行：https://github.com/Liyilin66/kai-kou/actions/runs/37745676128 。`test-and-build (on)` 与 `test-and-build (off)` 均 completed / success，未配置任何密钥。
+
+### B：重录对比与验收
+
+新增纯函数比较、本人同题上一条 done 记录读取、指标与三组证据卡片、标签回听和同题重练入口。语速仅显示变化，不把越快视为越好。无上次记录不显示比较卡片，识别不确定证据不参与分类。不改诊断与反馈规则。
+
+真实持久化链路：用临时测试账号将现有真实 RA_024 录音串行提交两次，两次实际调用语音识别、实际入库；浏览器通过普通登录身份和 RLS 查前一次记录。为避免混淆，此项是**同一真实录音回放两次**，不是两次新鲜麦克风重录，也不证明练习提分。
+
+第二次页面对比数据：
+
+| 项目 | 上次 | 本次 |
+|---|---:|---:|
+| 内容完整度 | 96% | 96% |
+| 犹豫次数 | 0 | 0 |
+| 长停顿次数 | 0 | 0 |
+| 语速 | 120 词/分 | 120 词/分 |
+
+已改善：无；仍需练习：substitution 的 spices、perfumes 两处；新出现：无。分类与两次实际证据一致。点击 spices 标签后音频跳到约 24.3 秒并播放，点击“再练一次这题”进入 `/ra/practice?questionId=RA_024`，页面显示正确题目。
+
+浏览器手机宽度：viewport 375，document scrollWidth 375，无横向溢出。截图保存在本机 `output/playwright/task7-compare-375-card.png` 和 `task7-compare-375.png`，真实结果本机 `output/eval/task7-real-results.json`；这些生成文件不提交。
+
+最终回归：328 项测试通过，开关 on/off 两种构建通过；开口延迟即使没有原文词位置也参与比较，同音/低置信度证据直接带 tag 时也排除。任务 7 仅推送 lyl，等待 Claude 审查后才合并 main。
