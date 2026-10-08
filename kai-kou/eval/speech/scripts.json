@@ -1,0 +1,387 @@
+[
+  {
+    "id": "ra024-normal",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "正常朗读完整原文，不故意漏词、重复、换词或增加停顿。",
+    "errors": []
+  },
+  {
+    "id": "ra024-omit-2",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "朗读时跳过第 1 次出现的 first和第 1 次出现的 cargo，直接接着读后面的词，其余正常读。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "first",
+        "occurrence": 1
+      },
+      {
+        "type": "omission",
+        "word": "cargo",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra024-pause-2",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "读到第 1 次出现的 transportation之前停顿约 2 秒；读到第 1 次出现的 carrying之前再停顿约 2 秒。停顿后继续完整朗读，不漏词，其余正常读。",
+    "errors": [
+      {
+        "type": "long_pause",
+        "word": "transportation",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "long_pause",
+        "word": "carrying",
+        "occurrence": 1,
+        "duration_ms": 2000
+      }
+    ]
+  },
+  {
+    "id": "ra024-repeat-2",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "把第 1 次出现的 boats连续读两遍（boats boats），把第 1 次出现的 spices也连续读两遍（spices spices），每处只多读一次，其余正常读。",
+    "errors": [
+      {
+        "type": "repetition",
+        "word": "boats",
+        "occurrence": 1
+      },
+      {
+        "type": "repetition",
+        "word": "spices",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra024-substitute-1",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "把第 1 次出现的 sailing故意读成近音词 selling，只读 selling，不再读 sailing，其余正常读。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "sailing",
+        "occurrence": 1,
+        "spoken_as": "selling"
+      }
+    ]
+  },
+  {
+    "id": "ra002-normal",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "正常朗读完整原文，不故意漏词、重复、换词或增加停顿。",
+    "errors": []
+  },
+  {
+    "id": "ra002-omit-2",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "朗读时跳过第 1 次出现的 annual和第 1 次出现的 bush，直接接着读后面的词，其余正常读。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "annual",
+        "occurrence": 1
+      },
+      {
+        "type": "omission",
+        "word": "bush",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra002-pause-2",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "读到第 1 次出现的 emissions之前停顿约 2 秒；读到第 1 次出现的 hectares之前再停顿约 2 秒。停顿后继续完整朗读，不漏词，其余正常读。",
+    "errors": [
+      {
+        "type": "long_pause",
+        "word": "emissions",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "long_pause",
+        "word": "hectares",
+        "occurrence": 1,
+        "duration_ms": 2000
+      }
+    ]
+  },
+  {
+    "id": "ra002-repeat-2",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "把第 1 次出现的 cars连续读两遍（cars cars），把第 1 次出现的 control也连续读两遍（control control），每处只多读一次，其余正常读。",
+    "errors": [
+      {
+        "type": "repetition",
+        "word": "cars",
+        "occurrence": 1
+      },
+      {
+        "type": "repetition",
+        "word": "control",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra002-substitute-1",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "把第 1 次出现的 cars故意读成近音词 cards，只读 cards，不再读 cars，其余正常读。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "cars",
+        "occurrence": 1,
+        "spoken_as": "cards"
+      }
+    ]
+  },
+  {
+    "id": "ra003-normal",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "正常朗读完整原文，不故意漏词、重复、换词或增加停顿。",
+    "errors": []
+  },
+  {
+    "id": "ra003-omit-2",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "朗读时跳过第 1 次出现的 theoretical和第 1 次出现的 generator，直接接着读后面的词，其余正常读。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "theoretical",
+        "occurrence": 1
+      },
+      {
+        "type": "omission",
+        "word": "generator",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra003-pause-2",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "读到第 1 次出现的 modern之前停顿约 2 秒；读到第 1 次出现的 ethical之前再停顿约 2 秒。停顿后继续完整朗读，不漏词，其余正常读。",
+    "errors": [
+      {
+        "type": "long_pause",
+        "word": "modern",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "long_pause",
+        "word": "ethical",
+        "occurrence": 1,
+        "duration_ms": 2000
+      }
+    ]
+  },
+  {
+    "id": "ra003-repeat-2",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "把第 1 次出现的 money连续读两遍（money money），把第 1 次出现的 Edison也连续读两遍（Edison Edison），每处只多读一次，其余正常读。",
+    "errors": [
+      {
+        "type": "repetition",
+        "word": "money",
+        "occurrence": 1
+      },
+      {
+        "type": "repetition",
+        "word": "Edison",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra003-substitute-1",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "把第 1 次出现的 formed故意读成近音词 farmed，只读 farmed，不再读 formed，其余正常读。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "formed",
+        "occurrence": 1,
+        "spoken_as": "farmed"
+      }
+    ]
+  },
+  {
+    "id": "ra016-normal",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "正常朗读完整原文，不故意漏词、重复、换词或增加停顿。",
+    "errors": []
+  },
+  {
+    "id": "ra016-omit-2",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "朗读时跳过第 1 次出现的 first和第 1 次出现的 towering，直接接着读后面的词，其余正常读。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "first",
+        "occurrence": 1
+      },
+      {
+        "type": "omission",
+        "word": "towering",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra016-pause-2",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "读到第 1 次出现的 Grand之前停顿约 2 秒；读到第 1 次出现的 Colorado之前再停顿约 2 秒。停顿后继续完整朗读，不漏词，其余正常读。",
+    "errors": [
+      {
+        "type": "long_pause",
+        "word": "Grand",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "long_pause",
+        "word": "Colorado",
+        "occurrence": 1,
+        "duration_ms": 2000
+      }
+    ]
+  },
+  {
+    "id": "ra016-repeat-2",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "把第 1 次出现的 nature连续读两遍（nature nature），把第 1 次出现的 miles也连续读两遍（miles miles），每处只多读一次，其余正常读。",
+    "errors": [
+      {
+        "type": "repetition",
+        "word": "nature",
+        "occurrence": 1
+      },
+      {
+        "type": "repetition",
+        "word": "miles",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra016-substitute-1",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "把第 1 次出现的 force故意读成近音词 forth，只读 forth，不再读 force，其余正常读。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "force",
+        "occurrence": 1,
+        "spoken_as": "forth"
+      }
+    ]
+  },
+  {
+    "id": "ra041-normal",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "正常朗读完整原文，不故意漏词、重复、换词或增加停顿。",
+    "errors": []
+  },
+  {
+    "id": "ra041-omit-2",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "朗读时跳过第 1 次出现的 unique和第 1 次出现的 electronic，直接接着读后面的词，其余正常读。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "unique",
+        "occurrence": 1
+      },
+      {
+        "type": "omission",
+        "word": "electronic",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra041-pause-2",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "读到第 1 次出现的 retail之前停顿约 2 秒；读到第 1 次出现的 sophisticated之前再停顿约 2 秒。停顿后继续完整朗读，不漏词，其余正常读。",
+    "errors": [
+      {
+        "type": "long_pause",
+        "word": "retail",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "long_pause",
+        "word": "sophisticated",
+        "occurrence": 1,
+        "duration_ms": 2000
+      }
+    ]
+  },
+  {
+    "id": "ra041-repeat-2",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "把第 1 次出现的 tools连续读两遍（tools tools），把第 1 次出现的 individual也连续读两遍（individual individual），每处只多读一次，其余正常读。",
+    "errors": [
+      {
+        "type": "repetition",
+        "word": "tools",
+        "occurrence": 1
+      },
+      {
+        "type": "repetition",
+        "word": "individual",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra041-substitute-1",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "把第 1 次出现的 retail故意读成近音词 retain，只读 retain，不再读 retail，其余正常读。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "retail",
+        "occurrence": 1,
+        "spoken_as": "retain"
+      }
+    ]
+  }
+]

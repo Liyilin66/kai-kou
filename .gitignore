@@ -24,3 +24,6 @@
 
 # Local browser verification logs
 .playwright-cli/
+
+# Private speech evaluation recordings
+/kai-kou/eval/speech/audio/
