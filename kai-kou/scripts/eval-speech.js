@@ -78,7 +78,7 @@ export function validateManifest(manifest, hypothesis = 'browser_asr') {
 
 export function predictedErrors(alignment) {
   return alignment.ops.flatMap((op, index, ops) => {
-    if (op.type === 'match' || op.tag === 'low_confidence') return [];
+    if (op.type === 'match' || op.tag === 'low_confidence' || op.tag === 'homophone') return [];
     let refIndex = op.ref_index;
     if (refIndex === null) {
       // Insertions occupy a boundary: use the next reference word, or last word at the end.

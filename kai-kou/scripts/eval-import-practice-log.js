@@ -18,11 +18,13 @@ export function parseArgs(argv) {
   if (Boolean(options.logId) === Boolean(options.latest)) throw new Error('Choose --log-id or --latest');
   if (!['dev', 'test'].includes(options.split)) throw new Error('--split must be dev or test');
   if (options.latest && (!/^\d+$/.test(options.latest) || Number(options.latest) < 1 || Number(options.latest) > 100 || !options.userId)) throw new Error('--latest requires 1–100 and --user-id');
+  if (options.script && Number(options.latest) > 1) throw new Error('--script cannot be combined with --latest greater than 1');
   if (!options.userId && !options.consent) throw new Error('Specify your own --user-id or provide --consent for a consenting user');
   return options;
 }
 
 export async function importPracticeLogs(client, options, directory = path.join(appRoot, 'eval/speech')) {
+  if (options.script && Number(options.latest) > 1) throw new Error('--script cannot be combined with --latest greater than 1');
   const manifestPath = path.join(directory, 'manifest.json');
   const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
   if (!Array.isArray(manifest)) throw new Error('manifest.json must contain an array');
@@ -43,7 +45,7 @@ export async function importPracticeLogs(client, options, directory = path.join(
   }
   const imported = [];
   for (const log of logs) {
-    const previousIndex = manifest.findIndex(item => String(item.hypotheses?.browser_asr?.practice_log_id) === String(log.id));
+    const previousIndex = manifest.findIndex(item => String(item.hypotheses?.browser_asr?.practice_log_id) === String(log.id) && (!options.script || item.source === 'constructed'));
     const previous = previousIndex >= 0 ? manifest[previousIndex] : null;
     const speaker = options.speaker || previous?.speaker_id || `spk-${createHash('sha256').update(log.user_id).digest('hex').slice(0, 12)}`;
     if (manifest.some((item, index) => index !== previousIndex && item.speaker_id === speaker && item.split !== options.split)) throw new Error(`Speaker ${speaker} already belongs to another split`);
@@ -58,9 +60,10 @@ export async function importPracticeLogs(client, options, directory = path.join(
     if (!audio?.path || (audio.bucket && audio.bucket !== 'practice-audio') || !audio.path.startsWith(`ra/${log.user_id}/`) || audio.path.split('/').includes('..')) throw new Error(`Practice log ${log.id}: valid private RA audio path required`);
     let id = previous?.id;
     if (!id) {
+      const prefix = script ? 'ra-con' : 'ra-real';
       let number = 1;
-      while (manifest.some(item => item.id === `ra-real-${String(number).padStart(4, '0')}`)) number++;
-      id = `ra-real-${String(number).padStart(4, '0')}`;
+      while (manifest.some(item => item.id === `${prefix}-${String(number).padStart(4, '0')}`)) number++;
+      id = `${prefix}-${String(number).padStart(4, '0')}`;
     }
     const extension = path.extname(audio.path).toLowerCase();
     if (!['.webm', '.wav', '.mp4', '.m4a', '.mp3', '.ogg', '.aac'].includes(extension)) throw new Error(`Practice log ${log.id}: unsupported audio extension`);

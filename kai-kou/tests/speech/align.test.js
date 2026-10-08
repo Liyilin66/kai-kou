@@ -85,7 +85,7 @@ test('hyphens and unicode dashes split words', () => {
 
 test('punctuation, case and curly quotes do not affect matches', () => {
   const result = alignWords('“IT’S” EARTH’S water!', "it is earth's water");
-  assert.equal(result.summary.matched, 4);
+  assert.equal(result.summary.matched, 3);
 });
 
 test('low-confidence substitutions remain visible but are excluded from user-error count', () => {
@@ -170,3 +170,96 @@ test('invalid inputs fail explicitly', () => {
   assert.throws(() => alignWords('boat', [{}]), TypeError);
   assert.throws(() => alignWords('boat', 'boat', { lowConfidenceThreshold: -1 }), RangeError);
 });
+
+for (const [reference, hypothesis, norms] of [
+  ['the twenty-first century', 'the 21st century', ['the', '#21st', 'century']],
+  ['the 21st century', 'the twenty first century', ['the', '#21st', 'century']],
+  ['about 2 million people', 'about two million people', ['about', '#2000000', 'people']],
+  ['about 1.5 million people', 'about one point five million people', ['about', '#1500000', 'people']],
+  ['it was 3.5 metres', 'it was three point five meters', ['it', 'was', '#3.5', 'meters']],
+  ['in the 1990s', 'in the nineteen nineties', ['in', 'the', '#1990s']],
+  ['costs $5 each', 'costs five dollars each', ['costs', '#5', 'dollars', 'each']],
+  ['£5', 'five pounds', ['#5', 'pounds']],
+  ['€5', 'five euros', ['#5', 'euros']],
+  ['$2 million', 'two million dollars', ['#2000000', 'dollars']],
+  ['zero point zero five', '0.05', ['#0.05']],
+  ['thirty-second', '32nd', ['#32nd']],
+  ['hundredth thousandth', '100th 1000th', ['#100th', '#1000th']],
+]) {
+  test(`review numeric regression: ${reference}`, () => {
+    const result = alignWords(reference, hypothesis);
+    assert.deepEqual(result.reference.map(t => t.norm), norms);
+    assert.deepEqual(result.hypothesis.map(t => t.norm), norms);
+    assert.ok(result.ops.every(op => op.type === 'match'));
+  });
+}
+
+for (const group of [
+  ['its', "it's"], ['there', 'their', "they're"], ['your', "you're"], ['whose', "who's"],
+  ['to', 'too', 'two'], ['for', 'four'], ['one', 'won'], ['ate', 'eight'],
+  ['know', 'no'], ['knew', 'new'], ['hear', 'here'], ['right', 'write'], ['by', 'buy'],
+  ['whether', 'weather'], ['weak', 'week'], ['sea', 'see'], ['son', 'sun'],
+]) {
+  test(`review homophones: ${group.join('/')}`, () => {
+    for (const left of group) for (const right of group) {
+      if (left === right) continue;
+      const result = alignWords(`word ${left} end`, `word ${right} end`);
+      assert.deepEqual(result.ops.map(op => op.type), ['match', 'substitution', 'match']);
+      assert.equal(result.ops[1].tag, 'homophone');
+      assert.equal(result.summary.substituted, 0);
+      assert.equal(result.summary.homophones, 1);
+      assert.equal(result.summary.omitted + result.summary.inserted, 0);
+    }
+  });
+}
+
+test('homophone contractions remain single tokens and explicit expansions still match', () => {
+  assert.deepEqual(normalizeTokens("it's they're you're who's").map(t => t.norm), ["it's", "they're", "you're", "who's"]);
+  assert.equal(alignWords("it's they're you're who's", 'it is they are you are who is').summary.completeness, 1);
+});
+
+test('merged decimal scales retain the complete timestamp span and minimum confidence', () => {
+  const words = ['one', 'point', 'five', 'million'].map((text, i) => ({text, start_ms: i * 100, end_ms: i * 100 + 90, confidence: 0.9 - i / 10}));
+  const result = alignWords('1.5 million', words);
+  assert.equal(result.hypothesis[0].norm, '#1500000');
+  assert.equal(result.ops[0].start_ms, 0);
+  assert.equal(result.ops[0].end_ms, 390);
+  assert.equal(result.ops[0].confidence, words[3].confidence);
+});
+
+test('homophones supersede confidence uncertainty without suppressing unrelated errors', () => {
+  assert.equal(alignWords('to', [{text: 'two', confidence: 0.2}]).ops[0].tag, 'homophone');
+  assert.equal(alignWords('sea trade', 'see tree').summary.substituted, 1);
+  assert.deepEqual(normalizeTokens('the nineties').map(t => t.norm), ['the', 'nineties']);
+});
+
+
+test('unscaled Arabic numbers preserve precision and remain separate', () => {
+  assert.deepEqual(normalizeTokens('9007199254740993 19 90').map(t => t.norm), ['#9007199254740993', '#19', '#90']);
+});
+
+test('currency and scaled Arabic amounts retain word timestamps', () => {
+  const result = alignWords('two million dollars', [
+    { text: '$2', start_ms: 10, end_ms: 80, confidence: 0.9 },
+    { text: 'million', start_ms: 100, end_ms: 200, confidence: 0.7 },
+  ]);
+  assert.equal(result.summary.completeness, 1);
+  assert.deepEqual(result.hypothesis.map(t => t.norm), ['#2000000', 'dollars']);
+  assert.equal(result.ops[0].start_ms, 10);
+  assert.equal(result.ops[0].end_ms, 200);
+  assert.equal(result.ops[0].confidence, 0.7);
+});
+
+
+for (const [reference, hypothesis, norm] of [
+  ['4.1 million', '4100000', '#4100000'],
+  ['four point one million', '4100000', '#4100000'],
+  ['4.1000001 million', '4100000.1', '#4100000.1'],
+  ['0.0000001 million', '0.1', '#0.1'],
+]) {
+  test(`decimal scales avoid binary multiplication artifacts: ${reference}`, () => {
+    const result = alignWords(reference, hypothesis);
+    assert.deepEqual(result.reference.map(token => token.norm), [norm]);
+    assert.equal(result.summary.completeness, 1);
+  });
+}

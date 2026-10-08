@@ -20,3 +20,23 @@ test('script import transfers intended labels only to matching question',async t
 test('speaker cannot be added to both development and test',async t=>{const f=await fixture(t,[log],[{id:'existing',speaker_id:'spk01',split:'test'}]);await assert.rejects(importPracticeLogs(f.client,{logId:'407',userId:'owner',split:'dev',speaker:'spk01'},f.dir),/another split/);assert.equal(f.downloads(),0);});
 test('batch consent is checked before any audio download',async t=>{const f=await fixture(t,[log,{...log,id:408,user_id:'other'}]);await assert.rejects(importPracticeLogs(f.client,{latest:'2',userId:'owner',split:'dev'},f.dir),/Consent/);assert.equal(f.downloads(),0);});
 test('explicit consent permits a different record owner',async t=>{const f=await fixture(t);await importPracticeLogs(f.client,{logId:'407',userId:'other',consent:true,split:'dev',device:'unknown'},f.dir);assert.equal(f.downloads(),1);});
+test('one script cannot label a batch of latest recordings',()=>{
+ assert.throws(()=>parseArgs(['--latest','2','--user-id','owner','--script','normal']),/script.*latest|latest.*script/);
+ assert.equal(parseArgs(['--latest','1','--user-id','owner','--script','normal']).latest,'1');
+});
+test('constructed IDs have a separate sequence and reimport preserves it',async t=>{
+ const f=await fixture(t,[{...log,id:408}],[{id:'ra-real-0001',source:'real',speaker_id:'spk01',split:'dev',hypotheses:{browser_asr:{practice_log_id:'407'}}}]);
+ const options={logId:'408',userId:'owner',script:'normal',split:'dev',device:'iphone',speaker:'spk01'};
+ const first=await importPracticeLogs(f.client,options,f.dir);assert.equal(first[0].id,'ra-con-0001');
+ await importPracticeLogs(f.client,options,f.dir);
+ const samples=JSON.parse(await fs.readFile(path.join(f.dir,'manifest.json')));assert.equal(samples.length,2);assert.equal(samples[0].id,'ra-real-0001');assert.equal(samples[1].id,'ra-con-0001');
+});
+test('script import of the same log preserves the original real sample',async t=>{
+ const f=await fixture(t);
+ const options={logId:'407',userId:'owner',split:'dev',device:'iphone',speaker:'spk01'};
+ await importPracticeLogs(f.client,options,f.dir);
+ const original=JSON.parse(await fs.readFile(path.join(f.dir,'manifest.json')))[0];
+ await importPracticeLogs(f.client,{...options,script:'normal'},f.dir);
+ const samples=JSON.parse(await fs.readFile(path.join(f.dir,'manifest.json')));
+ assert.equal(samples.length,2);assert.deepEqual(samples[0],original);assert.equal(samples[1].id,'ra-con-0001');
+});

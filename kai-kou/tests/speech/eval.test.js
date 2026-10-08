@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateManifest, validateManifest, matchErrors, labelIndex, main } from '../../scripts/eval-speech.js';
+import { evaluateManifest, validateManifest, matchErrors, labelIndex, predictedErrors, main } from '../../scripts/eval-speech.js';
 
 function sample(overrides = {}) {
   return { id: 'sample-1', task_type: 'RA', question_id: 'RA_024', reference_text: 'the boat sailed',
@@ -67,4 +67,9 @@ test('filters by split and accepts an empty recognized transcript', () => {
 test('CLI rejects unsupported options without reading or writing data', async () => {
   await assert.rejects(main(['--split']), /missing value/);
   await assert.rejects(main(['--unknown', 'value']), /Unknown option/);
+});
+
+test('homophone substitutions do not become predicted user errors',()=>{
+ const ops=[{type:'substitution',tag:'homophone',ref_index:0,hyp_index:0,ref_text:'sea',hyp_text:'see'}];
+ assert.deepEqual(predictedErrors({ops}),[]);
 });
