@@ -18,6 +18,348 @@
       "browser_asr": {
         "text": "Not a lot is knowing about how the transportation of goods by waterfront began large cargo boats were being used in some parts of the world up to 5000 years ago however sea tree become more widespread with large selling boat traveled between ports carrying species performance and objects made by hand",
         "practice_log_id": "407"
+      },
+      "groq_whisper": {
+        "text": " Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to 5000 years ago. However, sea trade became more widespread when large sailing boats traveled between ports carrying specious performs and objects made by hand.",
+        "words": [
+          {
+            "text": "Not",
+            "start_ms": 1180,
+            "end_ms": 1420,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 1420,
+            "end_ms": 1760,
+            "confidence": null
+          },
+          {
+            "text": "lot",
+            "start_ms": 1760,
+            "end_ms": 1920,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "start_ms": 1920,
+            "end_ms": 2100,
+            "confidence": null
+          },
+          {
+            "text": "known",
+            "start_ms": 2100,
+            "end_ms": 2520,
+            "confidence": null
+          },
+          {
+            "text": "about",
+            "start_ms": 2520,
+            "end_ms": 2940,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "start_ms": 2940,
+            "end_ms": 3320,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 3320,
+            "end_ms": 3640,
+            "confidence": null
+          },
+          {
+            "text": "transportation",
+            "start_ms": 3640,
+            "end_ms": 4480,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 4480,
+            "end_ms": 5120,
+            "confidence": null
+          },
+          {
+            "text": "goods",
+            "start_ms": 5120,
+            "end_ms": 5520,
+            "confidence": null
+          },
+          {
+            "text": "by",
+            "start_ms": 5520,
+            "end_ms": 5760,
+            "confidence": null
+          },
+          {
+            "text": "water",
+            "start_ms": 5760,
+            "end_ms": 6200,
+            "confidence": null
+          },
+          {
+            "text": "first",
+            "start_ms": 6200,
+            "end_ms": 6580,
+            "confidence": null
+          },
+          {
+            "text": "began.",
+            "start_ms": 6580,
+            "end_ms": 7460,
+            "confidence": null
+          },
+          {
+            "text": "Large",
+            "start_ms": 7260,
+            "end_ms": 7840,
+            "confidence": null
+          },
+          {
+            "text": "cargo",
+            "start_ms": 7840,
+            "end_ms": 8300,
+            "confidence": null
+          },
+          {
+            "text": "boats",
+            "start_ms": 8300,
+            "end_ms": 8780,
+            "confidence": null
+          },
+          {
+            "text": "were",
+            "start_ms": 8780,
+            "end_ms": 9320,
+            "confidence": null
+          },
+          {
+            "text": "being",
+            "start_ms": 9320,
+            "end_ms": 10140,
+            "confidence": null
+          },
+          {
+            "text": "used",
+            "start_ms": 10140,
+            "end_ms": 10600,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 10600,
+            "end_ms": 10880,
+            "confidence": null
+          },
+          {
+            "text": "some",
+            "start_ms": 10880,
+            "end_ms": 11180,
+            "confidence": null
+          },
+          {
+            "text": "parts",
+            "start_ms": 11180,
+            "end_ms": 11500,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 11500,
+            "end_ms": 11660,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 11660,
+            "end_ms": 11760,
+            "confidence": null
+          },
+          {
+            "text": "world",
+            "start_ms": 11760,
+            "end_ms": 12140,
+            "confidence": null
+          },
+          {
+            "text": "up",
+            "start_ms": 12140,
+            "end_ms": 12520,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 12520,
+            "end_ms": 12720,
+            "confidence": null
+          },
+          {
+            "text": "5000",
+            "start_ms": 12720,
+            "end_ms": 13260,
+            "confidence": null
+          },
+          {
+            "text": "years",
+            "start_ms": 13260,
+            "end_ms": 13620,
+            "confidence": null
+          },
+          {
+            "text": "ago.",
+            "start_ms": 13620,
+            "end_ms": 14220,
+            "confidence": null
+          },
+          {
+            "text": "However,",
+            "start_ms": 14020,
+            "end_ms": 15280,
+            "confidence": null
+          },
+          {
+            "text": "sea",
+            "start_ms": 15280,
+            "end_ms": 15580,
+            "confidence": null
+          },
+          {
+            "text": "trade",
+            "start_ms": 15580,
+            "end_ms": 15660,
+            "confidence": null
+          },
+          {
+            "text": "became",
+            "start_ms": 15660,
+            "end_ms": 16260,
+            "confidence": null
+          },
+          {
+            "text": "more",
+            "start_ms": 16260,
+            "end_ms": 16880,
+            "confidence": null
+          },
+          {
+            "text": "widespread",
+            "start_ms": 16880,
+            "end_ms": 18120,
+            "confidence": null
+          },
+          {
+            "text": "when",
+            "start_ms": 18120,
+            "end_ms": 18860,
+            "confidence": null
+          },
+          {
+            "text": "large",
+            "start_ms": 18860,
+            "end_ms": 19340,
+            "confidence": null
+          },
+          {
+            "text": "sailing",
+            "start_ms": 19340,
+            "end_ms": 19740,
+            "confidence": null
+          },
+          {
+            "text": "boats",
+            "start_ms": 19740,
+            "end_ms": 20040,
+            "confidence": null
+          },
+          {
+            "text": "traveled",
+            "start_ms": 20040,
+            "end_ms": 20760,
+            "confidence": null
+          },
+          {
+            "text": "between",
+            "start_ms": 20760,
+            "end_ms": 21860,
+            "confidence": null
+          },
+          {
+            "text": "ports",
+            "start_ms": 21660,
+            "end_ms": 22580,
+            "confidence": null
+          },
+          {
+            "text": "carrying",
+            "start_ms": 22580,
+            "end_ms": 23160,
+            "confidence": null
+          },
+          {
+            "text": "specious",
+            "start_ms": 23160,
+            "end_ms": 24120,
+            "confidence": null
+          },
+          {
+            "text": "performs",
+            "start_ms": 24120,
+            "end_ms": 25380,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 25380,
+            "end_ms": 25760,
+            "confidence": null
+          },
+          {
+            "text": "objects",
+            "start_ms": 25760,
+            "end_ms": 26300,
+            "confidence": null
+          },
+          {
+            "text": "made",
+            "start_ms": 26300,
+            "end_ms": 26680,
+            "confidence": null
+          },
+          {
+            "text": "by",
+            "start_ms": 26680,
+            "end_ms": 26960,
+            "confidence": null
+          },
+          {
+            "text": "hand.",
+            "start_ms": 26960,
+            "end_ms": 27680,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 14000,
+            "end_ms": 14280
+          },
+          {
+            "start_ms": 21120,
+            "end_ms": 21480
+          },
+          {
+            "start_ms": 24160,
+            "end_ms": 24780
+          }
+        ],
+        "speech_onset_ms": 800,
+        "speech_offset_ms": 27320,
+        "duration_ms": 27740,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -52,6 +394,348 @@
       "browser_asr": {
         "text": "Have you ever pictured a world with a light just think how much we rely on mermaid light sources in our lives without an engineers we wouldn't be able to leave the way we do no street lights no TV no computer display no house lights and engineers design and build all these things",
         "practice_log_id": "408"
+      },
+      "groq_whisper": {
+        "text": " Have you ever pictured a world without light? Just think how much we rely on man-made light sources in our lives. Without engineers, we wouldn't be able to live the way we do. No street lights, no TV, no computer displays, no house lights. Engineers design and build all these things.",
+        "words": [
+          {
+            "text": "Have",
+            "start_ms": 1200,
+            "end_ms": 1360,
+            "confidence": null
+          },
+          {
+            "text": "you",
+            "start_ms": 1360,
+            "end_ms": 1560,
+            "confidence": null
+          },
+          {
+            "text": "ever",
+            "start_ms": 1560,
+            "end_ms": 1880,
+            "confidence": null
+          },
+          {
+            "text": "pictured",
+            "start_ms": 1880,
+            "end_ms": 2420,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 2420,
+            "end_ms": 2640,
+            "confidence": null
+          },
+          {
+            "text": "world",
+            "start_ms": 2640,
+            "end_ms": 2960,
+            "confidence": null
+          },
+          {
+            "text": "without",
+            "start_ms": 2960,
+            "end_ms": 3360,
+            "confidence": null
+          },
+          {
+            "text": "light?",
+            "start_ms": 3360,
+            "end_ms": 3940,
+            "confidence": null
+          },
+          {
+            "text": "Just",
+            "start_ms": 4160,
+            "end_ms": 4480,
+            "confidence": null
+          },
+          {
+            "text": "think",
+            "start_ms": 4480,
+            "end_ms": 4700,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "start_ms": 4700,
+            "end_ms": 4960,
+            "confidence": null
+          },
+          {
+            "text": "much",
+            "start_ms": 4960,
+            "end_ms": 5440,
+            "confidence": null
+          },
+          {
+            "text": "we",
+            "start_ms": 5440,
+            "end_ms": 5640,
+            "confidence": null
+          },
+          {
+            "text": "rely",
+            "start_ms": 5640,
+            "end_ms": 6100,
+            "confidence": null
+          },
+          {
+            "text": "on",
+            "start_ms": 6100,
+            "end_ms": 6380,
+            "confidence": null
+          },
+          {
+            "text": "man-made",
+            "start_ms": 6380,
+            "end_ms": 6880,
+            "confidence": null
+          },
+          {
+            "text": "light",
+            "start_ms": 6880,
+            "end_ms": 7340,
+            "confidence": null
+          },
+          {
+            "text": "sources",
+            "start_ms": 7340,
+            "end_ms": 7820,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 7820,
+            "end_ms": 8040,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 8040,
+            "end_ms": 8320,
+            "confidence": null
+          },
+          {
+            "text": "lives.",
+            "start_ms": 8320,
+            "end_ms": 8820,
+            "confidence": null
+          },
+          {
+            "text": "Without",
+            "start_ms": 9100,
+            "end_ms": 9480,
+            "confidence": null
+          },
+          {
+            "text": "engineers,",
+            "start_ms": 9480,
+            "end_ms": 11820,
+            "confidence": null
+          },
+          {
+            "text": "we",
+            "start_ms": 11820,
+            "end_ms": 12660,
+            "confidence": null
+          },
+          {
+            "text": "wouldn't",
+            "start_ms": 12660,
+            "end_ms": 13140,
+            "confidence": null
+          },
+          {
+            "text": "be",
+            "start_ms": 13140,
+            "end_ms": 13440,
+            "confidence": null
+          },
+          {
+            "text": "able",
+            "start_ms": 13440,
+            "end_ms": 13800,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 13800,
+            "end_ms": 14060,
+            "confidence": null
+          },
+          {
+            "text": "live",
+            "start_ms": 14060,
+            "end_ms": 14380,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 14380,
+            "end_ms": 14560,
+            "confidence": null
+          },
+          {
+            "text": "way",
+            "start_ms": 14560,
+            "end_ms": 14840,
+            "confidence": null
+          },
+          {
+            "text": "we",
+            "start_ms": 14840,
+            "end_ms": 15000,
+            "confidence": null
+          },
+          {
+            "text": "do.",
+            "start_ms": 15000,
+            "end_ms": 15480,
+            "confidence": null
+          },
+          {
+            "text": "No",
+            "start_ms": 15760,
+            "end_ms": 16000,
+            "confidence": null
+          },
+          {
+            "text": "street",
+            "start_ms": 16000,
+            "end_ms": 16460,
+            "confidence": null
+          },
+          {
+            "text": "lights,",
+            "start_ms": 16460,
+            "end_ms": 16960,
+            "confidence": null
+          },
+          {
+            "text": "no",
+            "start_ms": 16960,
+            "end_ms": 17140,
+            "confidence": null
+          },
+          {
+            "text": "TV,",
+            "start_ms": 17140,
+            "end_ms": 17680,
+            "confidence": null
+          },
+          {
+            "text": "no",
+            "start_ms": 17680,
+            "end_ms": 17840,
+            "confidence": null
+          },
+          {
+            "text": "computer",
+            "start_ms": 17840,
+            "end_ms": 18340,
+            "confidence": null
+          },
+          {
+            "text": "displays,",
+            "start_ms": 18340,
+            "end_ms": 19160,
+            "confidence": null
+          },
+          {
+            "text": "no",
+            "start_ms": 19160,
+            "end_ms": 19320,
+            "confidence": null
+          },
+          {
+            "text": "house",
+            "start_ms": 19320,
+            "end_ms": 19800,
+            "confidence": null
+          },
+          {
+            "text": "lights.",
+            "start_ms": 19800,
+            "end_ms": 20460,
+            "confidence": null
+          },
+          {
+            "text": "Engineers",
+            "start_ms": 20600,
+            "end_ms": 22460,
+            "confidence": null
+          },
+          {
+            "text": "design",
+            "start_ms": 22460,
+            "end_ms": 23460,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 23460,
+            "end_ms": 23840,
+            "confidence": null
+          },
+          {
+            "text": "build",
+            "start_ms": 23840,
+            "end_ms": 24400,
+            "confidence": null
+          },
+          {
+            "text": "all",
+            "start_ms": 24400,
+            "end_ms": 24840,
+            "confidence": null
+          },
+          {
+            "text": "these",
+            "start_ms": 24840,
+            "end_ms": 25060,
+            "confidence": null
+          },
+          {
+            "text": "things.",
+            "start_ms": 25060,
+            "end_ms": 25580,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 3880,
+            "end_ms": 4220
+          },
+          {
+            "start_ms": 8760,
+            "end_ms": 9140
+          },
+          {
+            "start_ms": 11860,
+            "end_ms": 12280
+          },
+          {
+            "start_ms": 15440,
+            "end_ms": 15800
+          },
+          {
+            "start_ms": 20300,
+            "end_ms": 20600
+          },
+          {
+            "start_ms": 22560,
+            "end_ms": 23000
+          }
+        ],
+        "speech_onset_ms": 1180,
+        "speech_offset_ms": 25520,
+        "duration_ms": 26013,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -86,6 +770,348 @@
       "browser_asr": {
         "text": "Thus a country my processes a size ball rural population but have an economic system in which the interest of the Walters were mentally related to their incomes not to their occupation or location and in such a country the political systems will be unlikely to include an important regions Party",
         "practice_log_id": "409"
+      },
+      "groq_whisper": {
+        "text": " Thus, a country might possess a sizable rural population but have an economic system in which the interests of the voters were predominantly related to their incomes, not to their occupation or location, and in such a country the political system would be unlikely to include an important our region's party.",
+        "words": [
+          {
+            "text": "Thus,",
+            "start_ms": 980,
+            "end_ms": 1540,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 1540,
+            "end_ms": 1640,
+            "confidence": null
+          },
+          {
+            "text": "country",
+            "start_ms": 1640,
+            "end_ms": 2120,
+            "confidence": null
+          },
+          {
+            "text": "might",
+            "start_ms": 2120,
+            "end_ms": 2520,
+            "confidence": null
+          },
+          {
+            "text": "possess",
+            "start_ms": 2520,
+            "end_ms": 3260,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 3260,
+            "end_ms": 3800,
+            "confidence": null
+          },
+          {
+            "text": "sizable",
+            "start_ms": 3800,
+            "end_ms": 4500,
+            "confidence": null
+          },
+          {
+            "text": "rural",
+            "start_ms": 4500,
+            "end_ms": 5260,
+            "confidence": null
+          },
+          {
+            "text": "population",
+            "start_ms": 5260,
+            "end_ms": 6440,
+            "confidence": null
+          },
+          {
+            "text": "but",
+            "start_ms": 6440,
+            "end_ms": 7200,
+            "confidence": null
+          },
+          {
+            "text": "have",
+            "start_ms": 7200,
+            "end_ms": 7760,
+            "confidence": null
+          },
+          {
+            "text": "an",
+            "start_ms": 7760,
+            "end_ms": 8360,
+            "confidence": null
+          },
+          {
+            "text": "economic",
+            "start_ms": 8360,
+            "end_ms": 9000,
+            "confidence": null
+          },
+          {
+            "text": "system",
+            "start_ms": 9000,
+            "end_ms": 9500,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 9500,
+            "end_ms": 9740,
+            "confidence": null
+          },
+          {
+            "text": "which",
+            "start_ms": 9240,
+            "end_ms": 10080,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 10080,
+            "end_ms": 10340,
+            "confidence": null
+          },
+          {
+            "text": "interests",
+            "start_ms": 10340,
+            "end_ms": 10840,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 10840,
+            "end_ms": 11160,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 11160,
+            "end_ms": 11580,
+            "confidence": null
+          },
+          {
+            "text": "voters",
+            "start_ms": 11580,
+            "end_ms": 12140,
+            "confidence": null
+          },
+          {
+            "text": "were",
+            "start_ms": 12140,
+            "end_ms": 13480,
+            "confidence": null
+          },
+          {
+            "text": "predominantly",
+            "start_ms": 13480,
+            "end_ms": 14720,
+            "confidence": null
+          },
+          {
+            "text": "related",
+            "start_ms": 14720,
+            "end_ms": 15880,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 15880,
+            "end_ms": 16440,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "start_ms": 16440,
+            "end_ms": 16960,
+            "confidence": null
+          },
+          {
+            "text": "incomes,",
+            "start_ms": 16960,
+            "end_ms": 17720,
+            "confidence": null
+          },
+          {
+            "text": "not",
+            "start_ms": 17720,
+            "end_ms": 17940,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 17940,
+            "end_ms": 18180,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "start_ms": 18180,
+            "end_ms": 18480,
+            "confidence": null
+          },
+          {
+            "text": "occupation",
+            "start_ms": 18480,
+            "end_ms": 19220,
+            "confidence": null
+          },
+          {
+            "text": "or",
+            "start_ms": 19080,
+            "end_ms": 19520,
+            "confidence": null
+          },
+          {
+            "text": "location,",
+            "start_ms": 19520,
+            "end_ms": 20320,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 20320,
+            "end_ms": 20680,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 20680,
+            "end_ms": 20780,
+            "confidence": null
+          },
+          {
+            "text": "such",
+            "start_ms": 20780,
+            "end_ms": 21120,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 21120,
+            "end_ms": 21220,
+            "confidence": null
+          },
+          {
+            "text": "country",
+            "start_ms": 21220,
+            "end_ms": 21720,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 21720,
+            "end_ms": 22080,
+            "confidence": null
+          },
+          {
+            "text": "political",
+            "start_ms": 22080,
+            "end_ms": 22720,
+            "confidence": null
+          },
+          {
+            "text": "system",
+            "start_ms": 22720,
+            "end_ms": 23440,
+            "confidence": null
+          },
+          {
+            "text": "would",
+            "start_ms": 23440,
+            "end_ms": 23940,
+            "confidence": null
+          },
+          {
+            "text": "be",
+            "start_ms": 23940,
+            "end_ms": 24180,
+            "confidence": null
+          },
+          {
+            "text": "unlikely",
+            "start_ms": 24180,
+            "end_ms": 24800,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 24800,
+            "end_ms": 25320,
+            "confidence": null
+          },
+          {
+            "text": "include",
+            "start_ms": 25320,
+            "end_ms": 25860,
+            "confidence": null
+          },
+          {
+            "text": "an",
+            "start_ms": 25860,
+            "end_ms": 26040,
+            "confidence": null
+          },
+          {
+            "text": "important",
+            "start_ms": 26040,
+            "end_ms": 26680,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 27000,
+            "end_ms": 27380,
+            "confidence": null
+          },
+          {
+            "text": "region's",
+            "start_ms": 27380,
+            "end_ms": 28160,
+            "confidence": null
+          },
+          {
+            "text": "party.",
+            "start_ms": 28160,
+            "end_ms": 29520,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 660,
+            "end_ms": 960
+          },
+          {
+            "start_ms": 5480,
+            "end_ms": 5760
+          },
+          {
+            "start_ms": 6720,
+            "end_ms": 7040
+          },
+          {
+            "start_ms": 12200,
+            "end_ms": 12600
+          },
+          {
+            "start_ms": 13200,
+            "end_ms": 13640
+          },
+          {
+            "start_ms": 20220,
+            "end_ms": 20480
+          }
+        ],
+        "speech_onset_ms": 640,
+        "speech_offset_ms": 29520,
+        "duration_ms": 29790,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -120,6 +1146,326 @@
       "browser_asr": {
         "text": "The training of an actor is an intensive process which requires curiosity courage and commitment you will learn how to prepare for a rehearsal how to rehearse and how to use independent and proactive processes setting informed you to do the best work possible for both stage and screen",
         "practice_log_id": "410"
+      },
+      "groq_whisper": {
+        "text": " The training of an actor is an intensive process which requires curiosity, courage, and commitment. You will learn how to prepare for rehearsal, how to rehearse, and how to use independent and proactive processes that inform you to do the best work possible for both stage and screen.",
+        "words": [
+          {
+            "text": "The",
+            "start_ms": 1640,
+            "end_ms": 1740,
+            "confidence": null
+          },
+          {
+            "text": "training",
+            "start_ms": 1740,
+            "end_ms": 2240,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 2240,
+            "end_ms": 2600,
+            "confidence": null
+          },
+          {
+            "text": "an",
+            "start_ms": 2600,
+            "end_ms": 2920,
+            "confidence": null
+          },
+          {
+            "text": "actor",
+            "start_ms": 2920,
+            "end_ms": 3420,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "start_ms": 3420,
+            "end_ms": 3740,
+            "confidence": null
+          },
+          {
+            "text": "an",
+            "start_ms": 3740,
+            "end_ms": 4040,
+            "confidence": null
+          },
+          {
+            "text": "intensive",
+            "start_ms": 4040,
+            "end_ms": 4860,
+            "confidence": null
+          },
+          {
+            "text": "process",
+            "start_ms": 4860,
+            "end_ms": 5460,
+            "confidence": null
+          },
+          {
+            "text": "which",
+            "start_ms": 5460,
+            "end_ms": 5740,
+            "confidence": null
+          },
+          {
+            "text": "requires",
+            "start_ms": 5740,
+            "end_ms": 6420,
+            "confidence": null
+          },
+          {
+            "text": "curiosity,",
+            "start_ms": 6420,
+            "end_ms": 7880,
+            "confidence": null
+          },
+          {
+            "text": "courage,",
+            "start_ms": 7880,
+            "end_ms": 8320,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 8320,
+            "end_ms": 8500,
+            "confidence": null
+          },
+          {
+            "text": "commitment.",
+            "start_ms": 8500,
+            "end_ms": 9880,
+            "confidence": null
+          },
+          {
+            "text": "You",
+            "start_ms": 9500,
+            "end_ms": 10420,
+            "confidence": null
+          },
+          {
+            "text": "will",
+            "start_ms": 10420,
+            "end_ms": 10700,
+            "confidence": null
+          },
+          {
+            "text": "learn",
+            "start_ms": 10700,
+            "end_ms": 11000,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "start_ms": 11000,
+            "end_ms": 11340,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 11340,
+            "end_ms": 11640,
+            "confidence": null
+          },
+          {
+            "text": "prepare",
+            "start_ms": 11640,
+            "end_ms": 12160,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "start_ms": 12160,
+            "end_ms": 12580,
+            "confidence": null
+          },
+          {
+            "text": "rehearsal,",
+            "start_ms": 12580,
+            "end_ms": 13660,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "start_ms": 13660,
+            "end_ms": 13820,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 13820,
+            "end_ms": 14100,
+            "confidence": null
+          },
+          {
+            "text": "rehearse,",
+            "start_ms": 14100,
+            "end_ms": 14900,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 14900,
+            "end_ms": 14980,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "start_ms": 14980,
+            "end_ms": 15260,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 15260,
+            "end_ms": 15440,
+            "confidence": null
+          },
+          {
+            "text": "use",
+            "start_ms": 15440,
+            "end_ms": 15800,
+            "confidence": null
+          },
+          {
+            "text": "independent",
+            "start_ms": 15800,
+            "end_ms": 16520,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 16520,
+            "end_ms": 17180,
+            "confidence": null
+          },
+          {
+            "text": "proactive",
+            "start_ms": 17180,
+            "end_ms": 18480,
+            "confidence": null
+          },
+          {
+            "text": "processes",
+            "start_ms": 18480,
+            "end_ms": 19360,
+            "confidence": null
+          },
+          {
+            "text": "that",
+            "start_ms": 18940,
+            "end_ms": 19800,
+            "confidence": null
+          },
+          {
+            "text": "inform",
+            "start_ms": 19800,
+            "end_ms": 20380,
+            "confidence": null
+          },
+          {
+            "text": "you",
+            "start_ms": 20380,
+            "end_ms": 20660,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 20660,
+            "end_ms": 20960,
+            "confidence": null
+          },
+          {
+            "text": "do",
+            "start_ms": 20960,
+            "end_ms": 21120,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 21120,
+            "end_ms": 21260,
+            "confidence": null
+          },
+          {
+            "text": "best",
+            "start_ms": 21260,
+            "end_ms": 21700,
+            "confidence": null
+          },
+          {
+            "text": "work",
+            "start_ms": 21700,
+            "end_ms": 22000,
+            "confidence": null
+          },
+          {
+            "text": "possible",
+            "start_ms": 22000,
+            "end_ms": 22600,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "start_ms": 22600,
+            "end_ms": 23200,
+            "confidence": null
+          },
+          {
+            "text": "both",
+            "start_ms": 23200,
+            "end_ms": 23700,
+            "confidence": null
+          },
+          {
+            "text": "stage",
+            "start_ms": 23700,
+            "end_ms": 24240,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 24240,
+            "end_ms": 24680,
+            "confidence": null
+          },
+          {
+            "text": "screen.",
+            "start_ms": 24680,
+            "end_ms": 25120,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 1020,
+            "end_ms": 1660
+          },
+          {
+            "start_ms": 8660,
+            "end_ms": 9020
+          },
+          {
+            "start_ms": 9820,
+            "end_ms": 10260
+          },
+          {
+            "start_ms": 17420,
+            "end_ms": 17740
+          },
+          {
+            "start_ms": 22620,
+            "end_ms": 23000
+          }
+        ],
+        "speech_onset_ms": 660,
+        "speech_offset_ms": 25060,
+        "duration_ms": 25438,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -154,6 +1500,376 @@
       "browser_asr": {
         "text": "Globalization has affected what we eat in ways we are only beginning to understand more than full production is no longer related to our biological needs but as in react to conflict with them the relationship between diet and our fertility our cancer heart disease and mental illness is become clear yet much of our food is nutritionally bank fruit",
         "practice_log_id": "411"
+      },
+      "groq_whisper": {
+        "text": " Globalization has affected what we eat in ways we are only beginning to understand. Modern food production is no longer related to our biological needs but is in direct conflict with them. The relationship between diet and our fertility, our cancer, heart disease, and mental illness has become clear. Yet much of our food is nutritionally bankrupt.",
+        "words": [
+          {
+            "text": "Globalization",
+            "start_ms": 900,
+            "end_ms": 1840,
+            "confidence": null
+          },
+          {
+            "text": "has",
+            "start_ms": 1840,
+            "end_ms": 2400,
+            "confidence": null
+          },
+          {
+            "text": "affected",
+            "start_ms": 2400,
+            "end_ms": 2960,
+            "confidence": null
+          },
+          {
+            "text": "what",
+            "start_ms": 2960,
+            "end_ms": 3460,
+            "confidence": null
+          },
+          {
+            "text": "we",
+            "start_ms": 3460,
+            "end_ms": 3680,
+            "confidence": null
+          },
+          {
+            "text": "eat",
+            "start_ms": 3680,
+            "end_ms": 4060,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 4060,
+            "end_ms": 4480,
+            "confidence": null
+          },
+          {
+            "text": "ways",
+            "start_ms": 4480,
+            "end_ms": 4760,
+            "confidence": null
+          },
+          {
+            "text": "we",
+            "start_ms": 4760,
+            "end_ms": 5340,
+            "confidence": null
+          },
+          {
+            "text": "are",
+            "start_ms": 5340,
+            "end_ms": 5740,
+            "confidence": null
+          },
+          {
+            "text": "only",
+            "start_ms": 5740,
+            "end_ms": 6180,
+            "confidence": null
+          },
+          {
+            "text": "beginning",
+            "start_ms": 6180,
+            "end_ms": 6740,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 6740,
+            "end_ms": 7080,
+            "confidence": null
+          },
+          {
+            "text": "understand.",
+            "start_ms": 7080,
+            "end_ms": 8300,
+            "confidence": null
+          },
+          {
+            "text": "Modern",
+            "start_ms": 8400,
+            "end_ms": 8740,
+            "confidence": null
+          },
+          {
+            "text": "food",
+            "start_ms": 8740,
+            "end_ms": 9040,
+            "confidence": null
+          },
+          {
+            "text": "production",
+            "start_ms": 9040,
+            "end_ms": 9820,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "start_ms": 9820,
+            "end_ms": 10240,
+            "confidence": null
+          },
+          {
+            "text": "no",
+            "start_ms": 10240,
+            "end_ms": 10460,
+            "confidence": null
+          },
+          {
+            "text": "longer",
+            "start_ms": 10460,
+            "end_ms": 10840,
+            "confidence": null
+          },
+          {
+            "text": "related",
+            "start_ms": 10840,
+            "end_ms": 11280,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 11280,
+            "end_ms": 11840,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 11840,
+            "end_ms": 12320,
+            "confidence": null
+          },
+          {
+            "text": "biological",
+            "start_ms": 12320,
+            "end_ms": 12960,
+            "confidence": null
+          },
+          {
+            "text": "needs",
+            "start_ms": 12960,
+            "end_ms": 14380,
+            "confidence": null
+          },
+          {
+            "text": "but",
+            "start_ms": 14380,
+            "end_ms": 14860,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "start_ms": 14860,
+            "end_ms": 15540,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 15540,
+            "end_ms": 15820,
+            "confidence": null
+          },
+          {
+            "text": "direct",
+            "start_ms": 15820,
+            "end_ms": 16540,
+            "confidence": null
+          },
+          {
+            "text": "conflict",
+            "start_ms": 16540,
+            "end_ms": 17220,
+            "confidence": null
+          },
+          {
+            "text": "with",
+            "start_ms": 17220,
+            "end_ms": 17620,
+            "confidence": null
+          },
+          {
+            "text": "them.",
+            "start_ms": 17620,
+            "end_ms": 18300,
+            "confidence": null
+          },
+          {
+            "text": "The",
+            "start_ms": 18280,
+            "end_ms": 18360,
+            "confidence": null
+          },
+          {
+            "text": "relationship",
+            "start_ms": 18360,
+            "end_ms": 18960,
+            "confidence": null
+          },
+          {
+            "text": "between",
+            "start_ms": 18960,
+            "end_ms": 19400,
+            "confidence": null
+          },
+          {
+            "text": "diet",
+            "start_ms": 19400,
+            "end_ms": 19840,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 19840,
+            "end_ms": 20080,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 20080,
+            "end_ms": 20440,
+            "confidence": null
+          },
+          {
+            "text": "fertility,",
+            "start_ms": 20440,
+            "end_ms": 21600,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 21600,
+            "end_ms": 21900,
+            "confidence": null
+          },
+          {
+            "text": "cancer,",
+            "start_ms": 21900,
+            "end_ms": 23100,
+            "confidence": null
+          },
+          {
+            "text": "heart",
+            "start_ms": 23100,
+            "end_ms": 23400,
+            "confidence": null
+          },
+          {
+            "text": "disease,",
+            "start_ms": 23400,
+            "end_ms": 24100,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 24100,
+            "end_ms": 24260,
+            "confidence": null
+          },
+          {
+            "text": "mental",
+            "start_ms": 24260,
+            "end_ms": 24620,
+            "confidence": null
+          },
+          {
+            "text": "illness",
+            "start_ms": 24620,
+            "end_ms": 25060,
+            "confidence": null
+          },
+          {
+            "text": "has",
+            "start_ms": 25060,
+            "end_ms": 25300,
+            "confidence": null
+          },
+          {
+            "text": "become",
+            "start_ms": 25300,
+            "end_ms": 25660,
+            "confidence": null
+          },
+          {
+            "text": "clear.",
+            "start_ms": 25660,
+            "end_ms": 26820,
+            "confidence": null
+          },
+          {
+            "text": "Yet",
+            "start_ms": 26860,
+            "end_ms": 27040,
+            "confidence": null
+          },
+          {
+            "text": "much",
+            "start_ms": 27040,
+            "end_ms": 27480,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 27480,
+            "end_ms": 27820,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "start_ms": 27820,
+            "end_ms": 28120,
+            "confidence": null
+          },
+          {
+            "text": "food",
+            "start_ms": 28120,
+            "end_ms": 28420,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "start_ms": 28420,
+            "end_ms": 28740,
+            "confidence": null
+          },
+          {
+            "text": "nutritionally",
+            "start_ms": 28740,
+            "end_ms": 29900,
+            "confidence": null
+          },
+          {
+            "text": "bankrupt.",
+            "start_ms": 29900,
+            "end_ms": 31100,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 7900,
+            "end_ms": 8340
+          },
+          {
+            "start_ms": 17880,
+            "end_ms": 18280
+          },
+          {
+            "start_ms": 22560,
+            "end_ms": 23180
+          },
+          {
+            "start_ms": 30060,
+            "end_ms": 30360
+          }
+        ],
+        "speech_onset_ms": 900,
+        "speech_offset_ms": 31060,
+        "duration_ms": 31453,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -188,6 +1904,338 @@
       "browser_asr": {
         "text": "Companies will want to be known not just for the financial results they generate but equally for the imprint the leaf on society as a whole first ensuring that their products contribute positively positively second operating way that approaches and that natural impact to the natural environment and searching their people",
         "practice_log_id": "412"
+      },
+      "groq_whisper": {
+        "text": " Companies will want to be known not just for the financial results they generate but equally for the imprint they leave on society as a whole. First, ensuring that their products contribute positively. Second, operating in a way that approaches a natural impact to the natural environment and so cherishing their people.",
+        "words": [
+          {
+            "text": "Companies",
+            "start_ms": 700,
+            "end_ms": 1260,
+            "confidence": null
+          },
+          {
+            "text": "will",
+            "start_ms": 1260,
+            "end_ms": 1600,
+            "confidence": null
+          },
+          {
+            "text": "want",
+            "start_ms": 1600,
+            "end_ms": 1940,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 1940,
+            "end_ms": 2200,
+            "confidence": null
+          },
+          {
+            "text": "be",
+            "start_ms": 2200,
+            "end_ms": 2460,
+            "confidence": null
+          },
+          {
+            "text": "known",
+            "start_ms": 2460,
+            "end_ms": 2640,
+            "confidence": null
+          },
+          {
+            "text": "not",
+            "start_ms": 2640,
+            "end_ms": 2860,
+            "confidence": null
+          },
+          {
+            "text": "just",
+            "start_ms": 2860,
+            "end_ms": 3260,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "start_ms": 3260,
+            "end_ms": 3520,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 3520,
+            "end_ms": 3760,
+            "confidence": null
+          },
+          {
+            "text": "financial",
+            "start_ms": 3760,
+            "end_ms": 4380,
+            "confidence": null
+          },
+          {
+            "text": "results",
+            "start_ms": 4380,
+            "end_ms": 5040,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "start_ms": 5040,
+            "end_ms": 5400,
+            "confidence": null
+          },
+          {
+            "text": "generate",
+            "start_ms": 5400,
+            "end_ms": 6120,
+            "confidence": null
+          },
+          {
+            "text": "but",
+            "start_ms": 6120,
+            "end_ms": 6380,
+            "confidence": null
+          },
+          {
+            "text": "equally",
+            "start_ms": 6380,
+            "end_ms": 6980,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "start_ms": 6980,
+            "end_ms": 7380,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 7380,
+            "end_ms": 7720,
+            "confidence": null
+          },
+          {
+            "text": "imprint",
+            "start_ms": 7720,
+            "end_ms": 8220,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "start_ms": 8220,
+            "end_ms": 8620,
+            "confidence": null
+          },
+          {
+            "text": "leave",
+            "start_ms": 8620,
+            "end_ms": 8880,
+            "confidence": null
+          },
+          {
+            "text": "on",
+            "start_ms": 8880,
+            "end_ms": 9200,
+            "confidence": null
+          },
+          {
+            "text": "society",
+            "start_ms": 9200,
+            "end_ms": 9940,
+            "confidence": null
+          },
+          {
+            "text": "as",
+            "start_ms": 9940,
+            "end_ms": 10360,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 10360,
+            "end_ms": 10600,
+            "confidence": null
+          },
+          {
+            "text": "whole.",
+            "start_ms": 10600,
+            "end_ms": 10840,
+            "confidence": null
+          },
+          {
+            "text": "First,",
+            "start_ms": 11280,
+            "end_ms": 11760,
+            "confidence": null
+          },
+          {
+            "text": "ensuring",
+            "start_ms": 11760,
+            "end_ms": 12300,
+            "confidence": null
+          },
+          {
+            "text": "that",
+            "start_ms": 12300,
+            "end_ms": 12780,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "start_ms": 12780,
+            "end_ms": 13140,
+            "confidence": null
+          },
+          {
+            "text": "products",
+            "start_ms": 13140,
+            "end_ms": 13680,
+            "confidence": null
+          },
+          {
+            "text": "contribute",
+            "start_ms": 13680,
+            "end_ms": 14420,
+            "confidence": null
+          },
+          {
+            "text": "positively.",
+            "start_ms": 14420,
+            "end_ms": 15900,
+            "confidence": null
+          },
+          {
+            "text": "Second,",
+            "start_ms": 15500,
+            "end_ms": 16540,
+            "confidence": null
+          },
+          {
+            "text": "operating",
+            "start_ms": 16540,
+            "end_ms": 17260,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "start_ms": 17260,
+            "end_ms": 17600,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 17600,
+            "end_ms": 17800,
+            "confidence": null
+          },
+          {
+            "text": "way",
+            "start_ms": 17800,
+            "end_ms": 18020,
+            "confidence": null
+          },
+          {
+            "text": "that",
+            "start_ms": 18020,
+            "end_ms": 18280,
+            "confidence": null
+          },
+          {
+            "text": "approaches",
+            "start_ms": 18280,
+            "end_ms": 18920,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 18920,
+            "end_ms": 19580,
+            "confidence": null
+          },
+          {
+            "text": "natural",
+            "start_ms": 19580,
+            "end_ms": 20260,
+            "confidence": null
+          },
+          {
+            "text": "impact",
+            "start_ms": 20260,
+            "end_ms": 20820,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 20820,
+            "end_ms": 21060,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 21060,
+            "end_ms": 21220,
+            "confidence": null
+          },
+          {
+            "text": "natural",
+            "start_ms": 21220,
+            "end_ms": 21700,
+            "confidence": null
+          },
+          {
+            "text": "environment",
+            "start_ms": 21700,
+            "end_ms": 22320,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "start_ms": 22320,
+            "end_ms": 22860,
+            "confidence": null
+          },
+          {
+            "text": "so",
+            "start_ms": 22860,
+            "end_ms": 23020,
+            "confidence": null
+          },
+          {
+            "text": "cherishing",
+            "start_ms": 23020,
+            "end_ms": 23600,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "start_ms": 23600,
+            "end_ms": 23920,
+            "confidence": null
+          },
+          {
+            "text": "people.",
+            "start_ms": 23920,
+            "end_ms": 24480,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 10800,
+            "end_ms": 11360
+          },
+          {
+            "start_ms": 18920,
+            "end_ms": 19320
+          }
+        ],
+        "speech_onset_ms": 720,
+        "speech_offset_ms": 24360,
+        "duration_ms": 24713,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {
@@ -222,6 +2270,426 @@
       "browser_asr": {
         "text": "For the first two or three years after the second world war a new title would often sell out within a few months of publication however unless public demand for the book was yearly high they were rarely able to print it with papers dog strictly recent they could not afford to use a precious paper or tie up there limited capital with a reprint",
         "practice_log_id": "413"
+      },
+      "groq_whisper": {
+        "text": " For the first two or three years after the Second World War, a new title would often sell out within a few months of publication. However, unless public demand for the book was unusually high, they were rarely able to reprint it. With paper stocks strictly rescinded, they could not afford to use precious paper or tie up their limited capital with a reprint.",
+        "words": [
+          {
+            "text": "For",
+            "start_ms": 1300,
+            "end_ms": 1440,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 1440,
+            "end_ms": 1620,
+            "confidence": null
+          },
+          {
+            "text": "first",
+            "start_ms": 1620,
+            "end_ms": 2020,
+            "confidence": null
+          },
+          {
+            "text": "two",
+            "start_ms": 2020,
+            "end_ms": 2340,
+            "confidence": null
+          },
+          {
+            "text": "or",
+            "start_ms": 2340,
+            "end_ms": 2520,
+            "confidence": null
+          },
+          {
+            "text": "three",
+            "start_ms": 2520,
+            "end_ms": 2800,
+            "confidence": null
+          },
+          {
+            "text": "years",
+            "start_ms": 2800,
+            "end_ms": 3200,
+            "confidence": null
+          },
+          {
+            "text": "after",
+            "start_ms": 3200,
+            "end_ms": 3520,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 3520,
+            "end_ms": 3720,
+            "confidence": null
+          },
+          {
+            "text": "Second",
+            "start_ms": 3720,
+            "end_ms": 4060,
+            "confidence": null
+          },
+          {
+            "text": "World",
+            "start_ms": 4060,
+            "end_ms": 4500,
+            "confidence": null
+          },
+          {
+            "text": "War,",
+            "start_ms": 4500,
+            "end_ms": 5600,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 5600,
+            "end_ms": 5740,
+            "confidence": null
+          },
+          {
+            "text": "new",
+            "start_ms": 5740,
+            "end_ms": 6100,
+            "confidence": null
+          },
+          {
+            "text": "title",
+            "start_ms": 6100,
+            "end_ms": 6660,
+            "confidence": null
+          },
+          {
+            "text": "would",
+            "start_ms": 6660,
+            "end_ms": 6960,
+            "confidence": null
+          },
+          {
+            "text": "often",
+            "start_ms": 6960,
+            "end_ms": 7320,
+            "confidence": null
+          },
+          {
+            "text": "sell",
+            "start_ms": 7320,
+            "end_ms": 7760,
+            "confidence": null
+          },
+          {
+            "text": "out",
+            "start_ms": 7760,
+            "end_ms": 8100,
+            "confidence": null
+          },
+          {
+            "text": "within",
+            "start_ms": 8100,
+            "end_ms": 8480,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 8480,
+            "end_ms": 8760,
+            "confidence": null
+          },
+          {
+            "text": "few",
+            "start_ms": 8760,
+            "end_ms": 9080,
+            "confidence": null
+          },
+          {
+            "text": "months",
+            "start_ms": 9080,
+            "end_ms": 9540,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "start_ms": 9540,
+            "end_ms": 10020,
+            "confidence": null
+          },
+          {
+            "text": "publication.",
+            "start_ms": 10020,
+            "end_ms": 11460,
+            "confidence": null
+          },
+          {
+            "text": "However,",
+            "start_ms": 11440,
+            "end_ms": 12060,
+            "confidence": null
+          },
+          {
+            "text": "unless",
+            "start_ms": 12060,
+            "end_ms": 12540,
+            "confidence": null
+          },
+          {
+            "text": "public",
+            "start_ms": 12540,
+            "end_ms": 13080,
+            "confidence": null
+          },
+          {
+            "text": "demand",
+            "start_ms": 13080,
+            "end_ms": 13840,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "start_ms": 13840,
+            "end_ms": 14180,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "start_ms": 14180,
+            "end_ms": 14540,
+            "confidence": null
+          },
+          {
+            "text": "book",
+            "start_ms": 14540,
+            "end_ms": 15180,
+            "confidence": null
+          },
+          {
+            "text": "was",
+            "start_ms": 15180,
+            "end_ms": 15680,
+            "confidence": null
+          },
+          {
+            "text": "unusually",
+            "start_ms": 15680,
+            "end_ms": 16280,
+            "confidence": null
+          },
+          {
+            "text": "high,",
+            "start_ms": 16280,
+            "end_ms": 17260,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "start_ms": 17260,
+            "end_ms": 17420,
+            "confidence": null
+          },
+          {
+            "text": "were",
+            "start_ms": 17420,
+            "end_ms": 17640,
+            "confidence": null
+          },
+          {
+            "text": "rarely",
+            "start_ms": 17640,
+            "end_ms": 18220,
+            "confidence": null
+          },
+          {
+            "text": "able",
+            "start_ms": 18220,
+            "end_ms": 18700,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 18700,
+            "end_ms": 19240,
+            "confidence": null
+          },
+          {
+            "text": "reprint",
+            "start_ms": 19240,
+            "end_ms": 19880,
+            "confidence": null
+          },
+          {
+            "text": "it.",
+            "start_ms": 19880,
+            "end_ms": 20280,
+            "confidence": null
+          },
+          {
+            "text": "With",
+            "start_ms": 20840,
+            "end_ms": 21060,
+            "confidence": null
+          },
+          {
+            "text": "paper",
+            "start_ms": 21060,
+            "end_ms": 21620,
+            "confidence": null
+          },
+          {
+            "text": "stocks",
+            "start_ms": 21620,
+            "end_ms": 22020,
+            "confidence": null
+          },
+          {
+            "text": "strictly",
+            "start_ms": 22020,
+            "end_ms": 22780,
+            "confidence": null
+          },
+          {
+            "text": "rescinded,",
+            "start_ms": 22780,
+            "end_ms": 24160,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "start_ms": 24160,
+            "end_ms": 24640,
+            "confidence": null
+          },
+          {
+            "text": "could",
+            "start_ms": 24640,
+            "end_ms": 24980,
+            "confidence": null
+          },
+          {
+            "text": "not",
+            "start_ms": 24980,
+            "end_ms": 25240,
+            "confidence": null
+          },
+          {
+            "text": "afford",
+            "start_ms": 25240,
+            "end_ms": 25680,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "start_ms": 25680,
+            "end_ms": 25980,
+            "confidence": null
+          },
+          {
+            "text": "use",
+            "start_ms": 25980,
+            "end_ms": 26380,
+            "confidence": null
+          },
+          {
+            "text": "precious",
+            "start_ms": 26380,
+            "end_ms": 27460,
+            "confidence": null
+          },
+          {
+            "text": "paper",
+            "start_ms": 27460,
+            "end_ms": 27980,
+            "confidence": null
+          },
+          {
+            "text": "or",
+            "start_ms": 27980,
+            "end_ms": 28400,
+            "confidence": null
+          },
+          {
+            "text": "tie",
+            "start_ms": 28400,
+            "end_ms": 28820,
+            "confidence": null
+          },
+          {
+            "text": "up",
+            "start_ms": 28820,
+            "end_ms": 29100,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "start_ms": 29100,
+            "end_ms": 29380,
+            "confidence": null
+          },
+          {
+            "text": "limited",
+            "start_ms": 29380,
+            "end_ms": 30240,
+            "confidence": null
+          },
+          {
+            "text": "capital",
+            "start_ms": 30240,
+            "end_ms": 30880,
+            "confidence": null
+          },
+          {
+            "text": "with",
+            "start_ms": 30880,
+            "end_ms": 31160,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "start_ms": 31160,
+            "end_ms": 31300,
+            "confidence": null
+          },
+          {
+            "text": "reprint.",
+            "start_ms": 31300,
+            "end_ms": 31660,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "start_ms": 960,
+            "end_ms": 1340
+          },
+          {
+            "start_ms": 5040,
+            "end_ms": 5580
+          },
+          {
+            "start_ms": 14540,
+            "end_ms": 14920
+          },
+          {
+            "start_ms": 16800,
+            "end_ms": 17220
+          },
+          {
+            "start_ms": 20360,
+            "end_ms": 20820
+          },
+          {
+            "start_ms": 24060,
+            "end_ms": 24500
+          }
+        ],
+        "speech_onset_ms": 560,
+        "speech_offset_ms": 31840,
+        "duration_ms": 32135,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
       }
     },
     "old_scores": {

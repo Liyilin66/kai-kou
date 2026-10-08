@@ -2,6 +2,8 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { alignWords, normalizeTokens } from '../backend/speech/align.js';
+import { extractFeatures } from '../backend/speech/features.js';
+import { buildEvidence } from '../backend/speech/evidence.js';
 
 const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const ERROR_TYPES = ['omission', 'substitution', 'insertion', 'repetition', 'hesitation', 'long_pause'];
@@ -50,6 +52,19 @@ export function validateManifest(manifest, hypothesis = 'browser_asr') {
     for (const [name, entry] of Object.entries(sample.hypotheses)) {
       requireField(object(entry), ctx, `hypotheses.${name}`, 'expected object');
       requireField(typeof entry.text === 'string', ctx, `hypotheses.${name}.text`, 'expected string (empty is allowed)');
+      if (entry.words !== undefined) {
+        requireField(Array.isArray(entry.words), ctx, `hypotheses.${name}.words`, 'expected array');
+        entry.words.forEach((word, i) => {
+          requireField(object(word) && typeof word.text === 'string', ctx, `hypotheses.${name}.words[${i}]`, 'expected word object with text');
+          for (const field of ['start_ms', 'end_ms']) requireField(Number.isFinite(word[field]) && word[field] >= 0, ctx, `hypotheses.${name}.words[${i}].${field}`, 'expected nonnegative milliseconds');
+          requireField(word.end_ms >= word.start_ms, ctx, `hypotheses.${name}.words[${i}]`, 'end must follow start');
+        });
+      }
+      if (entry.silences !== undefined) {
+        requireField(Array.isArray(entry.silences) && Array.isArray(entry.words), ctx, `hypotheses.${name}.silences`, 'requires silence array and words');
+        entry.silences.forEach((pause, i) => requireField(object(pause) && Number.isFinite(pause.start_ms) && Number.isFinite(pause.end_ms) && pause.start_ms >= 0 && pause.end_ms > pause.start_ms, ctx, `hypotheses.${name}.silences[${i}]`, 'expected valid time interval'));
+        for (const field of ['speech_onset_ms', 'speech_offset_ms']) requireField(entry[field] === null || (Number.isFinite(entry[field]) && entry[field] >= 0), ctx, `hypotheses.${name}.${field}`, 'expected nonnegative milliseconds or null');
+      }
     }
     requireField(object(sample.hypotheses[hypothesis]), ctx, `hypotheses.${hypothesis}`, 'requested hypothesis is missing');
     requireField(object(sample.old_scores), ctx, 'old_scores', 'expected object');
@@ -125,8 +140,13 @@ export function evaluateManifest(manifest, { split = 'all', hypothesis = 'browse
   const metrics = ERROR_TYPES.map((type) => ({ type, tp: 0, fp: 0, fn: 0 }));
   const noErrorSamples = { count: 0, false_positives: 0 };
   const results = samples.map((sample) => {
-    const alignment = alignWords(sample.reference_text, sample.hypotheses[hypothesis].text);
+    const entry = sample.hypotheses[hypothesis];
+    const alignment = alignWords(sample.reference_text, entry.words ?? entry.text);
     const predictions = predictedErrors(alignment);
+    const features = Array.isArray(entry.words) && Array.isArray(entry.silences)
+      ? extractFeatures({ alignment, ...entry, referenceText: sample.reference_text }) : null;
+    if (features) predictions.push(...features.pauses.filter(pause => ['hesitation', 'long_pause'].includes(pause.type)).map(pause => ({ type: pause.type, ref_index: pause.ref_index, start_ms: pause.start_ms, end_ms: pause.end_ms })));
+    const evidence = buildEvidence({ alignment, pauses: features?.pauses || [], metrics: features?.metrics || {} });
     const labeled = sample.labels.status === 'labeled';
     const labels = labeled ? sample.labels.errors.map((label) => ({ ...label, ref_index: labelIndex(sample.reference_text, label) })) : [];
     if (labeled) {
@@ -138,7 +158,7 @@ export function evaluateManifest(manifest, { split = 'all', hypothesis = 'browse
         noErrorSamples.false_positives += predictions.length;
       }
     }
-    return { id: sample.id, split: sample.split, label_status: sample.labels.status, included_in_metrics: labeled, predictions, labels, alignment };
+    return { id: sample.id, split: sample.split, label_status: sample.labels.status, included_in_metrics: labeled, predictions, labels, alignment, features, evidence };
   });
   return {
     generated_at: new Date().toISOString(), split, hypothesis,
@@ -146,28 +166,39 @@ export function evaluateManifest(manifest, { split = 'all', hypothesis = 'browse
     unlabeled_count: results.filter((sample) => !sample.included_in_metrics).length,
     notes: ['Precision is TP/(TP+FP); recall is TP/(TP+FN). Undefined denominators are null.',
       'This baseline evaluates transcript alignment, not acoustic pronunciation accuracy.',
-      'No hesitation or long_pause predictions are inferred from transcript text.'],
+      'Pause predictions require timed words plus audio-energy silences; transcript-only results cannot detect pauses.'],
     metrics: metrics.map((row) => ({ ...row, precision: row.tp + row.fp ? row.tp / (row.tp + row.fp) : null,
       recall: row.tp + row.fn ? row.tp / (row.tp + row.fn) : null })),
     no_error_samples: noErrorSamples, samples: results,
   };
 }
 
+export function compareManifest(manifest, { split = 'all', hypotheses = ['browser_asr', 'groq_whisper'] } = {}) {
+  if (!Array.isArray(hypotheses) || hypotheses.length < 2 || new Set(hypotheses).size !== hypotheses.length || hypotheses.some(name => !name.trim())) throw new Error('--compare: specify at least two distinct hypothesis names');
+  const reports = hypotheses.map(hypothesis => evaluateManifest(manifest, { split, hypothesis }));
+  return { generated_at: reports[0].generated_at, comparison: true, split, hypotheses, sample_count: reports[0].sample_count, labeled_count: reports[0].labeled_count, reports };
+}
+
 const percent = (value) => value === null ? 'N/A' : `${(value * 100).toFixed(1)}%`;
 export function markdownReport(report) {
+  if (report.comparison) {
+    const header = report.hypotheses.flatMap(name => [`${name} Precision`, `${name} Recall`]);
+    const rows = ERROR_TYPES.map(type => `| ${type} | ${report.reports.flatMap(r => { const row = r.metrics.find(m => m.type === type); return [percent(row.precision), percent(row.recall)]; }).join(' | ')} |`);
+    return `# Speech provider comparison\n\nSame samples: ${report.sample_count}; labeled: ${report.labeled_count}. Unlabeled samples do not contribute to metrics.\n\n| Error type | ${header.join(' | ')} |\n| --- | ${header.map(() => '---:').join(' | ')} |\n${rows.join('\n')}\n\n` + report.reports.map(markdownReport).join('\n');
+  }
   return `# Speech alignment baseline\n\nGenerated: ${report.generated_at}\n\nHypothesis: ${report.hypothesis}; split: ${report.split}\n\nSamples: ${report.sample_count}; labeled: ${report.labeled_count}; unlabeled (excluded): ${report.unlabeled_count}\n\n| Error type | TP | FP | FN | Precision | Recall |\n| --- | ---: | ---: | ---: | ---: | ---: |\n`
     + report.metrics.map((row) => `| ${row.type} | ${row.tp} | ${row.fp} | ${row.fn} | ${percent(row.precision)} | ${percent(row.recall)} |`).join('\n')
     + `\n\nNo-error labeled samples: ${report.no_error_samples.count}; false positives: ${report.no_error_samples.false_positives}.\n\n`
     + report.notes.map((note) => `- ${note}`).join('\n')
     + '\n\n## Per-sample alignment\n\n'
-    + report.samples.map((sample) => `### ${sample.id}\n\nStatus: ${sample.label_status}; included in metrics: ${sample.included_in_metrics}\n\n\`\`\`json\n${JSON.stringify({ predictions: sample.predictions, alignment: sample.alignment }, null, 2)}\n\`\`\``).join('\n\n') + '\n';
+    + report.samples.map((sample) => `### ${sample.id}\n\nStatus: ${sample.label_status}; included in metrics: ${sample.included_in_metrics}\n\n\`\`\`json\n${JSON.stringify({ predictions: sample.predictions, alignment: sample.alignment, features: sample.features, evidence: sample.evidence }, null, 2)}\n\`\`\``).join('\n\n') + '\n';
 }
 
 export async function main(args = process.argv.slice(2)) {
   const options = { split: 'all', hypothesis: 'browser_asr' };
   for (let index = 0; index < args.length; index++) {
     const flag = args[index];
-    if (!['--split', '--hypothesis'].includes(flag)) throw new Error(`Unknown option: ${flag}`);
+    if (!['--split', '--hypothesis', '--compare'].includes(flag)) throw new Error(`Unknown option: ${flag}`);
     const value = args[++index];
     if (!value || value.startsWith('--')) throw new Error(`${flag}: missing value`);
     options[flag.slice(2)] = value;
@@ -177,15 +208,21 @@ export async function main(args = process.argv.slice(2)) {
   try { manifest = JSON.parse(await readFile(manifestPath, 'utf8')); } catch (error) {
     throw new Error(`${manifestPath}: ${error.message}`);
   }
-  const report = evaluateManifest(manifest, options);
+  if (options.compare && args.includes('--hypothesis')) throw new Error('--compare cannot be combined with --hypothesis');
+  const report = options.compare ? compareManifest(manifest, { split: options.split, hypotheses: options.compare.split(',').map(name => name.trim()) }) : evaluateManifest(manifest, options);
   const outputDir = resolve(APP_ROOT, 'output/eval');
   await mkdir(outputDir, { recursive: true });
   const stem = resolve(outputDir, `speech-${report.generated_at.replace(/[:.]/g, '-')}`);
   await writeFile(`${stem}.json`, `${JSON.stringify(report, null, 2)}\n`);
   await writeFile(`${stem}.md`, markdownReport(report));
+  if (report.comparison) {
+    console.table(ERROR_TYPES.map(type => ({ type, ...Object.fromEntries(report.reports.flatMap(r => { const row = r.metrics.find(m => m.type === type); return [[`${r.hypothesis}_TP`, row.tp], [`${r.hypothesis}_FP`, row.fp], [`${r.hypothesis}_FN`, row.fn], [`${r.hypothesis}_precision`, percent(row.precision)], [`${r.hypothesis}_recall`, percent(row.recall)]]; })) })));
+    console.log(`Same samples: ${report.sample_count}; labeled: ${report.labeled_count}; unlabeled excluded: ${report.sample_count - report.labeled_count}`);
+  } else {
   console.table(report.metrics.map((row) => ({ ...row, precision: percent(row.precision), recall: percent(row.recall) })));
   console.log(`Samples: ${report.sample_count}; labeled: ${report.labeled_count}; unlabeled excluded: ${report.unlabeled_count}`);
   console.log(`No-error samples: ${report.no_error_samples.count}; false positives: ${report.no_error_samples.false_positives}`);
+  }
   console.log(`Reports: ${stem}.json\n${stem}.md`);
   return report;
 }

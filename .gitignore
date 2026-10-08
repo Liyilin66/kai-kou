@@ -27,3 +27,6 @@
 
 # Private speech evaluation recordings
 /kai-kou/eval/speech/audio/
+
+# Local speech provider response cache
+/kai-kou/eval/speech/cache/

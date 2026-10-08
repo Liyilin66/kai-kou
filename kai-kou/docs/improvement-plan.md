@@ -204,6 +204,15 @@ POST /api/ra/analyze  { question_id, audio_path, attempt_id }
 
 注意：如果使用通用识别模型（例如 Whisper 一类），这类模型倾向于省略填充词和重复，不利于检测犹豫和重复，评测时要专门看这一项。
 
+**决定（2026-10-08）：选方案 A。** 识别使用 Groq 托管的 `whisper-large-v3`（已有密钥）。发音维度本版本**不评估**：界面不显示发音分，反馈中对替换词只说"可能读错或识别不清，请回听"，不下发音结论。若以后改为 B，适配层可替换。
+
+实测（`ra-real-0001`，Groq `whisper-large-v3`）：
+
+- 直接接受 webm 录音，0.7 秒返回，含词级时间戳；前端无需转 WAV。
+- 浏览器识别错出的 known、water first、sea trade、became、when、sailing boats，Whisper 全部识别正确；spices、perfumes 两种识别都没识别对。说明 RA_024 的大部分"错误"来自浏览器识别，而不是用户朗读——待用户回听确认。
+- `whisper-large-v3-turbo` 准确度明显较差（sea trees become），不使用。
+- **Whisper 的词级时间戳会把停顿吸收进相邻词**（例如 `of` 0.64 秒、`between` 1.1 秒），全篇没有一处词间空隙超过 0.3 秒。因此**停顿必须由音频能量检测得到**，不能从词时间戳推算。
+
 ### 3.7 前端改动
 
 | 文件 | 改动 |

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateManifest, validateManifest, matchErrors, labelIndex, predictedErrors, main } from '../../scripts/eval-speech.js';
+import { evaluateManifest, validateManifest, matchErrors, labelIndex, predictedErrors, compareManifest, markdownReport, main } from '../../scripts/eval-speech.js';
 
 function sample(overrides = {}) {
   return { id: 'sample-1', task_type: 'RA', question_id: 'RA_024', reference_text: 'the boat sailed',
@@ -72,4 +72,26 @@ test('CLI rejects unsupported options without reading or writing data', async ()
 test('homophone substitutions do not become predicted user errors',()=>{
  const ops=[{type:'substitution',tag:'homophone',ref_index:0,hyp_index:0,ref_text:'sea',hyp_text:'see'}];
  assert.deepEqual(predictedErrors({ops}),[]);
+});
+
+test('timed hypothesis uses PCM silences while browser baseline cannot detect pauses',()=>{
+ const entry={text:'the boat sailed',words:[{text:'the',start_ms:0,end_ms:400},{text:'boat',start_ms:400,end_ms:1400},{text:'sailed',start_ms:1400,end_ms:1800}],silences:[{start_ms:400,end_ms:1200}],speech_onset_ms:0,speech_offset_ms:1800,duration_ms:1800};
+ const labels={status:'labeled',errors:[{type:'hesitation',word:'boat',occurrence:1}],labeled_by:'test',notes:''};
+ const data=sample({hypotheses:{browser_asr:{text:entry.text},groq_whisper:entry},labels});
+ const acoustic=evaluateManifest([data],{hypothesis:'groq_whisper'});const browser=evaluateManifest([data]);
+ assert.equal(acoustic.metrics.find(m=>m.type==='hesitation').tp,1);assert.equal(browser.metrics.find(m=>m.type==='hesitation').fn,1);
+ assert.equal(acoustic.samples[0].features.pauses[0].type,'hesitation');
+});
+test('comparison uses the same labeled samples and excludes unlabeled samples',()=>{
+ const data=sample({hypotheses:{browser_asr:{text:'the sailed'},groq_whisper:{text:'the boat sailed'}}});
+ const unlabeled={...data,id:'unlabeled',labels:{status:'unlabeled',errors:[],labeled_by:'',notes:''}};
+ const report=compareManifest([data,unlabeled]);assert.equal(report.sample_count,2);assert.equal(report.labeled_count,1);
+ assert.deepEqual(report.reports.map(r=>r.samples.map(s=>s.id)),[['sample-1','unlabeled'],['sample-1','unlabeled']]);
+ assert.equal(report.reports[0].metrics.find(m=>m.type==='omission').tp,1);assert.equal(report.reports[1].metrics.find(m=>m.type==='omission').fn,1);
+ assert.match(markdownReport(report),/browser_asr Precision.*groq_whisper Precision/);
+ assert.throws(()=>compareManifest([sample()]),/groq_whisper.*missing/);
+});
+test('invalid provider timestamps identify sample and field',()=>{
+ const entry={text:'boat',words:[{text:'boat',start_ms:500,end_ms:100}],silences:[],speech_onset_ms:0,speech_offset_ms:1000};
+ assert.throws(()=>validateManifest([sample({hypotheses:{groq_whisper:entry}})],'groq_whisper'),/words\[0\].*end/);
 });
