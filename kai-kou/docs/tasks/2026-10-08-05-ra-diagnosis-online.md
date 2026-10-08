@@ -166,3 +166,12 @@ alter table public.speech_analyses
 ```
 
 不必重新创建表或重跑RPC。若尚未执行过旧版本，则执行更新后的`db/speech-analyses.sql`全文。已有记录丢失的浏览器文本无法通过这个迁移自动恢复；导入工具不会拿Whisper文字冒充浏览器结果。迁移后用预览录制新记录再验收。
+
+## 数据库执行与预览阻塞修复（2026-10-08）
+
+- [x] 按用户指示在当前 Supabase 项目执行整份 `db/speech-analyses.sql`，界面返回 Success。
+- [x] 只读检查表及 `client_transcript` 字段可访问；RLS 已开启，用户 SELECT=true，INSERT=false，执行 complete_ra_analysis=false；service_role 执行权限=true。
+- [x] 修复既有 main.js 将全部 Vercel 预览跳回生产的行为：仅诊断开关为 on 时保留当前域名；off 时保持原有跳转。新增回归测试，233 项测试及两种开关构建通过。
+- [ ] 手机在修复后的预览地址完成一次新 RA，并核验两份转写、影子评分及对应 practice_logs。
+
+此预览修复仍只提交到 lyl，未合并 main；实际数据库权限已验证，不以此替代完整录音链路验收。
