@@ -370,9 +370,25 @@
     },
     "labels": {
       "status": "unlabeled",
-      "errors": [],
-      "labeled_by": "",
-      "notes": ""
+      "errors": [
+        {
+          "type": "substitution",
+          "word": "trade",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "became",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "perfumes",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "user-listening",
+      "notes": "sailing (40): 听不清"
     }
   },
   {
@@ -746,9 +762,25 @@
     },
     "labels": {
       "status": "unlabeled",
-      "errors": [],
-      "labeled_by": "",
-      "notes": ""
+      "errors": [
+        {
+          "type": "insertion",
+          "word": "engineers",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "live",
+          "occurrence": 1
+        },
+        {
+          "type": "insertion",
+          "word": "Engineers",
+          "occurrence": 2
+        }
+      ],
+      "labeled_by": "user-listening",
+      "notes": "without (6): 听不清"
     }
   },
   {
@@ -1122,9 +1154,30 @@
     },
     "labels": {
       "status": "unlabeled",
-      "errors": [],
-      "labeled_by": "",
-      "notes": ""
+      "errors": [
+        {
+          "type": "substitution",
+          "word": "might",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "possess",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "occupations",
+          "occurrence": 1
+        },
+        {
+          "type": "insertion",
+          "word": "agrarian",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "user-listening",
+      "notes": "predominantly (22): 听不清"
     }
   },
   {
@@ -1475,9 +1528,9 @@
       "pronunciation": 75
     },
     "labels": {
-      "status": "unlabeled",
+      "status": "labeled",
       "errors": [],
-      "labeled_by": "",
+      "labeled_by": "user-listening",
       "notes": ""
     }
   },
@@ -1879,9 +1932,15 @@
       "pronunciation": 55
     },
     "labels": {
-      "status": "unlabeled",
-      "errors": [],
-      "labeled_by": "",
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "substitution",
+          "word": "becoming",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "user-listening",
       "notes": ""
     }
   },
@@ -2246,9 +2305,20 @@
     },
     "labels": {
       "status": "unlabeled",
-      "errors": [],
-      "labeled_by": "",
-      "notes": ""
+      "errors": [
+        {
+          "type": "substitution",
+          "word": "they",
+          "occurrence": 2
+        },
+        {
+          "type": "substitution",
+          "word": "neutral",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "user-listening",
+      "notes": "net (41): 听不清；third (49): 听不清"
     }
   },
   {
@@ -2701,8 +2771,8 @@
     "labels": {
       "status": "unlabeled",
       "errors": [],
-      "labeled_by": "",
-      "notes": ""
+      "labeled_by": "user-listening",
+      "notes": "reprint (40): 听不清；rationed (46): 听不清；up (53): 听不清"
     }
   }
 ]
