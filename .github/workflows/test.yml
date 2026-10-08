@@ -1,0 +1,29 @@
+name: Test and build
+on:
+  push:
+    branches: [lyl, main]
+  pull_request:
+    branches: [lyl, main]
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ra-diagnosis: ['on', 'off']
+    defaults:
+      run:
+        working-directory: kai-kou
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: kai-kou/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          VITE_RA_DIAGNOSIS: ${{ matrix.ra-diagnosis }}
