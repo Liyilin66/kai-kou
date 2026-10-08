@@ -7,7 +7,7 @@ import { transcribeWithGroqWhisper } from './providers/groq-whisper.js';
 export const AUDIO_BUCKET = 'practice-audio';
 export function validateAnalysisInput(body, userId) {
   if (typeof body.attempt_id !== 'string' || !/^[A-Za-z0-9_-]{8,100}$/.test(body.attempt_id)) return [400, 'invalid_attempt_id'];
-  if (body.action === 'legacy_score') return null;
+  if (['legacy_score', 'feedback'].includes(body.action)) return null;
   if (body.client_transcript !== undefined && (typeof body.client_transcript !== 'string' || body.client_transcript.length > 5000)) return [400, 'invalid_client_transcript'];
   if (typeof body.audio_path !== 'string' || !body.audio_path.startsWith(`ra/${userId}/`) || body.audio_path.length > 500
     || body.audio_path.includes('..') || /[\\%?#\u0000-\u001f]/.test(body.audio_path)) return [403, 'invalid_audio_path'];

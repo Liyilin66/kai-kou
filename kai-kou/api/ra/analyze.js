@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { getAccessStatus } from '../../backend/auth/access-status.js';
 import { analysisResponse, diagnoseRecording, validateAnalysisInput } from '../../backend/speech/analyze-service.js';
 import scoreHandler from '../score.js';
+import { generateEvidenceFeedback } from '../../backend/speech/feedback.js';
 
-export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, legacyHandler = scoreHandler } = {}) {
+export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, legacyHandler = scoreHandler, feedbackGenerator = generateEvidenceFeedback } = {}) {
   return async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -27,6 +28,34 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
       const lookup = () => db.from('speech_analyses').select('*').eq('user_id', user.id).eq('attempt_id', body.attempt_id).maybeSingle();
       const existing = await lookup();
       if (existing.error) throw new Error('analysis_read_failed');
+      if (body.action === 'feedback') {
+        if (!existing.data) return res.status(404).json({ error: 'analysis_not_found' });
+        row = existing.data;
+        if (row.status !== 'done') return res.status(409).json({ error: 'analysis_not_ready' });
+        if (row.feedback_status) return res.status(row.feedback_status === 'processing' ? 202 : 200).json(feedbackResponse(row));
+        const claimed = await db.from('speech_analyses').update({ feedback_status: 'processing' })
+          .eq('id', row.id).eq('user_id', user.id).is('feedback_status', null).select('id').maybeSingle();
+        if (claimed.error) throw new Error('feedback_claim_failed');
+        if (!claimed.data) {
+          const concurrent = await lookup();
+          if (concurrent.error || !concurrent.data) throw new Error('feedback_read_failed');
+          return res.status(concurrent.data.feedback_status === 'processing' ? 202 : 200).json(feedbackResponse(concurrent.data));
+        }
+        let result;
+        try {
+          // Feedback only receives server-stored evidence; no client evidence or transcript.
+          result = await feedbackGenerator({ evidence: row.evidence, metrics: row.metrics, referenceText: row.reference_text });
+        } catch {
+          const failed = await db.from('speech_analyses').update({ feedback_status: 'failed' })
+            .eq('id', row.id).eq('user_id', user.id);
+          if (failed.error) throw new Error('feedback_failure_save_failed');
+          return res.status(200).json(feedbackResponse({ ...row, feedback_status: 'failed' }));
+        }
+        // Save advice and the matching history summary in one transaction.
+        const saved = await db.rpc('complete_ra_feedback', { p_id: row.id, p_user_id: user.id, p_feedback: result.feedback, p_meta: result.meta });
+        if (saved.error || !saved.data) throw new Error('feedback_save_failed');
+        return res.status(200).json(feedbackResponse(saved.data));
+      }
       if (body.action === 'legacy_score') {
         if (!existing.data) return res.status(404).json({ error: 'analysis_not_found' });
         row = existing.data;
@@ -80,6 +109,9 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
       return res.status(500).json({ error: 'analysis_service_failed', ...(row ? { analysis_id: row.id } : {}) });
     }
   };
+}
+function feedbackResponse(row) {
+  return { analysis_id: row.id, feedback_status: row.feedback_status, feedback: row.feedback ?? null, feedback_meta: row.feedback_meta ?? null };
 }
 function getDb() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;

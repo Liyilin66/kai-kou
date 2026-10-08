@@ -1,3 +1,4 @@
+import { buildTemplateFeedback } from "../../backend/speech/feedback-rules.js";
 import { normalizeTokens } from "../../backend/speech/align.js";
 
 // One submission object belongs to one finalized recording. Retrying analysis
@@ -81,5 +82,50 @@ export function diagnosisWordItems(alignment, evidence = [], referenceText = '')
     const annotations = evidence.filter(item => item.ref_span && word.indices.some(i => i >= item.ref_span[0] && i < item.ref_span[1]));
     return { text: word.text, index, uncertain, annotations,
       type: uncertain ? 'uncertain' : annotations[0]?.type || 'match' };
+  });
+}
+
+// Feedback follows analysis independently; failure still leaves useful evidence
+// guidance on screen, and leaving the result page cancels all pending work.
+export async function loadRADiagnosisFeedback({ client, result, fetchImpl = fetch, signal, wait = feedbackDelay }) {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener('abort', abort, { once: true });
+  if (signal?.aborted) abort();
+  const timer = setTimeout(abort, 30000);
+  try {
+    controller.signal.throwIfAborted();
+    if (!result.attempt_id) throw new Error('missing saved attempt');
+    const { data, error } = await client.auth.getSession();
+    if (error || !data?.session?.access_token) throw new Error('session unavailable');
+    for (let attempt = 0; attempt < 5; attempt++) {
+      controller.signal.throwIfAborted();
+      const response = await fetchImpl('/api/ra/analyze', {
+        method: 'POST', signal: controller.signal,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+        body: JSON.stringify({ action: 'feedback', attempt_id: result.attempt_id })
+      });
+      const body = await response.json();
+      if (response.ok && body.feedback_status === 'done' && typeof body.feedback?.summary === 'string' && Array.isArray(body.feedback?.suggestions)) return body;
+      if (response.status !== 202 || body.feedback_status !== 'processing') throw new Error('feedback unavailable');
+      if (attempt < 4) await wait(1500, controller.signal);
+    }
+  } catch (error) {
+    if (signal?.aborted) throw error;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', abort);
+  }
+  return { feedback: buildTemplateFeedback({ evidence: result.evidence || [], metrics: result.metrics || {}, referenceText: result.question?.content || '' }),
+    feedback_meta: { provider: 'template', model: 'template', prompt_version: 'ra-feedback-0.1' }, feedback_status: 'done' };
+}
+
+function feedbackDelay(ms, signal) {
+  return new Promise((resolve, reject) => {
+    const finish = () => { clearTimeout(timer); signal.removeEventListener('abort', abort); resolve(); };
+    const abort = () => { clearTimeout(timer); signal.removeEventListener('abort', abort); reject(signal.reason); };
+    const timer = setTimeout(finish, ms);
+    signal.addEventListener('abort', abort, { once: true });
+    if (signal.aborted) abort();
   });
 }

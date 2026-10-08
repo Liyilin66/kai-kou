@@ -6,7 +6,7 @@ import { diagnoseRecording, validateAnalysisInput } from '../../backend/speech/a
 const body = { attempt_id: 'attempt-0001', question_id: 'RA_001', audio_path: 'ra/user/recording.webm',
   duration_ms: 2000, speech_onset_ms: 100, speech_offset_ms: 1900, silences: [], client_transcript: 'The browser reference.' };
 function fixture(options = {}) {
-  const state = { row: null, calls: 0, transcribeCalls: 0, logs: [], legacyCalls: 0, ...options };
+  const state = { row: null, calls: 0, transcribeCalls: 0, logs: [], legacyCalls: 0, feedbackCalls: 0, ...options };
   const db = {
     auth: { getUser: async () => ({ data: { user: state.noAuth ? null : { id: 'user' } } }) },
     storage: { from: () => ({ download: async () => ({ data: new Blob(['audio'], { type: 'audio/webm' }) }) }) },
@@ -22,12 +22,23 @@ function fixture(options = {}) {
             state.row = { id: 'analysis-id', ...this.value }; return { data: { ...state.row } };
           }
           if (!state.row || Object.entries(this.filters).some(([k, v]) => (state.row[k] ?? null) !== v)) return { data: null };
-          if (this.op === 'update') Object.assign(state.row, this.value);
+          if (this.op === 'update') {
+            if (state.feedbackClaimFails && this.value.feedback_status === 'processing') return { error: { message: 'claim failed' } };
+            Object.assign(state.row, this.value);
+          }
           return { data: { ...state.row } };
         } };
       return q;
     },
     async rpc(name, args) {
+      if (name === 'complete_ra_feedback') {
+        if (state.feedbackSaveFails) return { error: { message: 'save failed' } };
+        assert.equal(args.p_user_id, state.row.user_id);
+        Object.assign(state.row, { feedback: args.p_feedback, feedback_meta: args.p_meta, feedback_status: 'done' });
+        const log = state.logs.find(log => log.analysis_id === state.row.id);
+        if (log) log.feedback = args.p_feedback.summary;
+        return { data: { ...state.row } };
+      }
       assert.equal(name, 'complete_ra_analysis');
       if (state.rpcFails) return { error: { message: 'failure' } };
       Object.assign(state.row, args.p_result);
@@ -51,7 +62,15 @@ function fixture(options = {}) {
     if (state.legacyFails) res.status(502).json({ error: 'provider_failed' });
     else res.json({ overall: 70, provider_used: 'groq' });
   };
-  const handler = createAnalyzeHandler({ createDb: () => db, diagnose, legacyHandler });
+  const feedbackGenerator = async input => {
+    state.feedbackCalls++;
+    assert.deepEqual(Object.keys(input).sort(), ['evidence', 'metrics', 'referenceText']);
+    assert.equal(input.referenceText, state.row.reference_text);
+    if (state.feedbackGate) await state.feedbackGate;
+    if (state.feedbackFails) throw new Error('feedback failed');
+    return { feedback: { summary: '保持稳定朗读。', suggestions: [] }, meta: { provider: 'groq', model: 'test', prompt_version: 'ra-feedback-0.1', attempts: 1, latency_ms: 1 } };
+  };
+  const handler = createAnalyzeHandler({ createDb: () => db, diagnose, legacyHandler, feedbackGenerator });
   async function invoke(payload = body, overrides = {}) {
     const result = { code: 200, headers: {} };
     const res = { setHeader(k, v) { result.headers[k] = v; }, status(n) { result.code = n; return this; }, json(data) { result.data = data; return this; }, end() { return this; } };
@@ -189,4 +208,63 @@ test('diagnosis retains original Whisper words for eval replay without normalizi
   });
   assert.deepEqual(result.aligned.words, words);
   assert.equal(result.transcript, "Don't stop.");
+});
+
+const feedbackRequest = { action: 'feedback', attempt_id: body.attempt_id };
+test('feedback persists summary and metadata and reuses done result without generation', async () => {
+  const { invoke, state } = fixture(); await invoke();
+  const first = await invoke(feedbackRequest);
+  assert.equal(first.code, 200); assert.equal(first.data.feedback_status, 'done');
+  assert.equal(first.data.feedback.summary, '保持稳定朗读。');
+  assert.equal(state.logs[0].feedback, first.data.feedback.summary);
+  assert.equal(first.data.feedback_meta.prompt_version, 'ra-feedback-0.1');
+  assert.deepEqual((await invoke(feedbackRequest)).data, first.data);
+  assert.equal(state.feedbackCalls, 1); assert.equal(state.logs.length, 1);
+});
+test('parallel feedback requests claim once and return processing to concurrent callers', async () => {
+  let release;
+  const feedbackGate = new Promise(resolve => { release = resolve; });
+  const { invoke, state } = fixture({ feedbackGate }); await invoke();
+  const first = invoke(feedbackRequest);
+  for (let tick = 0; !state.feedbackCalls && tick < 100; tick++) await new Promise(resolve => setImmediate(resolve));
+  assert.equal(state.feedbackCalls, 1);
+  const second = await invoke(feedbackRequest);
+  assert.equal(second.code, 202); assert.equal(second.data.feedback_status, 'processing');
+  assert.equal(state.feedbackCalls, 1);
+  release(); assert.equal((await first).data.feedback_status, 'done');
+});
+test('feedback is scoped to the authenticated owner and existing attempt', async () => {
+  const { invoke, state } = fixture();
+  assert.equal((await invoke(feedbackRequest)).code, 404);
+  await invoke(); state.row.user_id = 'other';
+  assert.equal((await invoke(feedbackRequest)).code, 404); assert.equal(state.feedbackCalls, 0);
+});
+test('feedback requires complete usable diagnosis and AI access', async () => {
+  const { invoke, state } = fixture(); await invoke();
+  for (const status of ['processing', 'failed', 'unusable_audio']) {
+    state.row.status = status;
+    assert.equal((await invoke(feedbackRequest)).code, 409);
+  }
+  state.row.status = 'done'; state.expired = true;
+  assert.equal((await invoke(feedbackRequest)).code, 403);
+  assert.equal((await invoke(feedbackRequest, { headers: {} })).code, 401);
+  assert.equal(state.feedbackCalls, 0);
+});
+test('feedback claim failure never invokes generator', async () => {
+  const { invoke, state } = fixture({ feedbackClaimFails: true }); await invoke();
+  assert.equal((await invoke(feedbackRequest)).code, 500); assert.equal(state.feedbackCalls, 0);
+});
+test('feedback persistence failure keeps claim so retries do not generate or partially save', async () => {
+  const { invoke, state } = fixture({ feedbackSaveFails: true }); await invoke();
+  assert.equal((await invoke(feedbackRequest)).code, 500);
+  assert.equal(state.row.feedback_status, 'processing'); assert.equal(state.row.feedback, undefined);
+  assert.equal(state.logs[0].feedback, undefined);
+  assert.equal((await invoke(feedbackRequest)).code, 202); assert.equal(state.feedbackCalls, 1);
+});
+test('unexpected feedback failure is terminal without damaging diagnosis or charging again', async () => {
+  const { invoke, state } = fixture({ feedbackFails: true }); await invoke();
+  assert.equal((await invoke(feedbackRequest)).data.feedback_status, 'failed');
+  assert.equal(state.row.status, 'done'); assert.equal(state.logs.length, 1);
+  assert.equal((await invoke(feedbackRequest)).data.feedback_status, 'failed');
+  assert.equal(state.feedbackCalls, 1);
 });
