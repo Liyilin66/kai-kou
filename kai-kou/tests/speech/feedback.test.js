@@ -96,6 +96,8 @@ for (const status of [401, 402, 403, 404, 500]) {
     const result = await generateEvidenceFeedback({ evidence });
     assert.equal(result.meta.provider, 'openai'); assert.equal(result.meta.model, 'fallback-model');
     assert.equal(result.meta.template, false); assert.equal(urls.length, 2);
+    assert.equal(result.meta.validation_failures[0].provider_error,'groq');
+    assert.equal(result.meta.validation_failures[0].error_type,`groq_http_${status}`);
   });
 }
 for (const status of [400, 413, 422]) {
@@ -176,4 +178,25 @@ test('prompt gives an unrelated structure example without prescribing template w
   assert.doesNotMatch(prompt,/issue 使用下方示例|summary 使用|每条建议仅引用一个|可直接复用/);
   return good();
  }});
+});
+test('length counts English words once while retaining Chinese limits', () => {
+ const p=good();p.suggestions[0].action='先回听，再把 '+Array(30).fill('climate').join(' ')+' 连读。';
+ assert.equal(validateFeedback(p,evidence).ok,true);
+ p.suggestions[0].action='先回听，再把 '+Array(61).fill('climate').join(' ')+' 连读。';
+ assert.equal(validateFeedback(p,evidence).ok,false);
+});
+test('provider exception is visible without persisting message or secrets', async () => {
+ const r=await generateEvidenceFeedback({evidence,callModel:async()=>{throw new Error('SECRET');}});
+ assert.equal(r.meta.validation_failures[0].provider_error,'unknown');
+ assert.equal(r.meta.validation_failures[0].error_type,'unknown_unexpected_error');
+ assert.equal(JSON.stringify(r.meta).includes('SECRET'),false);
+});
+
+test('published feedback never calls a model after failing the three-round gate',async t=>{
+ const {generatePublishedFeedback}=await import('../../backend/speech/feedback.js');
+ t.mock.method(globalThis,'fetch',()=>{throw new Error('online model must not be called');});
+ const r=await generatePublishedFeedback({evidence});
+ assert.deepEqual(r.feedback,buildTemplateFeedback({evidence}));
+ assert.equal(r.meta.attempts,0);assert.equal(r.meta.mode,'template_only');
+ assert.equal(validateFeedback(r.feedback,evidence).ok,true);
 });

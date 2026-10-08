@@ -44,18 +44,38 @@ export async function evaluateFeedbackSamples(manifest, generate = generateEvide
       'Template identical rate compares punctuation-stripped actions against templates for any cited evidence; fallback suggestions are included.',
       'Template fallback does not count as model validation success. This measures feedback constraints, not diagnostic or pronunciation accuracy.'], results };
 }
+export async function evaluateFeedbackRounds(manifest, generate = generateEvidenceFeedback) {
+  const rounds = [];
+  for (let i = 0; i < 3; i++) {
+    rounds.push(await evaluateFeedbackSamples(manifest, generate));
+    console.log(`Feedback round ${i + 1}/3 complete`);
+  }
+  const metrics = Object.fromEntries(['first_pass_rate', 'final_model_pass_rate', 'template_identical_rate'].map(key => {
+    const values = rounds.map(round => round[key]);
+    return [key, values.every(value => Number.isFinite(value))
+      ? { mean: values.reduce((sum, value) => sum + value, 0) / 3, min: Math.min(...values), max: Math.max(...values) }
+      : { mean: null, min: null, max: null }];
+  }));
+  const use_llm = metrics.final_model_pass_rate.mean !== null && metrics.final_model_pass_rate.mean >= 0.8
+    && metrics.template_identical_rate.mean !== null && metrics.template_identical_rate.mean <= 0.3
+    && rounds.every(round => round.results.every(result => result.validation.ok));
+  return { generated_at: new Date().toISOString(), metrics, use_llm, rounds };
+}
 const percent = value => value === null ? 'N/A' : `${(value * 100).toFixed(1)}%`;
 export async function main() {
   const { default: dotenv } = await import('dotenv');
   dotenv.config({ path: path.join(root, '.env.local'), quiet: true });
   const manifest = JSON.parse(await fs.readFile(path.join(root, 'eval/speech/manifest.json'), 'utf8'));
-  const report = await evaluateFeedbackSamples(manifest);
+  const report = await evaluateFeedbackRounds(manifest);
   const directory = path.join(root, 'output/eval');await fs.mkdir(directory, { recursive: true });
-  const stem = path.join(directory, `feedback-${report.generated_at.replace(/[:.]/g, '-')}`);
-  const markdown = `# Evidence feedback evaluation\n\nSamples: ${report.sample_count}; model-eligible: ${report.model_eligible_count}; no-evidence summaries: ${report.no_evidence_count}.\n\nFirst pass: ${percent(report.first_pass_rate)}; retry pass: ${percent(report.retry_pass_rate)}; final model pass: ${percent(report.final_model_pass_rate)}; template: ${percent(report.template_rate)}; template-identical actions: ${percent(report.template_identical_rate)} (${report.template_identical_count}/${report.suggestion_count}).\n\nGate: ${report.gate_passed ? 'PASS' : 'FAIL'}\n\n${report.notes.map(note => '- ' + note).join('\n')}\n\n` + report.results.map(result => `## ${result.id}\n\nProvider/model: ${result.meta.provider}/${result.meta.model}; attempts: ${result.meta.attempts}; template: ${result.meta.template}\n\n${result.feedback.summary}\n\n${result.feedback.suggestions.map(s => `- [${s.evidence_ids.join(', ')}] ${s.issue}：${s.action}`).join('\n')}\n`).join('\n');
+  const stem = path.join(directory, `feedback-three-rounds-${report.generated_at.replace(/[:.]/g, '-')}`);
+  const markdown = '# Three serial feedback rounds\n\n' + Object.entries(report.metrics).map(([key, value]) =>
+    `${key}: mean ${percent(value.mean)}; range ${percent(value.min)}–${percent(value.max)}`).join('\n')
+    + `\n\nDecision: ${report.use_llm ? 'LLM with template fallback' : 'template only'}\n\n`
+    + report.rounds.map((round, index) => `## Round ${index + 1}\n\nFirst: ${percent(round.first_pass_rate)}; final: ${percent(round.final_model_pass_rate)}; identical: ${percent(round.template_identical_rate)}.\n\n`
+      + round.results.map(result => `### ${result.id}\n\n${JSON.stringify(result.feedback, null, 2)}\n\nMetadata: ${JSON.stringify(result.meta)}\n`).join('\n')).join('\n');
   await fs.writeFile(stem + '.json', JSON.stringify(report, null, 2)+'\n');await fs.writeFile(stem + '.md', markdown);
-  console.log(JSON.stringify({ samples: report.sample_count, model_eligible: report.model_eligible_count, no_evidence: report.no_evidence_count, first_pass: report.first_pass_rate, retry_pass: report.retry_pass_rate, final_pass: report.final_model_pass_rate, template: report.template_rate, template_identical: report.template_identical_rate, gate_passed: report.gate_passed, reports: [stem+'.json',stem+'.md'] }, null, 2));
-  if (!report.gate_passed) process.exitCode = 1;
+  console.log(JSON.stringify({ metrics: report.metrics, use_llm: report.use_llm, reports: [stem+'.json',stem+'.md'] }, null, 2));
   return report;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch(error => {console.error(`Feedback evaluation failed: ${error.message}`);process.exitCode=1;});

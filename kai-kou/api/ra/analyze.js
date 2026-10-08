@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { getAccessStatus } from '../../backend/auth/access-status.js';
 import { analysisResponse, diagnoseRecording, validateAnalysisInput } from '../../backend/speech/analyze-service.js';
 import scoreHandler from '../score.js';
-import { generateEvidenceFeedback } from '../../backend/speech/feedback.js';
+import { generatePublishedFeedback } from '../../backend/speech/feedback.js';
 
-export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, legacyHandler = scoreHandler, feedbackGenerator = generateEvidenceFeedback } = {}) {
+export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, legacyHandler = scoreHandler, feedbackGenerator = generatePublishedFeedback } = {}) {
   return async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

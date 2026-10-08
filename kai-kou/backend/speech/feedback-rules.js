@@ -12,7 +12,7 @@ const TYPE_PATTERNS = {
 const TIME_CLAIM = /(?:[0-9零一二三四五六七八九十百两]+(?:[.点][0-9零一二三四五六七八九十百两]+)?)\s*(?:毫秒|秒|分钟)/;
 const englishWords = text => String(text ?? '').toLowerCase().match(/[a-z]+(?:['’][a-z]+)?/g) ?? [];
 const BANNED = /发音错误|发音不准|分数|\d\s*分|PTE|发音|音素|重音|口音|语法|拼写/i;
-const length = text => Array.from(text).length;
+const length = text => (String(text).match(/[a-z]+(?:['’][a-z]+)?|[\u3400-\u9fff]|[^\s\p{P}\p{S}a-z\u3400-\u9fff]/giu) ?? []).length;
 export function selectFeedbackEvidence(evidence = []) {
   return (Array.isArray(evidence) ? evidence : []).filter(item => item && TYPE_PATTERNS[item.type] && typeof item.id === 'string')
     .slice().sort((a, b) => (b.severity ?? 0) - (a.severity ?? 0)).slice(0, 6);

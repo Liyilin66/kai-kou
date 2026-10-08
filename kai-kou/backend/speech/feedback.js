@@ -5,11 +5,22 @@ import { selectFeedbackEvidence, validateFeedback, buildTemplateFeedback } from 
 export { validateFeedback, buildTemplateFeedback } from './feedback-rules.js';
 export const FEEDBACK_PROMPT_VERSION = 'ra-feedback-0.2';
 
-async function callFeedbackModel({ prompt }) {
+function providerFailure(error, provider, attempt) {
+  const normalized = toProviderError(provider, error);
+  return { attempt, provider_error: normalized.provider, error_type: normalized.raw_error_type,
+    status: normalized.status, errors: ['模型调用异常，详见 provider_error 和 error_type'] };
+}
+
+async function callFeedbackModel({ prompt, attempt, recordFailure }) {
   try { return await callGroq({ prompt, model: 'openai/gpt-oss-120b' }); }
   catch (error) {
+    recordFailure(providerFailure(error, 'groq', attempt));
     if (!isFallbackEligible(toProviderError('groq', error))) throw error;
-    return callScoringOpenAICompatible({ prompt });
+    try { return await callScoringOpenAICompatible({ prompt }); }
+    catch (backupError) {
+      recordFailure(providerFailure(backupError, 'openai', attempt));
+      throw backupError;
+    }
   }
 }
 
@@ -46,8 +57,13 @@ export async function generateEvidenceFeedback({ evidence = [], metrics = {}, re
   let errors = [];
   for (let attempt = 1; attempt <= 2; attempt++) {
     let response;
-    try { response = await callModel({ prompt: buildPrompt(selected, metrics, referenceText, errors), attempt }); }
-    catch { return fallback(attempt); }
+    try { response = await callModel({ prompt: buildPrompt(selected, metrics, referenceText, errors), attempt, recordFailure: failure => validationFailures.push(failure) }); }
+    catch (error) {
+      if (!validationFailures.some(failure => failure.attempt === attempt && failure.provider_error)) {
+        validationFailures.push(providerFailure(error, error?.provider ?? 'unknown', attempt));
+      }
+      return fallback(attempt);
+    }
     let payload;
     try { payload = typeof response?.raw_text === 'string' ? JSON.parse(response.raw_text) : response?.feedback ?? response; }
     catch { errors = ['返回内容不是合法 JSON']; validationFailures.push({ attempt, errors }); continue; }
@@ -59,4 +75,13 @@ export async function generateEvidenceFeedback({ evidence = [], metrics = {}, re
     validationFailures.push({ attempt, errors });
   }
   return fallback(2);
+}
+
+// Three serial evaluation rounds failed the pre-agreed quality gate.
+// Keep model generation available for offline evaluation, but never call it online.
+export async function generatePublishedFeedback({ evidence = [], metrics = {} } = {}) {
+  return { feedback: buildTemplateFeedback({ evidence, metrics }), meta: {
+    provider: 'template', model: 'deterministic', prompt_version: FEEDBACK_PROMPT_VERSION,
+    attempts: 0, latency_ms: 0, template: true, validation_failures: [], mode: 'template_only'
+  } };
 }

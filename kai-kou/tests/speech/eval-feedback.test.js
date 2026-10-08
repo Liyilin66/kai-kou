@@ -33,3 +33,19 @@ test('valid distinct evidence-grounded actions pass the incremental-value gate',
  });
  assert.equal(report.template_identical_rate,0);assert.equal(report.gate_passed,true);
 });
+test('three rounds run serially and report mean and range with the release decision',async()=>{
+ const {evaluateFeedbackRounds}=await import('../../scripts/eval-feedback.js');
+ let active=0,calls=0;
+ const report=await evaluateFeedbackRounds([sample('one')],async input=>{
+  assert.equal(active++,0);calls++;await Promise.resolve();active--;
+  const feedback=buildTemplateFeedback(input);feedback.suggestions[0].action='先回听确认，再把 hello world 连成短语练三遍。';
+  return {feedback,meta:{attempts:calls===1?2:1,template:false}};
+ });
+ assert.equal(calls,3);assert.equal(report.metrics.first_pass_rate.mean,2/3);
+ assert.equal(report.metrics.first_pass_rate.min,0);assert.equal(report.metrics.first_pass_rate.max,1);assert.equal(report.use_llm,true);
+});
+test('three-round decision chooses template-only when outputs merely copy templates',async()=>{
+ const {evaluateFeedbackRounds}=await import('../../scripts/eval-feedback.js');
+ const report=await evaluateFeedbackRounds([sample('one')],async input=>({feedback:buildTemplateFeedback(input),meta:{attempts:1,template:false}}));
+ assert.equal(report.metrics.final_model_pass_rate.mean,1);assert.equal(report.metrics.template_identical_rate.mean,1);assert.equal(report.use_llm,false);
+});
