@@ -19,8 +19,8 @@ app.mount("#app");
 
 function redirectToCanonicalHost() {
   if (typeof window === "undefined") return;
-  // Diagnosis Preview must use its own API and assets, not the production host.
-  if (import.meta.env.VITE_RA_DIAGNOSIS === "on") return;
+  // Every Preview keeps its own API and assets regardless of feature flags.
+  if (import.meta.env.VERCEL_ENV === "preview") return;
 
   const canonicalHost = "kai-kou.vercel.app";
   const currentHost = window.location.hostname.toLowerCase();

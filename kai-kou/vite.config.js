@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    define: {
+      "import.meta.env.VERCEL_ENV": JSON.stringify(process.env.VERCEL_ENV || "development")
+    },
     server: {
       proxy: {
         "/api": {
