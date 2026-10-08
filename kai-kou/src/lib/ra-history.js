@@ -1,3 +1,4 @@
+import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const PER_QUESTION_HISTORY_LIMIT = 10;
@@ -6,7 +7,7 @@ const DEFAULT_SIGNED_URL_TTL_SECONDS = 60 * 30;
 function createEmptyRAQuestionPerformance() {
   return {
     hasHistory: false,
-    bestScore: 0,
+    bestScore: null,
     lastScore: null,
     totalAttempts: 0,
     levelTag: "待提升"
@@ -62,17 +63,17 @@ export async function fetchRAQuestionPerformance(questionId) {
   // Reuse normalizeRALog so score parsing and fallback behavior stay aligned with history list.
   const normalizedLogs = rows.map((row) => normalizeRALog(row));
   const totalAttempts = normalizedLogs.length;
-  const lastScore = normalizeNumber(normalizedLogs[0]?.overall, 0);
-  const bestScore = normalizedLogs.reduce((maxScore, log) => {
-    return Math.max(maxScore, normalizeNumber(log?.overall, 0));
-  }, 0);
+  const scoredLogs = normalizedLogs.filter((log) => hasNumericScore(log.overall));
+  const lastScore = scoredLogs[0]?.overall ?? null;
+  const bestScore = scoredLogs.length ? Math.max(...scoredLogs.map((log) => log.overall)) : null;
 
   return {
     hasHistory: totalAttempts > 0,
     bestScore,
     lastScore,
     totalAttempts,
-    levelTag: getRALevelTag(bestScore)
+    diagnosisLabel: normalizedLogs[0]?.diagnosisLabel || "",
+    levelTag: bestScore === null ? "诊断练习" : getRALevelTag(bestScore)
   };
 }
 
@@ -107,10 +108,11 @@ export function normalizeRALog(row) {
   const scoreJson = toObject(row?.score_json);
   const nestedScores = toObject(scoreJson?.scores);
   const legacyScores = nestedScores || scoreJson;
-  const pronunciation = normalizeScore(legacyScores?.pronunciation);
-  const fluency = normalizeScore(legacyScores?.fluency);
-  const content = normalizeScore(legacyScores?.content);
-  const overall = normalizeOverall(
+  const diagnosis = isRADiagnosis(scoreJson);
+  const pronunciation = diagnosis ? null : normalizeScore(legacyScores?.pronunciation);
+  const fluency = diagnosis ? null : normalizeScore(legacyScores?.fluency);
+  const content = diagnosis ? null : normalizeScore(legacyScores?.content);
+  const overall = diagnosis ? null : normalizeOverall(
     nestedScores?.overall ?? scoreJson?.overall,
     [pronunciation, fluency, content]
   );
@@ -132,6 +134,10 @@ export function normalizeRALog(row) {
       content
     },
     overall,
+    analysisId: diagnosis ? `${scoreJson.analysis_id || ""}` : "",
+    diagnosisVersion: diagnosis ? `${scoreJson.diagnosis_version || ""}` : "",
+    diagnosisLabel: diagnosisLabel(scoreJson),
+    metrics: diagnosis ? toObject(scoreJson.metrics) : null,
     audio,
     questionSnapshot: questionSnapshot
       ? {
@@ -171,18 +177,18 @@ function normalizeNumber(value, fallback = 0) {
 }
 
 function normalizeScore(value) {
-  const parsed = normalizeNumber(value, 0);
-  return Math.max(0, Math.min(90, Math.round(parsed)));
+  if (!hasNumericScore(value)) return null;
+  return Math.max(0, Math.min(90, Math.round(Number(value))));
 }
 
 function normalizeOverall(value, scores = []) {
-  const parsed = normalizeNumber(value, Number.NaN);
+  const parsed = hasNumericScore(value) ? Number(value) : Number.NaN;
   if (Number.isFinite(parsed)) {
     return Math.max(0, Math.min(100, Math.round(parsed)));
   }
 
-  const validScores = (Array.isArray(scores) ? scores : []).filter((item) => Number.isFinite(Number(item)));
-  if (!validScores.length) return 0;
+  const validScores = (Array.isArray(scores) ? scores : []).filter(hasNumericScore);
+  if (!validScores.length) return null;
   const sum = validScores.reduce((total, score) => total + Number(score), 0);
   return Math.round(sum / validScores.length);
 }

@@ -1,3 +1,4 @@
+import { isRADiagnosis } from "../../src/lib/ra-diagnosis-score.js";
 import { callOpenAICompatibleChat, getOpenAICompatibleConfig } from "../llm/providers/openai-compatible.js";
 import { buildDailySuggestionMessages } from "./daily-suggestion-prompt.js";
 
@@ -280,7 +281,8 @@ function buildSummaryFromRows(rows, totalAttempts) {
     const createdAt = new Date(row?.created_at);
     const createdAtValid = Number.isFinite(createdAt.getTime());
     const dateKey = createdAtValid ? toDateKey(createdAt) : "";
-    const score = extractOverallScore(row?.score_json);
+    const score = taskType === "RA" && isRADiagnosis(parseJsonObject(row?.score_json))
+      ? null : extractOverallScore(row?.score_json);
     const bucket = taskStats[taskType];
 
     bucket.attempts += 1;

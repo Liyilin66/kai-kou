@@ -228,6 +228,8 @@
 </template>
 
 <script setup>
+import { normalizeRALog } from "@/lib/ra-history";
+import { hasNumericScore } from "@/lib/ra-diagnosis-score.js";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { requestDailyAiSuggestion } from "@/lib/agent";
@@ -434,7 +436,7 @@ const questionById = computed(() => {
   return map;
 });
 
-const scoredLogs = computed(() => raLogs.value.filter((log) => Number.isFinite(Number(log.overall))));
+const scoredLogs = computed(() => raLogs.value.filter((log) => hasNumericScore(log.overall)));
 const recentScoredLogs = computed(() => scoredLogs.value.slice(0, RECENT_SCORE_SAMPLE_SIZE));
 const recentAverageScore = computed(() => average(recentScoredLogs.value.map((log) => log.overall)));
 const weeklyLogs = computed(() => raLogs.value.filter((log) => isInCurrentWeek(log.createdAt)));
@@ -517,8 +519,8 @@ const recentHistory = computed(() =>
       question,
       title: truncateText(title, 26),
       date: formatMonthDayTime(log.createdAt),
-      score: Number(log.overall || 0),
-      scoreLabel: Number.isFinite(Number(log.overall)) ? Math.round(log.overall) : "--"
+      score: log.overall,
+      scoreLabel: log.diagnosisLabel || (hasNumericScore(log.overall) ? Math.round(log.overall) : "--")
     };
   })
 );
@@ -694,7 +696,7 @@ function buildRecommendationProfile() {
     if (index < 8) recentQuestionKeys.add(key);
     if (isToday(log.createdAt)) todayQuestionKeys.add(key);
 
-    if (!latestScoreByQuestion.has(key) && Number.isFinite(Number(log.overall))) {
+    if (!latestScoreByQuestion.has(key) && hasNumericScore(log.overall)) {
       latestScoreByQuestion.set(key, Number(log.overall));
     }
 
@@ -936,25 +938,6 @@ async function pickQuestion(difficulty = "") {
   return pool[Math.floor(Math.random() * pool.length)] || null;
 }
 
-function normalizeRALog(row) {
-  const score = toObject(row?.score_json) || {};
-  const scores = toObject(score?.scores) || {};
-  const questionSnapshot = toObject(score?.questionSnapshot);
-  return {
-    id: normalizeText(row?.id),
-    questionId: normalizeText(row?.question_id),
-    transcript: normalizeText(row?.transcript),
-    questionContent: normalizeText(questionSnapshot?.content),
-    createdAt: normalizeText(row?.created_at),
-    overall: normalizeScore(scores?.overall ?? score?.overall),
-    scores: {
-      pronunciation: normalizeScore(scores?.pronunciation ?? score?.pronunciation),
-      fluency: normalizeScore(scores?.fluency ?? score?.fluency),
-      content: normalizeScore(scores?.content ?? score?.content)
-    }
-  };
-}
-
 function resolveQuestionForLog(log) {
   const id = normalizeText(log?.questionId);
   if (!id) return null;
@@ -973,26 +956,8 @@ async function resolveCurrentUserId() {
   return normalizeText(data?.session?.user?.id);
 }
 
-function toObject(value) {
-  if (typeof value === "string") {
-    try {
-      const parsed = JSON.parse(value);
-      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  }
-  return value && typeof value === "object" && !Array.isArray(value) ? value : null;
-}
-
-function normalizeScore(value) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return null;
-  return clamp(number, 0, 90);
-}
-
 function average(values) {
-  const numericValues = values.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+  const numericValues = values.filter(hasNumericScore).map(Number);
   if (!numericValues.length) return null;
   return Number((numericValues.reduce((sum, value) => sum + value, 0) / numericValues.length).toFixed(1));
 }

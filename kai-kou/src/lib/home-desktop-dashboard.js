@@ -1,3 +1,4 @@
+import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const DASHBOARD_PAGE_SIZE = 1000;
@@ -716,7 +717,7 @@ function buildCoach(homeAnalytics, weakPoints) {
 }
 
 function buildWeeklyGoal(homeAnalytics) {
-  const currentScore = Number(homeAnalytics?.averageScore || 0);
+  const currentScore = hasNumericScore(homeAnalytics?.averageScore) ? Number(homeAnalytics.averageScore) : null;
   const progress = currentScore > 0 ? Math.min(currentScore / TARGET_WEEKLY_SCORE, 1) : 0;
   return {
     percent: Math.round(progress * 100),
@@ -954,11 +955,12 @@ function buildRecentPractices(rows) {
     const questionId = `${row?.question_id || ""}`.trim();
     const id = `${row?.id || ""}`.trim();
     const createdAt = `${row?.created_at || ""}`.trim();
-    const metricLabel = score !== null
+    const diagnosisText = taskType === "RA" ? diagnosisLabel(toObject(row?.score_json)) : "";
+    const metricLabel = diagnosisText || (score !== null
       ? `得分 ${formatNumericScore(score)}/90`
       : accuracy !== null
         ? `正确率 ${formatInteger(accuracy)}%`
-        : "暂无分数";
+        : "暂无分数");
 
     return {
       id: id || `${questionId || taskType || "log"}-${createdAt || index}`,
@@ -1083,6 +1085,7 @@ function buildRecentDateKeys(days) {
 }
 
 export function extractOverallScore(log) {
+  if (normalizeTaskType(log?.task_type) === "RA" && isRADiagnosis(toObject(log?.score_json))) return null;
   const score = toObject(log?.score_json) || {};
   const candidates = [
     score?.overall,
@@ -1117,6 +1120,7 @@ export function extractOverallScore(log) {
 }
 
 function extractTrendOverallScore(log) {
+  if (normalizeTaskType(log?.task_type) === "RA" && isRADiagnosis(toObject(log?.score_json))) return null;
   const score = toObject(log?.score_json) || {};
   const candidates = [
     score?.overall,
@@ -1139,6 +1143,7 @@ function extractTrendOverallScore(log) {
 }
 
 function resolveWeaknessScore(taskType, row) {
+  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(toObject(row?.score_json))) return null;
   const overall = resolveOverallScore(taskType, row?.score_json);
   if (overall !== null) return overall;
 
@@ -1208,6 +1213,7 @@ function resolveAccuracyPercent(row) {
 }
 
 function resolveOverallScore(taskType, scoreJson) {
+  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(toObject(scoreJson))) return null;
   const score = toObject(scoreJson) || {};
   const candidates = [
     score?.overall,

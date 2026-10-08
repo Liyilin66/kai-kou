@@ -1,3 +1,4 @@
+import { isRADiagnosis, hasNumericScore } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const TASK_TYPES = ["RA", "WFD", "RTS", "DI", "RS", "RL", "WE"];
@@ -38,6 +39,7 @@ export function formatInteger(value) {
 }
 
 export function formatScore(value) {
+  if (!hasNumericScore(value)) return "--";
   const number = Number(value);
   if (!Number.isFinite(number)) return "--";
   return new Intl.NumberFormat("zh-CN", {
@@ -353,6 +355,7 @@ function resolveDurationSec(scoreJson) {
 
 function resolveOverallScore(taskType, scoreJson) {
   const score = toObject(scoreJson) || {};
+  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(score)) return null;
   const candidates = [
     score?.overall,
     score?.score_overall,

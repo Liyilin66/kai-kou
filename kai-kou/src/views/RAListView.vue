@@ -71,13 +71,15 @@ const questionCards = computed(() =>
       level,
       diff: difficultyLabel(difficulty),
       myScore: lastScore,
+      diagnosisLabel: history[0]?.diagnosisLabel || "",
       bestScore,
       hasHistory: history.length > 0,
-      isWeak: Boolean(history.length && Number(bestScore || 0) < SCORE_WEAK_THRESHOLD),
+      isWeak: bestScore !== null && bestScore < SCORE_WEAK_THRESHOLD,
       isFavorite: favoriteIds.value.has(id),
       history: history.slice(0, 3).map((log) => ({
         date: formatShortDate(log?.createdAt),
-        score: normalizeScore(log?.overall)
+        score: normalizeScore(log?.overall),
+        label: log?.diagnosisLabel || (log?.overall ?? "--")
       }))
     };
   })
@@ -430,6 +432,7 @@ function summarizeQuestionText(text) {
 }
 
 function normalizeScore(value) {
+  if (value === null || value === undefined || value === "") return null;
   const parsed = Number(value || 0);
   if (!Number.isFinite(parsed)) return 0;
   return Math.max(0, Math.min(90, Math.round(parsed)));
@@ -649,11 +652,11 @@ function normalizeText(value) {
                   {{ q.isFavorite ? "★" : "☆" }}
                 </button>
                 <span
-                  v-if="q.myScore"
+                  v-if="q.diagnosisLabel || q.myScore !== null"
                   class="qc-score"
                   :style="{ color: q.myScore >= 70 ? 'var(--grn)' : 'var(--org)' }"
                 >
-                  我的：{{ q.myScore }}
+                  {{ q.diagnosisLabel || `我的：${q.myScore}` }}
                 </span>
                 <button
                   class="qc-go"
@@ -669,8 +672,8 @@ function normalizeText(value) {
             <div v-if="q.history.length" class="qc-hist">
               <div v-for="h in q.history" :key="`${q.id}-${h.date}-${h.score}`" class="qch-item">
                 <span class="qch-date">{{ h.date }}</span>
-                <div class="qch-bar-bg"><div class="qch-bar-fill" :style="{ width: `${Math.max(0, Math.min(100, (h.score / 90) * 100))}%` }"></div></div>
-                <span class="qch-val">{{ h.score }}</span>
+                <div v-if="h.score !== null" class="qch-bar-bg"><div class="qch-bar-fill" :style="{ width: `${Math.max(0, Math.min(100, (h.score / 90) * 100))}%` }"></div></div>
+                <span class="qch-val">{{ h.label }}</span>
               </div>
             </div>
           </article>

@@ -33,6 +33,7 @@ function homophone(left, right) {
 }
 const FILLERS = new Set(['um', 'uh', 'er', 'erm', 'ah', 'hmm']);
 const SPELLINGS = {
+  sizeable: 'sizable',
   colour: 'color', colours: 'colors', coloured: 'colored', colouring: 'coloring',
   favour: 'favor', favourite: 'favorite', favourites: 'favorites', favourable: 'favorable',
   flavour: 'flavor', flavours: 'flavors', honour: 'honor', honours: 'honors',

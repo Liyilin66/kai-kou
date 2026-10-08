@@ -1,3 +1,4 @@
+import { isRADiagnosis } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const MAX_ANALYTICS_DURATION_SEC = 60 * 60 * 3;
@@ -178,6 +179,7 @@ function applyRowSignalsToBuckets(row, buckets) {
   const taskType = normalizeTaskType(row?.task_type);
   const transcript = normalizeText(row?.transcript);
   const score = parseScoreJson(row?.score_json);
+  if (taskType === "RA" && isRADiagnosis(score)) return;
 
   const contentScore = resolveContentScore(score, taskType);
   pushSignal(buckets.content, contentScore, 1.25, "direct");

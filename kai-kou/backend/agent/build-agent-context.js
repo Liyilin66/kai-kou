@@ -1,3 +1,4 @@
+import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "../../src/lib/ra-diagnosis-score.js";
 import { getAccessStatus } from "../auth/access-status.js";
 
 const MAX_RECENT_LOGS = 60;
@@ -166,9 +167,9 @@ async function buildLifetimeSummary(supabase, userId) {
 
   const normalizedScoreRows = normalizePracticeLogs(scoreRows);
   const averageScoreByTaskType = buildAverageScoreMap(normalizedScoreRows);
-  const scoredAttempts = normalizedScoreRows.filter((item) => Number.isFinite(Number(item?.score?.comparable))).length;
+  const scoredAttempts = normalizedScoreRows.filter((item) => hasNumericScore(item?.score?.comparable)).length;
   const comparableScores = normalizedScoreRows
-    .map((item) => Number(item?.score?.comparable))
+    .map((item) => item?.score?.comparable)
     .filter((value) => Number.isFinite(value));
   const scoreSampleSize = normalizedScoreRows.length;
   const scoreSampleIsLimited = scoreSampleSize >= MAX_SCORE_SAMPLE_LIMIT;
@@ -348,6 +349,7 @@ function normalizePracticeLogs(rows) {
         createdAt: normalizeText(row?.created_at),
         createdDateKey: toDateKey(row?.created_at),
         score,
+        diagnosisLabel: taskType === "RA" ? diagnosisLabel(scoreJson) : "",
         feedback,
         questionTitle: "",
         transcriptWordCount: resolveTranscriptWordCount(row?.transcript, scoreJson)
@@ -375,7 +377,7 @@ function buildPracticeSummary(logs, questionRefs) {
   normalizedLogs.forEach((item) => {
     attemptsByTaskType[item.taskType] = (attemptsByTaskType[item.taskType] || 0) + 1;
 
-    if (!Number.isFinite(Number(item?.score?.comparable))) return;
+    if (!hasNumericScore(item?.score?.comparable)) return;
 
     if (!scoreBuckets[item.taskType]) {
       scoreBuckets[item.taskType] = {
@@ -416,7 +418,7 @@ function buildPracticeSummary(logs, questionRefs) {
     : null;
 
   const latestRecord = normalizedLogs[0] || null;
-  const latestScoredRecord = normalizedLogs.find((item) => Number.isFinite(Number(item?.score?.display))) || null;
+  const latestScoredRecord = normalizedLogs.find((item) => hasNumericScore(item?.score?.display)) || null;
 
   return {
     sample_insufficient: normalizedLogs.length < 5 || scoredLogs.length < 3,
@@ -454,6 +456,7 @@ function buildAttemptSummary(item) {
     question_title: item.questionTitle || null,
     question_id: item.questionId || null,
     display_score: item?.score?.display ?? null,
+    diagnosis_label: item.diagnosisLabel || null,
     score_scale: item?.score?.scale || null,
     feedback_excerpt: item.feedback ? truncateText(item.feedback, 100) : null
   };
@@ -473,8 +476,8 @@ function buildAverageScoreMap(logs) {
   const counts = createTaskCounterSeed(0);
 
   (Array.isArray(logs) ? logs : []).forEach((item) => {
-    const score = Number(item?.score?.comparable);
-    if (!item?.taskType || !Number.isFinite(score)) return;
+    if (!item?.taskType || !hasNumericScore(item?.score?.comparable)) return;
+    const score = Number(item.score.comparable);
     if (!Object.prototype.hasOwnProperty.call(totals, item.taskType)) return;
 
     totals[item.taskType] += score;
@@ -518,7 +521,7 @@ function buildRecent7DaysActivity(logs) {
     if (!bucket) return;
 
     bucket.attempts += 1;
-    if (Number.isFinite(Number(item?.score?.comparable))) {
+    if (hasNumericScore(item?.score?.comparable)) {
       bucket.comparableScoreTotal += Number(item.score.comparable || 0);
       bucket.comparableScoreCount += 1;
     }
@@ -556,7 +559,7 @@ function buildTrendSummary(scoredLogs) {
 }
 
 function averageComparableScore(items) {
-  const comparableItems = (Array.isArray(items) ? items : []).filter((item) => Number.isFinite(Number(item?.score?.comparable)));
+  const comparableItems = (Array.isArray(items) ? items : []).filter((item) => hasNumericScore(item?.score?.comparable));
   if (!comparableItems.length) return null;
 
   const total = comparableItems.reduce((sum, item) => sum + Number(item.score.comparable || 0), 0);
@@ -564,7 +567,7 @@ function averageComparableScore(items) {
 }
 
 function resolveTrendDirection(delta) {
-  if (!Number.isFinite(Number(delta))) return "unknown";
+  if (!hasNumericScore(delta)) return "unknown";
   if (Number(delta) >= 3) return "up";
   if (Number(delta) <= -3) return "down";
   return "flat";
@@ -573,6 +576,7 @@ function resolveTrendDirection(delta) {
 function resolveComparableScore(taskType, scoreJson) {
   const normalizedTaskType = normalizeTaskType(taskType);
   const score = toObject(scoreJson);
+  if (normalizedTaskType === "RA" && isRADiagnosis(score)) return null;
 
   if (normalizedTaskType === "WFD") {
     const accuracy = normalizePercent(score?.score)

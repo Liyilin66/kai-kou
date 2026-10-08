@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { detectSilences } from "../../backend/speech/silence.js";
 
 export function useRecorder() {
   const isRecording = ref(false);
@@ -859,7 +860,18 @@ export function useRecorder() {
     const durationMs = safeSampleRate > 0
       ? Math.max(0, Math.round((frameCount / safeSampleRate) * 1000))
       : 0;
+    let speechDiagnosis = null;
+    if (import.meta.env.VITE_RA_DIAGNOSIS === "on" && safeSampleRate > 0) {
+      const mono = new Float32Array(frameCount);
+      for (let frame = 0; frame < frameCount; frame++) {
+        for (let channel = 0; channel < safeChannelCount; channel++) {
+          mono[frame] += samples[frame * safeChannelCount + channel] / safeChannelCount;
+        }
+      }
+      speechDiagnosis = detectSilences(mono, safeSampleRate);
+    }
     return {
+      speechDiagnosis,
       amplitudeStatsAvailable: true,
       peakAmplitude: Number(peakAmplitude || 0),
       rmsAmplitude: Number(rmsAmplitude || 0),
@@ -2777,6 +2789,7 @@ export function useRecorder() {
         chunkMimeTypeList,
         chunkTotalBytes: Number(runtimeChunkStats.chunkTotalBytes || mediaStopResult?.chunkTotalBytes || blobSize || 0),
         lastDataAvailableAtMs: Number(runtimeChunkStats.lastDataAvailableAtMs || mediaStopResult?.lastDataAvailableAtMs || 0),
+        speechDiagnosis: audioAmplitudeStats?.speechDiagnosis || null,
         peakAmplitude: Number(audioAmplitudeStats?.peakAmplitude || 0),
         rmsAmplitude: Number(audioAmplitudeStats?.rmsAmplitude || 0),
         meanAbsAmplitude: Number(audioAmplitudeStats?.meanAbsAmplitude || 0),

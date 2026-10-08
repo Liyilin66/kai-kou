@@ -263,3 +263,8 @@ for (const [reference, hypothesis, norm] of [
     assert.equal(result.summary.completeness, 1);
   });
 }
+
+test('sizeable and sizable are equivalent spelling variants',()=>{
+ const result=alignWords('a sizeable improvement','a sizable improvement');
+ assert.equal(result.summary.completeness,1);assert.equal(result.summary.substituted,0);
+});

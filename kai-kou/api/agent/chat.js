@@ -1,3 +1,4 @@
+import { hasNumericScore } from "../../src/lib/ra-diagnosis-score.js";
 import { buildAgentContext } from "../../backend/agent/build-agent-context.js";
 import { buildAgentMessages } from "../../backend/agent/agent-prompt.js";
 import { Buffer } from "node:buffer";
@@ -599,7 +600,7 @@ function shouldUseLocalPracticeSummary({ intent = "", message = "", recentMessag
 
 function buildContextFromPracticeSummary({ user, intent, summary } = {}) {
   const averageScoreByTaskType = Object.entries(summary?.task_stats || {}).reduce((acc, [taskType, bucket]) => {
-    acc[taskType] = Number.isFinite(Number(bucket?.average_score)) ? Number(bucket.average_score) : null;
+    acc[taskType] = hasNumericScore(bucket?.average_score) ? Number(bucket.average_score) : null;
     return acc;
   }, {});
 
@@ -609,7 +610,7 @@ function buildContextFromPracticeSummary({ user, intent, summary } = {}) {
     recent_30_days_attempts: toRoundedInt(summary?.recent_30_days_attempts, 0),
     scored_attempts: Object.values(summary?.task_stats || {})
       .reduce((total, bucket) => total + toRoundedInt(bucket?.scored_attempts, 0), 0),
-    overall_average_score: Number.isFinite(Number(summary?.recent_7_days_average_score))
+    overall_average_score: hasNumericScore(summary?.recent_7_days_average_score)
       ? Number(summary.recent_7_days_average_score)
       : null,
     attempts_by_task_type: Object.entries(summary?.task_stats || {}).reduce((acc, [taskType, bucket]) => {
@@ -625,8 +626,8 @@ function buildContextFromPracticeSummary({ user, intent, summary } = {}) {
     .map((item) => ({
       task_type: normalizeText(item?.task_type).toUpperCase(),
       label: normalizeText(item?.title) || normalizeText(item?.task_type).toUpperCase(),
-      average_score: Number.isFinite(Number(item?.average_score)) ? Number(item.average_score) : null,
-      comparable_score: Number.isFinite(Number(item?.average_score)) ? Number(item.average_score) : null,
+      average_score: hasNumericScore(item?.average_score) ? Number(item.average_score) : null,
+      comparable_score: hasNumericScore(item?.average_score) ? Number(item.average_score) : null,
       attempts: toRoundedInt(item?.attempts, 0),
       score_scale: "score_90"
     }))
@@ -649,7 +650,7 @@ function buildContextFromPracticeSummary({ user, intent, summary } = {}) {
     practice: {
       sample_insufficient: toRoundedInt(summary?.total_attempts, 0) < 5,
       total_recent_attempts: toRoundedInt(summary?.total_attempts, 0),
-      recent_average_score_90_scale: Number.isFinite(Number(summary?.recent_7_days_average_score))
+      recent_average_score_90_scale: hasNumericScore(summary?.recent_7_days_average_score)
         ? Number(summary.recent_7_days_average_score)
         : null,
       weak_task_types: weakTaskTypes,

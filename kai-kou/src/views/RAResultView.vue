@@ -1,4 +1,5 @@
 <script setup>
+import RADiagnosisResult from "@/components/ra/RADiagnosisResult.vue";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { fetchRAHistoryByQuestion } from "@/lib/ra-history";
@@ -56,6 +57,7 @@ const dimensionConfig = [
 ];
 
 const scoreResult = computed(() => practiceStore.result || null);
+const showDiagnosis = computed(() => import.meta.env.VITE_RA_DIAGNOSIS === "on" && scoreResult.value?.kind === "ra_diagnosis");
 const resultSource = computed(() => {
   const errorCode = normalizeText(scoreResult.value?.meta?.scoreErrorCode);
   if (errorCode) {
@@ -300,6 +302,7 @@ onMounted(async () => {
     return;
   }
 
+  if (showDiagnosis.value) return;
   await Promise.allSettled([
     loadQuestionBank(),
     loadQuestionHistory(),
@@ -689,7 +692,8 @@ function inferNextQuestionId(id) {
 </script>
 
 <template>
-  <div class="ra-result-shell" data-testid="ra-result-page">
+  <RADiagnosisResult v-if="showDiagnosis" :result="scoreResult" />
+  <div v-else class="ra-result-shell" data-testid="ra-result-page">
     <header class="topbar">
       <button class="tb-back" type="button" data-testid="ra-result-back" @click="goRAHome">
         <span class="tb-arr">‹</span>

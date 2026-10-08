@@ -1,6 +1,8 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { supabase } from "@/lib/supabase";
+import { createRADiagnosisSubmission } from "@/lib/ra-diagnosis";
 import RecordingWave from "@/components/RecordingWave.vue";
 import { fetchQuestions, getQuestionById, getRandomQuestion } from "@/lib/questions";
 import {
@@ -27,6 +29,8 @@ const practiceStore = usePracticeStore();
 const authStore = useAuthStore();
 const uiStore = useUIStore();
 const recorder = useRecorder();
+const diagnosisEnabled = import.meta.env.VITE_RA_DIAGNOSIS === "on";
+let diagnosisSubmission = null;
 const timer = useTimer();
 
 const RA_PREP_SECONDS = 40;
@@ -169,7 +173,7 @@ const historyBadgeClass = computed(() => questionPerformance.value?.hasHistory ?
 const historyStats = computed(() => {
   if (!questionPerformance.value?.hasHistory) return [];
   return [
-    { val: questionPerformance.value.bestScore, label: "最高分", tone: "brown" },
+    { val: questionPerformance.value.bestScore ?? "—", label: "最高分", tone: "brown" },
     { val: questionPerformance.value.totalAttempts, label: "练习次数", tone: "dark" },
     { val: lastScoreText.value, label: "最近一次", tone: "green" }
   ];
@@ -268,7 +272,8 @@ let questionHistoryRequestSeq = 0;
 const practiceRecommendation = computed(() => getPracticeRecommendationCopy(questionPerformance.value));
 const lastScoreText = computed(() => {
   if (!questionPerformance.value?.hasHistory) return "暂无";
-  return `${Number(questionPerformance.value?.lastScore || 0)} 分`;
+  if (questionPerformance.value?.lastScore == null) return "诊断练习";
+  return `${Number(questionPerformance.value.lastScore)} 分`;
 });
 const ERROR_TEXT = {
   SPEECH_RECOGNITION_DISABLED_HUAWEI: "检测到华为设备，已自动切换到兼容录音模式；实时字幕可能不可用，但可正常录音和提交评测。",
@@ -338,10 +343,10 @@ function createEmptyQuestionPerformance() {
 function normalizeQuestionPerformance(payload) {
   const next = payload && typeof payload === "object" ? payload : {};
   const hasHistory = Boolean(next.hasHistory);
-  const bestScore = Number.isFinite(Number(next.bestScore))
+  const bestScore = next.bestScore != null && Number.isFinite(Number(next.bestScore))
     ? clampNumber(Math.round(Number(next.bestScore)), 0, 100)
-    : 0;
-  const lastScore = Number.isFinite(Number(next.lastScore))
+    : null;
+  const lastScore = next.lastScore != null && Number.isFinite(Number(next.lastScore))
     ? clampNumber(Math.round(Number(next.lastScore)), 0, 100)
     : null;
   const totalAttempts = Number.isFinite(Number(next.totalAttempts))
@@ -371,6 +376,7 @@ function getPracticeRecommendationCopy(stats) {
   const totalAttempts = Number(stats?.totalAttempts || 0);
 
   if (!hasHistory) return "首次练习，先打基准分。";
+  if (stats?.bestScore == null) return "结合录音诊断，核验标注后再练一次。";
   if (totalAttempts < 3) return "建议再刷 1-2 次看稳定性。";
   if (bestScore < 60) return "建议继续刷本题。";
   if (bestScore < 75) return "建议冲到 75+。";
@@ -700,6 +706,7 @@ function clearFinalizedRecordingState() {
 }
 
 function clearAttemptScopedUIState() {
+  diagnosisSubmission = null;
   clearFinalizedRecordingState();
   prepareStartedAtMs.value = 0;
   prepareElapsedSec.value = 0;
@@ -1253,6 +1260,15 @@ async function submitEvaluation() {
     practiceStore.setTranscript(transcript);
     practiceStore.setAudioBlob(finalBlob);
 
+    if (diagnosisEnabled) {
+      diagnosisSubmission ||= createRADiagnosisSubmission({ client: supabase });
+      const result = await diagnosisSubmission({ blob: finalBlob, questionId: question.value.id,
+        speechDiagnosis: finalizedStopResult.value?.speechDiagnosis });
+      practiceStore.$patch({ result, phase: "done" });
+      if (!unmounted) router.push("/ra/result");
+      return;
+    }
+
     const scoreStartedAt = getNowMs();
     const scoreResult = await practiceStore.submitScore(
       "RA",
@@ -1293,6 +1309,10 @@ async function submitEvaluation() {
     if (!unmounted && practiceStore.phase === "done" && scoreResult && !scoreResult.error) {
       router.push("/ra/result");
     }
+  } catch (error) {
+    if (!diagnosisEnabled) throw error;
+    uiStore.showToast(error?.name === "AbortError" ? "诊断超时，录音已保存，请重试提交。" : `${error?.message || "录音诊断失败，请稍后重试。"}`, "warning");
+    practiceStore.setPhase("recording");
   } finally {
     isSubmitting.value = false;
   }
@@ -1532,8 +1552,9 @@ async function startRecordingNow() {
               <div class="hist-mini">
                 <div v-for="record in historyMiniRecords" :key="record.id" class="hist-mini-row">
                   <span>{{ formatHistoryShortDate(record.createdAt) }}</span>
-                  <div class="hist-bar"><i :style="{ width: `${Math.max(8, Math.min(100, Number(record.overall || 0) / 90 * 100))}%` }"></i></div>
-                  <strong>{{ Number(record.overall || 0) }}</strong>
+                  <span v-if="record.diagnosisLabel">{{ record.diagnosisLabel }}</span>
+                  <div v-else class="hist-bar"><i :style="{ width: `${Math.max(8, Math.min(100, Number(record.overall || 0) / 90 * 100))}%` }"></i></div>
+                  <strong v-if="!record.diagnosisLabel">{{ record.overall ?? "—" }}</strong>
                 </div>
               </div>
               <button class="inline-history-btn" type="button" data-testid="ra-history-button" @click="showHistoryFromCard">查看本题历史</button>
@@ -1616,7 +1637,7 @@ async function startRecordingNow() {
 
           <section v-else-if="phase === 'processing' || phase === 'done'" class="processing-card">
             <div class="loading-dot"></div>
-            <p>{{ phase === "done" ? "评测完成，正在进入结果页..." : "正在提交 AI 评测，请稍候..." }}</p>
+            <p>{{ phase === "done" ? "评测完成，正在进入结果页..." : diagnosisEnabled ? "正在保存录音并分析，请稍候..." : "正在提交 AI 评测，请稍候..." }}</p>
           </section>
 
           <section class="article-card" data-testid="ra-question-card">
@@ -1648,10 +1669,10 @@ async function startRecordingNow() {
                   <div>
                     <div class="history-log-top">
                       <strong>{{ formatHistoryDateTime(record.createdAt) }}</strong>
-                      <span>Overall {{ Number(record.overall || 0) }}</span>
+                      <span>{{ record.diagnosisLabel || `Overall ${record.overall ?? "—"}` }}</span>
                     </div>
                     <p>{{ getHistoryQuestionText(record) || "暂无题目快照" }}</p>
-                    <div class="score-mini">
+                    <div v-if="!record.diagnosisLabel" class="score-mini">
                       <span>P {{ Number(record.scores?.pronunciation || 0) }}</span>
                       <span>F {{ Number(record.scores?.fluency || 0) }}</span>
                       <span>C {{ Number(record.scores?.content || 0) }}</span>

@@ -1,3 +1,4 @@
+import { isRADiagnosis, hasNumericScore } from "./ra-diagnosis-score.js";
 import { getApiUrl } from "@/lib/api-url";
 import { createEmptyHomeAnalytics, loadHomeAnalyticsSnapshotForAuth } from "@/lib/home-analytics";
 import { createEmptyProfilePortrait, loadProfilePortraitSnapshotForAuth } from "@/lib/profile-portrait";
@@ -529,7 +530,7 @@ async function loadRecentTaskSnapshot(authStore) {
   recentRows.forEach((item) => {
     attemptsByTask[item.taskType] = (attemptsByTask[item.taskType] || 0) + 1;
 
-    if (!Number.isFinite(Number(item?.score?.comparable))) return;
+    if (!hasNumericScore(item?.score?.comparable)) return;
 
     if (!scoredByTask[item.taskType]) {
       scoredByTask[item.taskType] = {
@@ -596,6 +597,7 @@ function createEmptyRecentTaskSnapshot() {
 function resolveComparableScore(taskType, scoreJson) {
   const normalizedTaskType = normalizeTaskType(taskType);
   const score = parseJsonObject(scoreJson);
+  if (normalizedTaskType === "RA" && isRADiagnosis(score)) return null;
 
   if (normalizedTaskType === "WFD") {
     const accuracy = normalizePercent(score?.score)
@@ -625,7 +627,7 @@ function resolveComparableScore(taskType, scoreJson) {
 
   for (const candidate of candidates) {
     const normalized = normalizeScore90(candidate);
-    if (Number.isFinite(Number(normalized))) {
+    if (hasNumericScore(normalized)) {
       return {
         display: normalized,
         comparable: normalized

@@ -1,0 +1,84 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
+
+// Exercise actual pure normalization/aggregation code without browser-only Supabase imports.
+function loadModule(path) {
+  const helper = readFileSync(new URL('../../src/lib/ra-diagnosis-score.js', import.meta.url), 'utf8').replace(/export /g, '');
+  const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8')
+    .replace(/^import .*?;\n/gm, '').replace(/export /g, '');
+  return vm.createContext({ console, Date, Intl, Map, Set, __source: helper + '\n' + source });
+}
+function invoke(path, expression) {
+  const ctx = loadModule(path);
+  return vm.runInContext(ctx.__source + '\n' + expression, ctx);
+}
+const diagnosis = { task_type: 'RA', question_id: 'RA_024', created_at: new Date().toISOString(),
+  score_json: { analysis_id: 'analysis-1', diagnosis_version: 'ra-diag-0.1', metrics: { completeness: 0.8 } } };
+const legacy = { ...diagnosis, score_json: { overall: 72, pronunciation: 70, fluency: 72, content: 74 } };
+
+test('RA history exposes diagnosis completeness without fabricating overall or trait scores', () => {
+  const log = invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(diagnosis)})`);
+  assert.equal(log.overall, null);
+  assert.equal(log.scores.pronunciation, null);
+  assert.equal(log.scores.fluency, null);
+  assert.equal(log.scores.content, null);
+  assert.equal(log.diagnosisLabel, '诊断：完整度 80%');
+  assert.equal(log.analysisId, 'analysis-1');
+});
+
+test('home analytics counts diagnosis practice but excludes it from score averages', () => {
+  const result = invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([diagnosis, legacy])})`);
+  assert.equal(result.totalCount, 2);
+  assert.equal(result.scoredCount, 1);
+  assert.equal(result.averageScore, 72);
+  const only = invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([diagnosis])})`);
+  assert.equal(only.averageScore, null);
+});
+
+test('agent context retains diagnosis activity without weak scores or a false trend', () => {
+  const expression = `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([diagnosis, legacy])}), [])`;
+  const result = invoke('backend/agent/build-agent-context.js', expression);
+  assert.equal(result.total_recent_attempts, 2);
+  assert.equal(result.scored_recent_attempts, 1);
+  assert.equal(result.recent_average_score_90_scale, 72);
+  assert.equal(result.latest_records[0].display_score, null);
+  const only = invoke('backend/agent/build-agent-context.js', `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([diagnosis])}), [])`);
+  assert.equal(only.recent_average_score_90_scale, null);
+  assert.equal(only.weak_task_types.length, 0);
+  assert.equal(only.trend_summary.direction, 'unknown');
+});
+
+test('diagnosis markers suppress stale legacy score fields while old score records stay readable', () => {
+  const stale = { ...diagnosis, score_json: { ...diagnosis.score_json, overall: 90, scores: { overall: 90, pronunciation: 90 } } };
+  assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(stale)}).overall`), null);
+  assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([stale, legacy])}).averageScore`), 72);
+  assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(legacy)}).overall`), 72);
+});
+
+test('desktop history labels diagnosis and excludes it from trends', () => {
+  const result = invoke('src/lib/home-desktop-dashboard.js', `buildRecentPractices(${JSON.stringify([diagnosis])})[0]`);
+  assert.equal(result.scoreLabel, '诊断：完整度 80%');
+  assert.equal(result.score, null);
+  assert.equal(invoke('src/lib/home-desktop-dashboard.js', `extractTrendOverallScore(${JSON.stringify(diagnosis)})`), null);
+});
+
+test('daily suggestion counts diagnosis as activity, not a weak zero score', () => {
+  const result = invoke('backend/agent/daily-suggestion-service.js', `buildSummaryFromRows(${JSON.stringify([diagnosis, legacy])}, 2)`);
+  assert.equal(result.task_stats.RA.attempts, 2);
+  assert.equal(result.task_stats.RA.scored_attempts, 1);
+  assert.equal(result.task_stats.RA.average_score, 72);
+});
+
+test('diagnosis-only practice does not create guessed pronunciation or content profile signals', () => {
+  const result = invoke('src/lib/profile-portrait.js', `(() => { const buckets = createMetricBuckets(); applyRowSignalsToBuckets(${JSON.stringify(diagnosis)}, buckets); return buckets; })()`);
+  assert.equal(result.pronunciation.signalCount, 0);
+  assert.equal(result.fluency.signalCount, 0);
+  assert.equal(result.content.signalCount, 0);
+});
+
+test('home score presentation uses a placeholder for diagnosis-only averages', () => {
+  assert.equal(invoke('src/lib/home-analytics.js', 'formatScore(null)'), '--');
+  assert.equal(invoke('src/lib/home-desktop-dashboard.js', 'buildWeeklyGoal({ averageScore: null }).currentValue'), null);
+});

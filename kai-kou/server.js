@@ -11,6 +11,7 @@ import agentSessionHandler from "./api/agent/session.js";
 import healthHandler from "./api/health.js";
 import questionsHandler from "./api/questions.js";
 import scoreHandler from "./api/score.js";
+import raAnalyzeHandler from "./api/ra/analyze.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.all("/api/ra/analyze", raAnalyzeHandler);
 app.options("/api/score", scoreHandler);
 app.post("/api/score", scoreHandler);
 app.options("/api/agent/chat", agentChatHandler);
