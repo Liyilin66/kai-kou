@@ -41,7 +41,8 @@ const profileSaving = ref(false);
 const profileSaveError = ref("");
 const profileDraft = ref(createProfileDraft());
 const profileDraftOriginal = ref(createProfileDraft());
-const avatarDraftDataUrl = ref("");
+const avatarDraftBlob = ref(null);
+const avatarDraftPreviewUrl = ref("");
 const avatarDraftName = ref("");
 const loggingOut = ref(false);
 let profileRefreshPromise = null;
@@ -171,7 +172,7 @@ const userEmail = computed(() =>
   normalizeText(authStore.user?.email || profile.value?.email)
 );
 const userAvatarUrl = computed(() => normalizeText(authStore.avatarUrl));
-const modalAvatarPreview = computed(() => avatarDraftDataUrl.value || userAvatarUrl.value);
+const modalAvatarPreview = computed(() => avatarDraftPreviewUrl.value || userAvatarUrl.value);
 const todayDateKey = computed(() => getLocalDateKey());
 const emailVerified = computed(() =>
   Boolean(authStore.user?.email_confirmed_at || authStore.user?.confirmed_at)
@@ -471,7 +472,7 @@ function handleEditProfile() {
   });
   profileDraft.value = draft;
   profileDraftOriginal.value = { ...draft };
-  avatarDraftDataUrl.value = "";
+  clearAvatarDraft();
   avatarDraftName.value = "";
   avatarUploadError.value = "";
   profileSaveError.value = "";
@@ -537,8 +538,8 @@ async function handleAvatarFileChange(event) {
 
   avatarUploading.value = true;
   try {
-    const avatarDataUrl = await createAvatarDataUrl(file);
-    avatarDraftDataUrl.value = avatarDataUrl;
+    const avatarBlob = await createAvatarBlob(file);
+    setAvatarDraftBlob(avatarBlob);
     avatarDraftName.value = normalizeText(file.name);
   } catch (error) {
     console.error("Avatar upload failed:", error);
@@ -554,6 +555,7 @@ function closeProfileModal() {
   profileModalOpen.value = false;
   profileSaveError.value = "";
   avatarUploadError.value = "";
+  clearAvatarDraft();
 }
 
 function handleProfileOverlayClick(event) {
@@ -575,7 +577,7 @@ async function saveProfileDraft() {
   try {
     const updatePayload = {
       displayName: profileDraft.value.displayName,
-      avatarDataUrl: avatarDraftDataUrl.value
+      avatarBlob: avatarDraftBlob.value
     };
 
     if (profileDraft.value.targetScore !== profileDraftOriginal.value.targetScore) {
@@ -590,7 +592,7 @@ async function saveProfileDraft() {
 
     await authStore.updateProfileDetails(updatePayload);
     profileModalOpen.value = false;
-    avatarDraftDataUrl.value = "";
+    clearAvatarDraft();
     avatarDraftName.value = "";
     uiStore.showToast("个人资料已更新", "success");
   } catch (error) {
@@ -676,6 +678,7 @@ onUnmounted(() => {
   if (typeof document !== "undefined") {
     document.removeEventListener("visibilitychange", handleProfileVisibilityChange);
   }
+  clearAvatarDraft();
 });
 
 function buildVipStatusText() {
@@ -983,7 +986,7 @@ async function resolveCurrentUserId() {
   return normalizeText(data?.session?.user?.id);
 }
 
-async function createAvatarDataUrl(file) {
+async function createAvatarBlob(file) {
   const image = await loadImageFromFile(file);
   const canvas = document.createElement("canvas");
   const size = 256;
@@ -1003,7 +1006,10 @@ async function createAvatarDataUrl(file) {
   context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
 
   const blob = await canvasToBlob(canvas, "image/jpeg", 0.86);
-  return blobToDataUrl(blob);
+  if (blob.size > 1024 * 1024) {
+    throw new Error("头像处理失败，请换一张图片重试");
+  }
+  return blob;
 }
 
 function loadImageFromFile(file) {
@@ -1034,13 +1040,18 @@ function canvasToBlob(canvas, type, quality) {
   });
 }
 
-function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("头像编码失败，请重试"));
-    reader.readAsDataURL(blob);
-  });
+function setAvatarDraftBlob(blob) {
+  clearAvatarDraft();
+  avatarDraftBlob.value = blob;
+  avatarDraftPreviewUrl.value = URL.createObjectURL(blob);
+}
+
+function clearAvatarDraft() {
+  avatarDraftBlob.value = null;
+  if (avatarDraftPreviewUrl.value) {
+    URL.revokeObjectURL(avatarDraftPreviewUrl.value);
+    avatarDraftPreviewUrl.value = "";
+  }
 }
 
 function detectCurrentDevice() {

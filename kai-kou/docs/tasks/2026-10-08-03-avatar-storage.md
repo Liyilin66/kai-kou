@@ -68,3 +68,40 @@
 
 - diff 交审查。
 - 附上：执行 SQL 后的验证截图或查询结果、上传前后 access token 长度对比。
+
+## 实施记录（2026-10-08）
+
+- 任务 6 已合并并推送 main：`fb26666`，Vercel Production 部署 Ready；随后切回 lyl 并同步 main。
+- 头像压缩结果改为 Blob，草稿预览使用 object URL 并在替换、关闭、卸载时释放。
+- 上传 JPEG 至当前用户文件夹，元数据只保存长度小于 300 的 HTTPS 公开链接。上传失败不改元数据；元数据保存失败清理新文件，保存成功后清理上传前列出的旧头像文件，清理失败只警告。
+- `normalizeAvatarUrl` 拒绝 data URL 和 HTTP；更新元数据时将历史头像字段里的 data URL 清空，避免再次写回令牌。其他资料保存方式不变。
+- 新增 SQL：`db/avatars-storage.sql`。该迁移与任务 6 的 SQL 不同，需要单独执行全文。
+
+### SQL 执行后的验证
+
+在 Supabase SQL Editor 查询：
+
+```sql
+select id, public, file_size_limit, allowed_mime_types
+from storage.buckets where id = 'avatars';
+-- 预期 public=true，file_size_limit=1048576，JPEG/PNG/WebP 三种 MIME。
+select policyname, cmd from pg_policies
+where schemaname='storage' and tablename='objects' and policyname like 'avatars-%';
+-- 预期一项公开 SELECT，三项本人文件夹写入策略：INSERT、UPDATE、DELETE。
+```
+
+在预览环境登录并更换两次头像，检查当前用户文件夹仅留下新头像，首页、个人中心和私教正常显示。仅比较 access token 的字符长度，勿粘贴完整令牌；新头像只增加一个短 URL，预计增幅不超过几百字符。
+
+当前数据库读取结果：`avatars` 桶尚不存在（Bucket not found）。真实上传、旧文件删除及 access token 长度对比待头像迁移后验收；没有用模拟结果冒充真实验收。
+
+工程验证：`npm test` 320/320 通过，`npm run build` 成功，`git diff --check` 通过；源码已无旧 `avatarDataUrl` 上传入口。当前交付为代码及迁移完成、真实验收待 SQL 执行，并未宣称任务的所有线上验收标准已通过。头像改动只推送 lyl 等 Claude 审查，不合并 main。
+
+### SQL 后真实验收（用户确认执行后）
+
+已使用临时测试账号、真实 JPEG、普通 authenticated 客户端完成两次上传与元数据保存；测试账号和文件已清理，未修改真实用户头像。
+
+- 桶查询：public=true；file_size_limit=1048576；allowed_mime_types 为 image/jpeg、image/png、image/webp。
+- 连续上传 2 次后，文件夹只保留新文件；旧文件已删除；公开图片请求 HTTP 200。
+- 元数据 avatar_url 为 HTTPS，长度 135 字符。
+- 登录 access token 长度：上传前 827，保存并 refreshSession 后 1028，增加 **201 字符**，符合增幅不超过几百字符的验收要求。未记录完整令牌。
+- 本节取代上方“桶尚不存在”和存储验收待迁移的时间点状态。首页、个人中心、私教的真实浏览器视觉验收尚未完成；头像读取仍统一走原 authStore.avatarUrl，没有改动这些页面的读取方式。

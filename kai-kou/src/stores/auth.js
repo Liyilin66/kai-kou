@@ -1,3 +1,4 @@
+import { normalizeAvatarUrl, uploadAndSaveAvatar } from "@/lib/avatar";
 import { defineStore } from "pinia";
 import { getApiUrl } from "@/lib/api-url";
 import { ACCESS_STATUS, getAccessStatus } from "@/lib/access-status";
@@ -238,41 +239,16 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async updateAvatarDataUrl(dataUrl) {
-      const normalizedAvatar = normalizeAvatarUrl(dataUrl);
-      if (!normalizedAvatar) {
-        throw new Error("头像数据无效，请重新选择图片");
-      }
-
-      const currentMeta =
-        this.user?.user_metadata && typeof this.user.user_metadata === "object"
-          ? this.user.user_metadata
-          : {};
-
-      const { data, error } = await supabase.auth.updateUser({
-        data: {
-          ...currentMeta,
-          avatar_url: normalizedAvatar,
-          avatar_updated_at: new Date().toISOString()
-        }
+    async updateAvatarBlob(avatarBlob, metadataPatch = {}) {
+      return uploadAndSaveAvatar({
+        client: supabase,
+        userId: this.user?.id,
+        blob: avatarBlob,
+        saveMetadata: (patch) => this.updateUserMetadata({ ...metadataPatch, ...patch })
       });
-
-      if (error) throw error;
-
-      if (data?.user) {
-        this.user = data.user;
-        if (this.session) {
-          this.session = {
-            ...this.session,
-            user: data.user
-          };
-        }
-      }
-
-      return normalizedAvatar;
     },
 
-    async updateProfileDetails({ displayName, targetScore, examDate, currentStage, avatarDataUrl } = {}) {
+    async updateProfileDetails({ displayName, targetScore, examDate, currentStage, avatarBlob } = {}) {
       const userId = normalizeDisplayValue(this.user?.id);
       if (!userId) {
         throw new Error("请先登录后再编辑个人资料");
@@ -316,11 +292,10 @@ export const useAuthStore = defineStore("auth", {
         username: normalizedDisplayName,
         ...pickSkippedProfileValues(profilePatch, skippedColumns)
       };
-      if (avatarDataUrl || Object.keys(metadataPatch).length > 0) {
-        await this.updateUserMetadata({
-          ...metadataPatch,
-          ...(avatarDataUrl ? { avatar_url: avatarDataUrl } : {})
-        });
+      if (avatarBlob) {
+        await this.updateAvatarBlob(avatarBlob, metadataPatch);
+      } else {
+        await this.updateUserMetadata(metadataPatch);
       }
 
       const access = getAccessStatus(this.user, this.profile);
@@ -389,6 +364,7 @@ export const useAuthStore = defineStore("auth", {
       const { data, error } = await supabase.auth.updateUser({
         data: {
           ...currentMeta,
+          ...getLegacyDataAvatarClears(currentMeta),
           ...sanitizedPatch,
           profile_updated_at: new Date().toISOString()
         }
@@ -543,15 +519,6 @@ function resolveAvatarUrl(user, profile) {
   return "";
 }
 
-function normalizeAvatarUrl(value) {
-  if (typeof value !== "string") return "";
-  const normalized = value.trim();
-  if (!normalized) return "";
-  if (normalized.startsWith("data:image/")) return normalized;
-  if (/^https?:\/\//i.test(normalized)) return normalized;
-  return "";
-}
-
 function normalizeProfileText(value, maxLength) {
   const normalized = normalizeDisplayValue(value)
     .replace(/[\u0000-\u001f\u007f]+/g, " ")
@@ -621,6 +588,18 @@ function normalizeMetadataPatch(metadataPatch) {
   }
 
   return normalized;
+}
+
+function getLegacyDataAvatarClears(metadata) {
+  const avatarKeys = new Set(["avatar_url", "avatarUrl", "photo_url", "photoUrl", "picture"]);
+  const clears = {};
+  for (const [key, value] of Object.entries(metadata || {})) {
+    if (!avatarKeys.has(key)) continue;
+    if (typeof value === "string" && /^data:/i.test(value.trim())) {
+      clears[key] = null;
+    }
+  }
+  return clears;
 }
 
 function pickSkippedProfileValues(patch, skippedColumns = []) {
