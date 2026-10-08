@@ -30,3 +30,7 @@
 
 # Local speech provider response cache
 /kai-kou/eval/speech/cache/
+
+# Private listening labeling kit and manifest backups
+/kai-kou/eval/speech/labeling/
+*.json.bak
