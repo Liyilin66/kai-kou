@@ -32,5 +32,209 @@
       "labeled_by": "",
       "notes": ""
     }
+  },
+  {
+    "id": "ra-real-0002",
+    "task_type": "RA",
+    "question_id": "RA_044",
+    "reference_text": "Have you ever pictured a world without light? Just think how much we rely on man-made light sources in our lives. Without engineers, we wouldn't be able to live the way we do. No streetlights, no TV, no computer displays, no house lights. Engineers design and build all these things.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0002.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-11-09-082Z-RA_044-jflnco.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Have you ever pictured a world with a light just think how much we rely on mermaid light sources in our lives without an engineers we wouldn't be able to leave the way we do no street lights no TV no computer display no house lights and engineers design and build all these things",
+        "practice_log_id": "408"
+      }
+    },
+    "old_scores": {
+      "content": 78,
+      "fluency": 72,
+      "overall": 72,
+      "pronunciation": 68
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
+  },
+  {
+    "id": "ra-real-0003",
+    "task_type": "RA",
+    "question_id": "RA_045",
+    "reference_text": "Thus, a country might possess a sizeable rural population, but have an economic system in which the interests of the voters were predominantly related to their incomes, not to their occupations or location; and in such a country the political system would be unlikely to include an important agrarian party.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0003.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-12-14-003Z-RA_045-1a75jd.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Thus a country my processes a size ball rural population but have an economic system in which the interest of the Walters were mentally related to their incomes not to their occupation or location and in such a country the political systems will be unlikely to include an important regions Party",
+        "practice_log_id": "409"
+      }
+    },
+    "old_scores": {
+      "content": 68,
+      "fluency": 70,
+      "overall": 67,
+      "pronunciation": 62
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
+  },
+  {
+    "id": "ra-real-0004",
+    "task_type": "RA",
+    "question_id": "RA_046",
+    "reference_text": "The training of an actor is an intensive process which requires curiosity, courage and commitment. You will learn how to prepare for rehearsal, how to rehearse and how to use independent and proactive processes that inform you to do the best work possible for both stage and screen.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0004.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-13-21-017Z-RA_046-l1ziqg.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "The training of an actor is an intensive process which requires curiosity courage and commitment you will learn how to prepare for a rehearsal how to rehearse and how to use independent and proactive processes setting informed you to do the best work possible for both stage and screen",
+        "practice_log_id": "410"
+      }
+    },
+    "old_scores": {
+      "content": 78,
+      "fluency": 70,
+      "overall": 73,
+      "pronunciation": 75
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
+  },
+  {
+    "id": "ra-real-0005",
+    "task_type": "RA",
+    "question_id": "RA_047",
+    "reference_text": "Globalization has affected what we eat in ways we are only beginning to understand. Modern food production is no longer related to our biological needs but is in direct conflict with them. The relationship between diet and our fertility, our cancer, heart disease and mental illness is becoming clear. Yet much of our food is nutritionally bankrupt.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0005.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-14-27-441Z-RA_047-mcywmq.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Globalization has affected what we eat in ways we are only beginning to understand more than full production is no longer related to our biological needs but as in react to conflict with them the relationship between diet and our fertility our cancer heart disease and mental illness is become clear yet much of our food is nutritionally bank fruit",
+        "practice_log_id": "411"
+      }
+    },
+    "old_scores": {
+      "content": 70,
+      "fluency": 50,
+      "overall": 56,
+      "pronunciation": 55
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
+  },
+  {
+    "id": "ra-real-0006",
+    "task_type": "RA",
+    "question_id": "RA_048",
+    "reference_text": "Companies will want to be known not just for the financial results they generate, but equally for the imprint they leave on society as a whole. First, ensuring that their products contribute positively. Second, operating in a way that approaches a net-neutral impact to the natural environment. And third, cherishing their people.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0006.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-15-45-567Z-RA_048-f5pwv7.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Companies will want to be known not just for the financial results they generate but equally for the imprint the leaf on society as a whole first ensuring that their products contribute positively positively second operating way that approaches and that natural impact to the natural environment and searching their people",
+        "practice_log_id": "412"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 45,
+      "overall": 51,
+      "pronunciation": 55
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
+  },
+  {
+    "id": "ra-real-0007",
+    "task_type": "RA",
+    "question_id": "RA_049",
+    "reference_text": "For the first two or three years after the Second World War, a new title would often sell out within a few months of publication. However, unless public demand for the book was unusually high, they were rarely able to reprint it. With paper stocks strictly rationed, they could not afford to use up precious paper or tie up their limited capital with a reprint.",
+    "source": "real",
+    "script_id": null,
+    "speaker_id": "spk01",
+    "device": "unknown",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-real-0007.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/2026-10-08T03-17-03-799Z-RA_049-lp0w1x.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "For the first two or three years after the second world war a new title would often sell out within a few months of publication however unless public demand for the book was yearly high they were rarely able to print it with papers dog strictly recent they could not afford to use a precious paper or tie up there limited capital with a reprint",
+        "practice_log_id": "413"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 50,
+      "overall": 49,
+      "pronunciation": 45
+    },
+    "labels": {
+      "status": "unlabeled",
+      "errors": [],
+      "labeled_by": "",
+      "notes": ""
+    }
   }
 ]

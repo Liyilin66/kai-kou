@@ -383,5 +383,155 @@
         "spoken_as": "retain"
       }
     ]
+  },
+  {
+    "id": "ra024-mixed-4",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "instruction": "混合错误朗读，按原文顺序：跳过第 1 次出现的 Not；在第 1 次出现的 how之前停顿约 2 秒，然后继续；把第 1 次出现的 water连续读两遍，只多读一次；把第 1 次出现的 sailing读成 selling，不再读原词。其余内容正常读，四处错误之间至少隔五个词。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "Not",
+        "occurrence": 1
+      },
+      {
+        "type": "long_pause",
+        "word": "how",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "repetition",
+        "word": "water",
+        "occurrence": 1
+      },
+      {
+        "type": "substitution",
+        "word": "sailing",
+        "occurrence": 1,
+        "spoken_as": "selling"
+      }
+    ]
+  },
+  {
+    "id": "ra002-mixed-4",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "instruction": "混合错误朗读，按原文顺序：跳过第 1 次出现的 When；把第 1 次出现的 cars读成 cards，不再读原词；在第 1 次出现的 fires之前停顿约 2 秒，然后继续；把第 1 次出现的 deemed连续读两遍，只多读一次。其余内容正常读，四处错误之间至少隔五个词。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "When",
+        "occurrence": 1
+      },
+      {
+        "type": "substitution",
+        "word": "cars",
+        "occurrence": 1,
+        "spoken_as": "cards"
+      },
+      {
+        "type": "long_pause",
+        "word": "fires",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "repetition",
+        "word": "deemed",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra003-mixed-4",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "instruction": "混合错误朗读，按原文顺序：把第 1 次出现的 formed读成 farmed，不再读原词；跳过第 1 次出现的 current；在第 1 次出现的 promised之前停顿约 2 秒，然后继续；把第 1 次出现的 money连续读两遍，只多读一次。其余内容正常读，四处错误之间至少隔五个词。",
+    "errors": [
+      {
+        "type": "substitution",
+        "word": "formed",
+        "occurrence": 1,
+        "spoken_as": "farmed"
+      },
+      {
+        "type": "omission",
+        "word": "current",
+        "occurrence": 1
+      },
+      {
+        "type": "long_pause",
+        "word": "promised",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "repetition",
+        "word": "money",
+        "occurrence": 1
+      }
+    ]
+  },
+  {
+    "id": "ra016-mixed-4",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "instruction": "混合错误朗读，按原文顺序：跳过第 1 次出现的 Few；在第 1 次出现的 such之前停顿约 2 秒，然后继续；把第 2 次出现的 the连续读两遍，只多读一次；把第 1 次出现的 force读成 forth，不再读原词。其余内容正常读，四处错误之间至少隔五个词。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "Few",
+        "occurrence": 1
+      },
+      {
+        "type": "long_pause",
+        "word": "such",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "repetition",
+        "word": "the",
+        "occurrence": 2
+      },
+      {
+        "type": "substitution",
+        "word": "force",
+        "occurrence": 1,
+        "spoken_as": "forth"
+      }
+    ]
+  },
+  {
+    "id": "ra041-mixed-4",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "instruction": "混合错误朗读，按原文顺序：跳过第 1 次出现的 unique；在第 1 次出现的 that之前停顿约 2 秒，然后继续；把第 1 次出现的 retail读成 retain，不再读原词；把第 1 次出现的 desirable连续读两遍，只多读一次。其余内容正常读，四处错误之间至少隔五个词。",
+    "errors": [
+      {
+        "type": "omission",
+        "word": "unique",
+        "occurrence": 1
+      },
+      {
+        "type": "long_pause",
+        "word": "that",
+        "occurrence": 1,
+        "duration_ms": 2000
+      },
+      {
+        "type": "substitution",
+        "word": "retail",
+        "occurrence": 1,
+        "spoken_as": "retain"
+      },
+      {
+        "type": "repetition",
+        "word": "desirable",
+        "occurrence": 1
+      }
+    ]
   }
 ]

@@ -265,3 +265,74 @@ node scripts/eval-speech.js --split dev --hypothesis browser_asr
 `--user-id` 是操作者对本人账号的声明，不是脚本自动验证的登录身份。导入其他同意者时必须明确加 `--consent`。同一说话人保持同一个 `speaker_id`，不能跨开发／测试集。脚本标注表示计划制造的错误，录制后应回听确认；不将识别错误直接称为发音错误。
 
 本次报告属于**浏览器转写 + 新对齐算法的诊断基线**，不代表旧页面对齐实现，也不衡量声学发音评分。录音位于 `eval/speech/audio/`；报告位于 `output/eval/`，两者不提交。
+
+## 审查结果（Claude，2026-10-08）
+
+**结论：结构通过，但不能合并，也不能开始录制基线。** 对齐算法、评测指标（一对一最大匹配）、导入脚本的归属校验整体写得扎实，117 项测试本地复跑通过。但用 RA 原文中常见的写法实测，`align.js` 会把**用户读对了的内容判成错误**。这类误报会直接计入基线的 FP，让旧方案显得比实际更差，基线数字失去意义。必须先修，再录 25 条样本。
+
+### 必改 1：数字的几种常见写法（实测均判错）
+
+| 原文 | 识别结果 | 当前输出 | 期望 |
+|---|---|---|---|
+| `the twenty-first century` | `the 21st century` | 漏读 + 替换 | match |
+| `the 21st century` | `the twenty first century` | 多读 + 替换 | match |
+| `about 2 million people` | `about two million people` | 替换 + 漏读 | match |
+| `about 1.5 million people` | `about one point five million people` | 3 处错误 | match |
+| `it was 3.5 metres` | `it was three point five meters` | 3 处错误 | match |
+| `in the 1990s` | `in the nineteen nineties` | 漏读 + 替换（`1990s` 被拆成 `#1990` 和 `s`） | match |
+| `costs $5 each` | `costs five dollars each` | 多读 dollars | match（`$`/`£`/`€` 与 dollars/pounds/euros 等价） |
+
+要求：
+
+- 复合序数：十位数词 + 序数词（`twenty first`、`thirty-second`）解析为 `#21st`、`#32nd`；`hundredth`、`thousandth` 同理。
+- 阿拉伯数字后接 `thousand`/`million`/`billion`：合并为一个数值记号，`2 million` 与 `two million` 都得到 `#2000000`，`1.5 million` 得到 `#1500000`。
+- 英文小数读法：`<数> point <数字序列>` 解析为小数，`three point five` → `#3.5`，`zero point zero five` → `#0.05`。
+- 年代：`1990s` 词法上作为一个记号 `#1990s`；`nineteen nineties` → `#1990s`。`the nineties` 这类省略世纪的说法不处理。
+- 货币：`$5`、`£5`、`€5` 分别得到 `#5` + `dollars` / `pounds` / `euros`；`$2 million` 同时符合上一条。
+
+### 必改 2：同音词不应算用户错误
+
+浏览器识别只输出文字，无法区分同音词。实测：`its`↔`it's` 判为替换 + 多读，`they're`↔`their`、`you're`↔`your` 判为替换 + 漏读，`to`↔`two`、`one`↔`won`、`four`↔`for`、`know`↔`no` 判为替换。
+
+要求：
+
+- 新增同音词组，至少包括：its/it's、there/their/they're、your/you're、whose/who's、to/too/two、for/four、one/won、ate/eight、know/no、knew/new、hear/here、right/write、by/buy、whether/weather、weak/week、sea/see、son/sun。
+- 有同音词的缩写（it's、they're、you're、who's）**不再展开**，改为参与同音词比较，避免一处差异变成两个错误。
+- 数词与同音词的比较在归一化后进行（`#2` 与 `to`/`too` 同组，`#4` 与 `for`，`#1` 与 `won`，`#8` 与 `ate`）。
+- 属于同一同音词组的替换：`type` 仍为 `substitution`，`tag` 设为 `homophone`；与 `low_confidence` 一样**不计入** `summary.substituted`，评测脚本的 `predictedErrors` 也跳过它。`summary` 增加 `homophones` 计数。
+
+### 必改 3：导入脚本
+
+- `--script` 与 `--latest N`（N > 1）同时使用时报错退出：同一题连续录了多条不同脚本时，会把同一个脚本标注套到所有记录上。
+- 构造样本的 ID 改为 `ra-con-0001` 起编，不再使用 `ra-real-`；`ra-real-0001` 保持不变。
+
+### 不需要改的
+
+- 评测匹配规则、`TOLERANT_TYPES` 的 ±1 容差、说话人不跨集合的校验、未标注样本跳过逻辑，均正确。
+- 25 条脚本的指令清楚，标注锚点可用。
+
+### 修复验收
+
+1. 上面两张表中的每一行都加为测试用例，全部通过；原有 117 项仍全部通过。
+2. RA_024 真实样本的结果不变（仍是那 10 个词未匹配）。
+3. diff 只涉及 `backend/speech/align.js`、`scripts/eval-import-practice-log.js` 和对应测试。
+4. 推送到 `lyl` 后再交审查；通过后才进入录制。
+
+### 录制流程建议（修复通过后）
+
+用户每录完一条，立即运行一次导入，避免事后对不上练习记录：
+
+```bash
+node scripts/eval-import-practice-log.js --latest 1 --user-id <本人UUID> --speaker spk01 --device iphone-chrome --split dev --script <刚录的脚本ID>
+```
+
+录制前在网站上确认这道题的原文与 `scripts.json` 中一致。
+
+## 后续补充（2026-10-08）
+
+- [x] 审查修复：数字、货币、年代、小数数量级与同音词归一化；同音词不计用户错误，导入脚本禁止一个脚本批量标注。修复后原有 RA_024 十个未匹配词不变。
+- [x] 五道题各增加一条 `mixed-4` 脚本：漏词、长停顿、重复、近音替换各一处；任意两处之间至少五个完整词。脚本总数 30，新增自动化测试校验类型、题数、标注锚点及间隔。
+- [x] 记录 408–413 导入为 `ra-real-0002`–`ra-real-0007`，全部 `source=real`、`labels.status=unlabeled`，没有根据转写自动制作人工标注。设备未确认，记录为 `unknown`。
+- [x] 全项目 161 项测试通过，构建通过；当前清单 7 条未标注样本均被指标排除。
+- [x] 录音及运行报告仅保存在忽略目录，不提交。
+- [x] 按用户本轮明确指示提交本地指导文件、任务文档并合并到本地 `main`。生产推送单独处理，未来发布继续遵守 `AGENTS.md`。
