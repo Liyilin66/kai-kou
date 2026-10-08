@@ -68,7 +68,7 @@ function fixture(options = {}) {
     assert.equal(input.referenceText, state.row.reference_text);
     if (state.feedbackGate) await state.feedbackGate;
     if (state.feedbackFails) throw new Error('feedback failed');
-    return { feedback: { summary: '保持稳定朗读。', suggestions: [] }, meta: { provider: 'groq', model: 'test', prompt_version: 'ra-feedback-0.1', attempts: 1, latency_ms: 1 } };
+    return { feedback: { summary: '保持稳定朗读。', suggestions: [] }, meta: { provider: 'groq', model: 'test', prompt_version: 'ra-feedback-0.2', attempts: 1, latency_ms: 1 } };
   };
   const handler = createAnalyzeHandler({ createDb: () => db, diagnose, legacyHandler, feedbackGenerator });
   async function invoke(payload = body, overrides = {}) {
@@ -217,7 +217,7 @@ test('feedback persists summary and metadata and reuses done result without gene
   assert.equal(first.code, 200); assert.equal(first.data.feedback_status, 'done');
   assert.equal(first.data.feedback.summary, '保持稳定朗读。');
   assert.equal(state.logs[0].feedback, first.data.feedback.summary);
-  assert.equal(first.data.feedback_meta.prompt_version, 'ra-feedback-0.1');
+  assert.equal(first.data.feedback_meta.prompt_version, 'ra-feedback-0.2');
   assert.deepEqual((await invoke(feedbackRequest)).data, first.data);
   assert.equal(state.feedbackCalls, 1); assert.equal(state.logs.length, 1);
 });

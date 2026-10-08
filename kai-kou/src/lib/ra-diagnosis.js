@@ -117,7 +117,7 @@ export async function loadRADiagnosisFeedback({ client, result, fetchImpl = fetc
     signal?.removeEventListener('abort', abort);
   }
   return { feedback: buildTemplateFeedback({ evidence: result.evidence || [], metrics: result.metrics || {}, referenceText: result.question?.content || '' }),
-    feedback_meta: { provider: 'template', model: 'template', prompt_version: 'ra-feedback-0.1' }, feedback_status: 'done' };
+    feedback_meta: { provider: 'template', model: 'template', prompt_version: 'ra-feedback-0.2' }, feedback_status: 'done' };
 }
 
 function feedbackDelay(ms, signal) {

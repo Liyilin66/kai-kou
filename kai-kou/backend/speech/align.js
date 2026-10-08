@@ -225,6 +225,21 @@ function optionalNumber(value) {
   return Number.isFinite(value) ? value : null;
 }
 
+function compoundJoin(tokens) {
+  return tokens.map(token => token?.norm ?? '').join('');
+}
+
+function combinedTiming(tokens) {
+  const starts = tokens.map(token => token?.start_ms).filter(Number.isFinite);
+  const ends = tokens.map(token => token?.end_ms).filter(Number.isFinite);
+  const confidences = tokens.map(token => token?.confidence).filter(Number.isFinite);
+  return {
+    start_ms: starts.length ? Math.min(...starts) : null,
+    end_ms: ends.length ? Math.max(...ends) : null,
+    confidence: confidences.length ? Math.min(...confidences) : null,
+  };
+}
+
 export function alignWords(referenceText, hypothesis, options = {}) {
   const reference = normalizeTokens(referenceText);
   const threshold = options.lowConfidenceThreshold ?? 0.6;
@@ -254,6 +269,12 @@ export function alignWords(referenceText, hypothesis, options = {}) {
         { type: 'omission', cost: costs[i - 1][j] + 1 },
         { type: 'insertion', cost: costs[i][j - 1] + 1 },
       ];
+      if (i >= 2 && compoundJoin([reference[i - 2], reference[i - 1]]) === normalizedHypothesis[j - 1].norm) {
+        candidates.push({ type: 'compound_ref', cost: costs[i - 2][j - 1] });
+      }
+      if (j >= 2 && reference[i - 1].norm === compoundJoin([normalizedHypothesis[j - 2], normalizedHypothesis[j - 1]])) {
+        candidates.push({ type: 'compound_hyp', cost: costs[i - 1][j - 2] });
+      }
       let best = candidates[0];
       for (const candidate of candidates.slice(1)) if (candidate.cost < best.cost - 1e-10) best = candidate;
       costs[i][j] = best.cost;
@@ -265,6 +286,25 @@ export function alignWords(referenceText, hypothesis, options = {}) {
   let j = normalizedHypothesis.length;
   while (i || j) {
     const type = steps[i][j];
+    if (type === 'compound_ref') {
+      const refs = [reference[i - 2], reference[i - 1]];
+      const hyp = normalizedHypothesis[j - 1];
+      ops.push({ type: 'match', ref_index: refs[0].index, hyp_index: hyp.index,
+        ref_text: refs.map(token => token.text).join(' '), hyp_text: hyp.text,
+        start_ms: hyp.start_ms ?? null, end_ms: hyp.end_ms ?? null, confidence: hyp.confidence ?? null,
+        tag: null, similarity: null, ref_count: refs.length, hyp_count: 1 });
+      i -= 2; j--;
+      continue;
+    }
+    if (type === 'compound_hyp') {
+      const ref = reference[i - 1];
+      const hyps = [normalizedHypothesis[j - 2], normalizedHypothesis[j - 1]];
+      ops.push({ type: 'match', ref_index: ref.index, hyp_index: hyps[0].index,
+        ref_text: ref.text, hyp_text: hyps.map(token => token.text).join(' '),
+        ...combinedTiming(hyps), tag: null, similarity: null, ref_count: 1, hyp_count: hyps.length });
+      i--; j -= 2;
+      continue;
+    }
     const ref = type === 'insertion' ? null : reference[i - 1];
     const hyp = type === 'omission' ? null : normalizedHypothesis[j - 1];
     let tag = null;
@@ -276,7 +316,8 @@ export function alignWords(referenceText, hypothesis, options = {}) {
     ops.push({ type, ref_index: ref?.index ?? null, hyp_index: hyp?.index ?? null,
       ref_text: ref?.text ?? null, hyp_text: hyp?.text ?? null,
       start_ms: hyp?.start_ms ?? null, end_ms: hyp?.end_ms ?? null, confidence: hyp?.confidence ?? null,
-      tag, similarity: type === 'substitution' ? similarity(ref.norm, hyp.norm) : null });
+      tag, similarity: type === 'substitution' ? similarity(ref.norm, hyp.norm) : null,
+      ref_count: ref ? 1 : 0, hyp_count: hyp ? 1 : 0 });
     if (type !== 'insertion') i--;
     if (type !== 'omission') j--;
   }
@@ -284,7 +325,7 @@ export function alignWords(referenceText, hypothesis, options = {}) {
   const summary = { ref_count: reference.length, matched: 0, substituted: 0, omitted: 0, inserted: 0,
     repetitions: 0, fillers: 0, low_confidence: 0, homophones: 0, completeness: 0 };
   for (const op of ops) {
-    if (op.type === 'match') summary.matched++;
+    if (op.type === 'match') summary.matched += op.ref_count ?? 1;
     if (op.type === 'substitution' && op.tag !== 'low_confidence' && op.tag !== 'homophone') summary.substituted++;
     if (op.type === 'omission') summary.omitted++;
     if (op.type === 'insertion') summary.inserted++;

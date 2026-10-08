@@ -10,10 +10,26 @@ test('evaluation separates first pass, successful retry and template fallback wi
 test('no-evidence deterministic summaries do not inflate model acceptance rates',async()=>{
  const empty=sample('empty');empty.hypotheses.groq_whisper.text='hello world';empty.hypotheses.groq_whisper.words[1].text='world';
  const report=await evaluateFeedbackSamples([empty,sample('eligible')],async input=>({feedback:buildTemplateFeedback(input),meta:{attempts:input.evidence.length?1:0,template:!input.evidence.length,provider:'test',model:'test'}}));
- assert.equal(report.no_evidence_count,1);assert.equal(report.model_eligible_count,1);assert.equal(report.first_pass_rate,1);assert.equal(report.gate_passed,true);
+ assert.equal(report.no_evidence_count,1);assert.equal(report.model_eligible_count,1);assert.equal(report.first_pass_rate,1);assert.equal(report.gate_passed,false);assert.equal(report.template_identical_rate,1);
 });
 test('invalid feedback or no eligible samples cannot pass evaluation',async()=>{
  assert.equal((await evaluateFeedbackSamples([])).gate_passed,false);
  const report=await evaluateFeedbackSamples([sample('bad')],async()=>({feedback:{summary:'发音错误',suggestions:[]},meta:{attempts:1,template:false}}));
  assert.equal(report.gate_passed,false);assert.equal(report.first_pass_rate,0);assert.equal(report.results[0].validation.ok,false);
+});
+
+test('template action comparison ignores punctuation and counts each suggestion including fallback', async () => {
+ const report=await evaluateFeedbackSamples([sample('one')],async input=>{
+  const feedback=buildTemplateFeedback(input);
+  feedback.suggestions[0].action=feedback.suggestions[0].action.replace(/[，。]/g,'！');
+  return {feedback,meta:{attempts:1,template:false}};
+ });
+ assert.equal(report.template_identical_rate,1);assert.equal(report.template_identical_count,1);assert.equal(report.suggestion_count,1);assert.equal(report.gate_passed,false);
+});
+test('valid distinct evidence-grounded actions pass the incremental-value gate',async()=>{
+ const report=await evaluateFeedbackSamples([sample('one')],async input=>{
+  const feedback=buildTemplateFeedback(input);feedback.suggestions[0].action='先回听确认，再把 hello world 连成短语练三遍。';
+  return {feedback,meta:{attempts:1,template:false}};
+ });
+ assert.equal(report.template_identical_rate,0);assert.equal(report.gate_passed,true);
 });

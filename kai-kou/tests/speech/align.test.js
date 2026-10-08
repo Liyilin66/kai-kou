@@ -145,6 +145,37 @@ test('similarity assigns waterfront to water rather than first', () => {
   assert.equal(result.ops[0].similarity, 0.5);
 });
 
+test('adjacent compound splits and joins match when normalized words concatenate exactly', () => {
+  const splitHypothesis = alignWords('streetlights arrived', [
+    { text: 'street', start_ms: 100, end_ms: 240, confidence: 0.92 },
+    { text: 'lights', start_ms: 250, end_ms: 430, confidence: 0.88 },
+    { text: 'arrived', start_ms: 500, end_ms: 760, confidence: 0.96 },
+  ]);
+  assert.deepEqual(splitHypothesis.ops.map((op) => [op.type, op.ref_text, op.hyp_text, op.start_ms, op.end_ms]), [
+    ['match', 'streetlights', 'street lights', 100, 430],
+    ['match', 'arrived', 'arrived', 500, 760],
+  ]);
+  assert.equal(splitHypothesis.summary.completeness, 1);
+  assert.equal(splitHypothesis.summary.inserted + splitHypothesis.summary.substituted + splitHypothesis.summary.omitted, 0);
+
+  const classRoom = alignWords('classroom work', 'class room work');
+  assert.deepEqual(classRoom.ops.map((op) => [op.type, op.ref_text, op.hyp_text]), [
+    ['match', 'classroom', 'class room'],
+    ['match', 'work', 'work'],
+  ]);
+
+  const joinedHypothesis = alignWords('every day matters', [
+    { text: 'everyday', start_ms: 1000, end_ms: 1400, confidence: 0.9 },
+    { text: 'matters', start_ms: 1500, end_ms: 1800, confidence: 0.95 },
+  ]);
+  assert.deepEqual(joinedHypothesis.ops.map((op) => [op.type, op.ref_text, op.hyp_text, op.start_ms, op.end_ms]), [
+    ['match', 'every day', 'everyday', 1000, 1400],
+    ['match', 'matters', 'matters', 1500, 1800],
+  ]);
+  assert.equal(joinedHypothesis.summary.completeness, 1);
+  assert.equal(joinedHypothesis.summary.matched, 3);
+});
+
 test('repeated calls including ties produce identical results', () => {
   const input = ['the the boat water first', 'the boat waterfront'];
   assert.deepEqual(alignWords(...input), alignWords(...input));

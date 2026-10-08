@@ -11,6 +11,10 @@ function punctuationBoundaries(text) {
   return indices;
 }
 
+function referenceEndIndex(op) {
+  return op.ref_index + Math.max(1, op.ref_count ?? 1) - 1;
+}
+
 export function extractFeatures({ alignment, silences = [], speech_onset_ms = null, speech_offset_ms = null,
   referenceText = '', duration_ms } = {}) {
   const reference = alignment?.reference ?? [];
@@ -24,7 +28,7 @@ export function extractFeatures({ alignment, silences = [], speech_onset_ms = nu
     // reference word. This also handles omissions between recognized words.
     const anchor = timed.slice(0, i + 1).reverse().find(op => op.ref_index !== null);
     if (!anchor) continue;
-    boundaries.push({ time: (left.end_ms + right.start_ms) / 2, index: anchor.ref_index });
+    boundaries.push({ time: (left.end_ms + right.start_ms) / 2, index: referenceEndIndex(anchor) });
   }
   const pauses = silences.filter(s => Number.isFinite(s.start_ms) && Number.isFinite(s.end_ms) && s.end_ms > s.start_ms).map(s => {
     const midpoint = (s.start_ms + s.end_ms) / 2;
@@ -53,7 +57,8 @@ export function extractFeatures({ alignment, silences = [], speech_onset_ms = nu
   let end = -Infinity;
   for (const [a, b] of intervals) { silent += Math.max(0, b - Math.max(a, end)); end = Math.max(end, b); }
   const active = Math.max(0, span - silent);
-  const count = (alignment?.ops ?? []).filter(op => op.hyp_index !== null && !['filler', 'repetition'].includes(op.tag)).length;
+  const count = (alignment?.ops ?? []).filter(op => op.hyp_index !== null && !['filler', 'repetition'].includes(op.tag))
+    .reduce((sum, op) => sum + Math.max(1, op.hyp_count ?? 1), 0);
   const total = Number.isFinite(duration_ms) && duration_ms >= (speech_offset_ms ?? 0) ? duration_ms : speech_offset_ms ?? 0;
   return { pauses, metrics: {
     speech_onset_ms, speech_offset_ms, duration_ms: total,

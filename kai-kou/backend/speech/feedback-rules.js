@@ -1,3 +1,4 @@
+import { normalizeTokens } from './align.js';
 // Shared with the result page: deterministic fallbacks never call a provider.
 const TYPE_PATTERNS = {
   omission: /漏读|漏词|遗漏|未读|未识别到|缺词|少读/,
@@ -17,7 +18,16 @@ export function selectFeedbackEvidence(evidence = []) {
     .slice().sort((a, b) => (b.severity ?? 0) - (a.severity ?? 0)).slice(0, 6);
 }
 
-export function validateFeedback(payload, evidence = []) {
+export function feedbackSentenceContext(referenceText = '') {
+  let offset = 0;
+  return (String(referenceText).match(/[^.!?]+[.!?]*/g) ?? []).map((text, index) => {
+    const start = offset;
+    offset += normalizeTokens(text).length;
+    return { index, start, end: offset, text: text.trim() };
+  });
+}
+
+export function validateFeedback(payload, evidence = [], referenceText = '') {
   const errors = [];
   const object = value => value && typeof value === 'object' && !Array.isArray(value);
   if (!object(payload)) return { ok: false, errors: ['反馈必须是 JSON 对象'] };
@@ -31,12 +41,15 @@ export function validateFeedback(payload, evidence = []) {
   }
   checkText(payload.summary, 60, 'summary');
   const items = Array.isArray(evidence) ? evidence : [];
+  const sentences = feedbackSentenceContext(referenceText);
+  const sentenceFor = item => sentences.find(sentence => item?.ref_span?.[0] >= sentence.start
+    && item?.ref_span?.[0] < sentence.end && item.ref_span[1] <= sentence.end);
   const byId = new Map(items.map(item => [item?.id, item]));
   function checkGrounding(text, cited, label) {
     if (typeof text !== 'string') return;
     // Timing is displayed from code-owned evidence. The model may not invent it.
     if (TIME_CLAIM.test(text)) errors.push(`${label} 不允许自行描述时长，请引用证据标签回听`);
-    const words = new Set(cited.flatMap(item => englishWords([item?.text, item?.detail?.expected, item?.detail?.observed].filter(Boolean).join(' '))));
+    const words = new Set(cited.flatMap(item => englishWords([sentenceFor(item)?.text, item?.text, item?.detail?.expected, item?.detail?.observed].filter(Boolean).join(' '))));
     if (englishWords(text).some(word => !words.has(word))) errors.push(`${label} 含所引用证据之外的英文词语`);
   }
   checkGrounding(payload.summary, items, 'summary');
@@ -62,6 +75,10 @@ export function validateFeedback(payload, evidence = []) {
       errors.push(`${label}.issue 问题类型必须与引用证据一致`);
     }
     const cited = ids.map(id => byId.get(id));
+    if (ids.length > 1 && (types.size !== 1 || !sentenceFor(cited[0])
+      || cited.some(item => sentenceFor(item)?.index !== sentenceFor(cited[0]).index))) {
+      errors.push(`${label} 多个证据必须属于同一类型、同一句原文`);
+    }
     checkGrounding(issue, cited, `${label}.issue`);
     checkGrounding(action, cited, `${label}.action`);
     for (const [type, pattern] of Object.entries(TYPE_PATTERNS)) {

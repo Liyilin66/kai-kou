@@ -147,3 +147,33 @@ test('templates remain valid for numeric words, timed-looking reference text and
   }
   assert.equal(validateFeedback(buildTemplateFeedback({ evidence: [], metrics: { wpm: 123 } }), []).ok, true);
 });
+
+test('sentence context permits phrase practice but rejects words from other sentences', () => {
+  const refs = [{id:'E1',type:'omission',text:'spices',ref_span:[1,2]}];
+  const p = {summary:'这里可能漏读，先练好这一句。',suggestions:[{evidence_ids:['E1'],issue:'这里可能漏读 spices',action:'先回听，再把 carrying spices and perfumes 连起来慢读三遍。'}]};
+  const reference = 'Carrying spices and perfumes. Boats travel overseas!';
+  assert.equal(validateFeedback(p, refs, reference).ok,true);
+  p.suggestions[0].action='先回听，再把 boats 连起来慢读三遍。';
+  assert.equal(validateFeedback(p,refs,reference).ok,false);
+});
+test('multiple citations must share both exact type and sentence', () => {
+ const refs=[{id:'E1',type:'omission',text:'one',ref_span:[0,1]},{id:'E2',type:'omission',text:'two',ref_span:[1,2]},{id:'E3',type:'omission',text:'three',ref_span:[2,3]},{id:'E4',type:'repetition',text:'two',ref_span:[1,2]}];
+ const p={summary:'先针对漏读练习。',suggestions:[{evidence_ids:['E1','E2'],issue:'两处可能漏读',action:'先回听，再把 one two 连起来慢读。'}]};
+ assert.equal(validateFeedback(p,refs,'One two. Three!').ok,true);
+ p.suggestions[0].evidence_ids=['E1','E3'];assert.equal(validateFeedback(p,refs,'One two. Three!').ok,false);
+ p.suggestions[0].evidence_ids=['E1','E4'];assert.equal(validateFeedback(p,refs,'One two. Three!').ok,false);
+});
+test('sentence context respects question and exclamation boundaries and normalized contractions', () => {
+ const refs=[{id:'E1',type:'omission',text:'garden',ref_span:[4,5]}];
+ const p={summary:'可能漏读了一处词语。',suggestions:[{evidence_ids:['E1'],issue:'可能漏读 garden',action:'先回听，再把 garden grows 连起来慢读。'}]};
+ assert.equal(validateFeedback(p,refs,"Don't stop? The garden grows! Ships sail.").ok,true);
+ p.suggestions[0].action='先回听，再把 ships sail 连起来慢读。';
+ assert.equal(validateFeedback(p,refs,"Don't stop? The garden grows! Ships sail.").ok,false);
+});
+test('prompt gives an unrelated structure example without prescribing template wording',async()=>{
+ await generateEvidenceFeedback({evidence,callModel:async({prompt})=>{
+  assert.match(prompt,/EXAMPLE_ONLY/);assert.match(prompt,/同类型且在同一句/);
+  assert.doesNotMatch(prompt,/issue 使用下方示例|summary 使用|每条建议仅引用一个|可直接复用/);
+  return good();
+ }});
+});

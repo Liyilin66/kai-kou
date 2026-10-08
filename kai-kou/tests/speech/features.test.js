@@ -87,3 +87,26 @@ test('a decimal separator is not a natural pause boundary', () => {
   const { pauses } = extractFeatures({ alignment, referenceText, silences: [{ start_ms: 1100, end_ms: 1900 }] });
   assert.equal(pauses[0].type, 'hesitation');
 });
+
+test('compound matches anchor pauses after the last covered reference word and count spoken words', () => {
+  const referenceText = 'Every day, matters';
+  const alignment = alignWords(referenceText, [
+    { text: 'everyday', start_ms: 0, end_ms: 500 },
+    { text: 'matters', start_ms: 1600, end_ms: 2200 },
+  ]);
+  const { pauses, metrics } = extractFeatures({
+    alignment, referenceText, speech_onset_ms: 0, speech_offset_ms: 2200, duration_ms: 2200,
+    silences: [{ start_ms: 600, end_ms: 1400 }],
+  });
+  assert.equal(pauses[0].ref_index, 1);
+  assert.equal(pauses[0].text, 'day');
+  assert.equal(pauses[0].type, 'natural');
+  assert.equal(metrics.wpm, 2 * 60000 / 2200);
+
+  const split = alignWords('streetlights matter', [
+    { text: 'street', start_ms: 0, end_ms: 300 },
+    { text: 'lights', start_ms: 300, end_ms: 700 },
+    { text: 'matter', start_ms: 700, end_ms: 1100 },
+  ]);
+  assert.equal(extractFeatures({ alignment: split, speech_onset_ms: 0, speech_offset_ms: 1100 }).metrics.wpm, 3 * 60000 / 1100);
+});
