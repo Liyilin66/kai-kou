@@ -55,3 +55,22 @@ test('display retains original punctuation and avoids expanding contractions', (
   assert.deepEqual(words.map(word => word.text), ["Don't", 'stop.']);
   assert.equal(words[1].type, 'omission');
 });
+
+test('analysis includes browser transcript separately from recording and shadow request',async()=>{
+ const bodies=[];
+ const submit=createRADiagnosisSubmission({client:clientStub([]),createId:()=> 'attempt',fetchImpl:async(url,init)=>{
+  bodies.push(JSON.parse(init.body));return{ok:true,json:async()=>({status:'done',rules_version:'test'})};
+ }});
+ await submit({blob:new Blob(['audio']),questionId:'RA',speechDiagnosis,clientTranscript:'browser words'});
+ assert.equal(bodies[0].client_transcript,'browser words');assert.equal('client_transcript'in bodies[1],false);
+});
+test('unusable audio gives microphone guidance and discards its attempt for the next recording',async()=>{
+ let next=0;const events=[],bodies=[];
+ const submit=createRADiagnosisSubmission({client:clientStub(events),createId:()=>`attempt-${++next}`,fetchImpl:async(url,init)=>{
+  const body=JSON.parse(init.body);bodies.push(body);
+  return{ok:true,json:async()=>({status:bodies.length===1?'unusable_audio':'done',rules_version:'test'})};
+ }});
+ const input={blob:new Blob(['audio']),questionId:'RA',speechDiagnosis};
+ await assert.rejects(submit(input),/没有检测到朗读声音，请检查麦克风后重录/);
+ await submit(input);assert.notEqual(bodies[0].attempt_id,bodies[1].attempt_id);assert.equal(events.length,2);
+});

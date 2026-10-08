@@ -1263,7 +1263,7 @@ async function submitEvaluation() {
     if (diagnosisEnabled) {
       diagnosisSubmission ||= createRADiagnosisSubmission({ client: supabase });
       const result = await diagnosisSubmission({ blob: finalBlob, questionId: question.value.id,
-        speechDiagnosis: finalizedStopResult.value?.speechDiagnosis });
+        speechDiagnosis: finalizedStopResult.value?.speechDiagnosis, clientTranscript: transcript });
       practiceStore.$patch({ result, phase: "done" });
       if (!unmounted) router.push("/ra/result");
       return;
@@ -1312,6 +1312,7 @@ async function submitEvaluation() {
   } catch (error) {
     if (!diagnosisEnabled) throw error;
     uiStore.showToast(error?.name === "AbortError" ? "诊断超时，录音已保存，请重试提交。" : `${error?.message || "录音诊断失败，请稍后重试。"}`, "warning");
+    if (error?.code === "unusable_audio") diagnosisSubmission = null;
     practiceStore.setPhase("recording");
   } finally {
     isSubmitting.value = false;

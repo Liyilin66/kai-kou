@@ -49,14 +49,30 @@ export async function importPracticeLogs(client, options, directory = path.join(
     const previous = previousIndex >= 0 ? manifest[previousIndex] : null;
     const speaker = options.speaker || previous?.speaker_id || `spk-${createHash('sha256').update(log.user_id).digest('hex').slice(0, 12)}`;
     if (manifest.some((item, index) => index !== previousIndex && item.speaker_id === speaker && item.split !== options.split)) throw new Error(`Speaker ${speaker} already belongs to another split`);
-    let reference = log.score_json?.questionSnapshot?.content;
+    let analysis = null;
+    if (log.score_json?.analysis_id) {
+      const read = await client.from('speech_analyses').select('*').eq('id', log.score_json.analysis_id).eq('user_id', log.user_id).maybeSingle();
+      analysis = read.data;
+      if (read.error || !analysis || analysis.status !== 'done' || analysis.user_id !== log.user_id || analysis.question_id !== log.question_id) throw new Error(`Practice log ${log.id}: diagnosis unavailable or does not match`);
+      if (typeof analysis.client_transcript !== 'string') throw new Error(`Practice log ${log.id}: browser transcript unavailable; do not substitute Whisper text`);
+    }
+    let reference = analysis?.reference_text || log.score_json?.questionSnapshot?.content;
     if (!reference) {
       const { data: question, error: questionError } = await client.from('questions').select('content').eq('id', log.question_id).maybeSingle();
       if (questionError || !question?.content) throw new Error(`Practice log ${log.id}: reference text unavailable`);
       reference = question.content;
     }
     if (typeof reference !== 'string' || typeof log.transcript !== 'string') throw new Error(`Practice log ${log.id}: invalid reference or transcript`);
-    const audio = log.score_json?.audio;
+    const audio = analysis ? { bucket: 'practice-audio', path: analysis.audio_path } : log.score_json?.audio;
+    let whisper;
+    if (analysis) {
+      const words = analysis.aligned?.words ?? analysis.aligned?.hypothesis;
+      if (typeof analysis.transcript !== 'string' || !Array.isArray(words) || !Array.isArray(analysis.client_silences)) throw new Error(`Practice log ${log.id}: stored Whisper data unavailable`);
+      whisper = { text: analysis.transcript, words, silences: analysis.client_silences,
+        speech_onset_ms: analysis.metrics?.speech_onset_ms ?? null, speech_offset_ms: analysis.metrics?.speech_offset_ms ?? null,
+        duration_ms: analysis.metrics?.duration_ms ?? null, model: analysis.model, rules_version: analysis.rules_version };
+    }
+    const legacyScore = analysis ? analysis.legacy_score : log.score_json;
     if (!audio?.path || (audio.bucket && audio.bucket !== 'practice-audio') || !audio.path.startsWith(`ra/${log.user_id}/`) || audio.path.split('/').includes('..')) throw new Error(`Practice log ${log.id}: valid private RA audio path required`);
     let id = previous?.id;
     if (!id) {
@@ -77,8 +93,8 @@ export async function importPracticeLogs(client, options, directory = path.join(
       source: script ? 'constructed' : (previous?.source || 'real'), script_id: script?.id || previous?.script_id || null,
       speaker_id: speaker, device: options.device, split: options.split, consent: true,
       audio: { local_file: localFile, storage_path: audio.path },
-      hypotheses: { ...previous?.hypotheses, browser_asr: { text: log.transcript, practice_log_id: String(log.id) } },
-      old_scores: { ...(log.score_json?.scores || {}), ...(log.score_json?.overall != null ? { overall: log.score_json.overall } : {}) },
+      hypotheses: { ...previous?.hypotheses, browser_asr: { text: analysis ? analysis.client_transcript : log.transcript, practice_log_id: String(log.id) }, ...(whisper ? { groq_whisper: whisper } : {}) },
+      old_scores: { ...(legacyScore?.scores || {}), ...(legacyScore?.overall != null ? { overall: legacyScore.overall } : {}) },
       labels: script ? { status: 'labeled', errors: structuredClone(script.errors), labeled_by: 'recording-script', notes: `Planned errors from ${script.id}; verify that recording followed instructions.` }
         : previous?.labels || { status: 'unlabeled', errors: [], labeled_by: '', notes: '' }
     };

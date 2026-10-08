@@ -117,3 +117,52 @@ SQL步骤：在当前Supabase项目的SQL Editor粘贴并执行`kai-kou/db/speec
 当前Supabase尚未创建speech_analyses表，不能宣称实际持久化或影子评分已通过。保存失败/请求中断可能保留processing占用；不会自动重新识别收费，需要运营排查恢复。客户端静音属于浏览器观测值，服务端校验范围并原样保存，不将其作为官方分数。录音签名链接在浏览器按用户权限生成，不公开存储桶。
 
 本地手机截图：仓库忽略目录`output/playwright/ra-diagnosis/`。真实分析详情：`kai-kou/output/qa/task5-real-analysis.json`。两者均不提交。
+
+## 审查结果（Claude，2026-10-08）
+
+**结论：整体通过，有 1 处必须修改（会污染评测数据），2 处小修改。修完后再做真机验收。** 223 项测试已复跑通过；SQL 已审，可以安全执行；鉴权、录音路径校验、`attempt_id` 幂等、影子评分的并发占位、"先存录音再分析"都正确。
+
+### 必改：新流程丢掉了浏览器识别文本
+
+开关打开后，`complete_ra_analysis` 把 **Whisper 的识别文本**写进 `practice_logs.transcript`，浏览器识别文本完全没有保存。后果：
+
+1. **影子评分测的不是旧方案。** `legacy_score` 用的是 `row.transcript`（Whisper 文本），而用户过去看到的旧分数是"浏览器文本 + LLM"。这样存下来的对比数据不能说明"旧方案的问题"。
+2. **评测导入会把 Whisper 文本当成浏览器基线。** `eval-import-practice-log.js` 读的是 `practice_logs.transcript`，新记录导入后，`browser_asr` 里装的其实是 Whisper 结果，对比表会失真。
+3. **白白丢掉了最有价值的数据。** 每一次真实练习本来都能同时得到"浏览器文本 vs Whisper 文本"的一对数据。
+
+修改：
+
+- `speech_analyses` 增加 `client_transcript text`。SQL 写成可重复执行的 `alter table public.speech_analyses add column if not exists client_transcript text;`，放在建表语句之后——用户可能已经执行过旧版本，追加执行这一句即可。
+- 前端提交时附带浏览器识别文本（`RAView.vue` 里已有的 `finalizedTranscript`），服务端校验长度（≤ 5000 字符）后存入 `client_transcript`。
+- 影子评分改用 `client_transcript`；为空时 `legacy_status = 'failed'`，不调用旧接口。
+- `eval-import-practice-log.js`：遇到 `score_json.analysis_id` 的新记录时，从 `speech_analyses` 读取 `client_transcript` 作为 `browser_asr`，并把服务端已有的 Whisper 结果（`transcript` 与 `aligned` 中的词时间戳）、`client_silences` 写入 `groq_whisper`，不再重复调用识别；旧记录保持原逻辑。
+- 补测试：影子评分使用的是浏览器文本；导入新记录时两种识别结果各归其位。
+
+### 小修改
+
+1. **没有检测到声音时的提示。** `status = 'unusable_audio'` 时前端现在提示"录音诊断失败，请稍后重试"，会让用户以为是系统故障。改为"没有检测到朗读声音，请检查麦克风后重录"，并且不保留这次的 `attempt_id`。
+2. **任务文档里的 SQL 执行说明**同步加上 `client_transcript` 这一句。
+
+### 用户录 5 条混合样本时
+
+在新流程修好之前，请在**生产地址**（开关关闭）录制，这样浏览器文本和录音都会按旧方式保存，导入不受影响。
+
+## 审查修复实施记录
+
+- [x] 浏览器转写通过`client_transcript`独立提交、校验（最多5000字符）并保存；Whisper结果继续独立保存。
+- [x] 影子评分只使用浏览器转写；为空时标记failed，不调用旧评分、不用Whisper补位。
+- [x] 新诊断练习导入时从同一用户的speech_analyses读取两份转写，browser_asr与groq_whisper分别保存；复用服务端词时间戳和静音，不重复识别。
+- [x] 保留原始Whisper词数组`aligned.words`，避免缩写等记号再次归一化后产生重复词。
+- [x] 缺失历史浏览器转写时拒绝生成假基线；旧练习记录的导入逻辑保持不变。
+- [x] 无声音提示改为“没有检测到朗读声音，请检查麦克风后重录”，并丢弃这次attempt_id。
+- [x] 231项测试通过；开关关闭和开启两种构建通过。
+- [ ] 用户追加执行字段迁移后进行Preview真实写库、影子评分与真机验收。
+
+### 已执行过旧建表 SQL 的用户仅需追加
+
+```sql
+alter table public.speech_analyses
+  add column if not exists client_transcript text;
+```
+
+不必重新创建表或重跑RPC。若尚未执行过旧版本，则执行更新后的`db/speech-analyses.sql`全文。已有记录丢失的浏览器文本无法通过这个迁移自动恢复；导入工具不会拿Whisper文字冒充浏览器结果。迁移后用预览录制新记录再验收。

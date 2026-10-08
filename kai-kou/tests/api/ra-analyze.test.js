@@ -4,7 +4,7 @@ import { createAnalyzeHandler } from '../../api/ra/analyze.js';
 import { diagnoseRecording, validateAnalysisInput } from '../../backend/speech/analyze-service.js';
 
 const body = { attempt_id: 'attempt-0001', question_id: 'RA_001', audio_path: 'ra/user/recording.webm',
-  duration_ms: 2000, speech_onset_ms: 100, speech_offset_ms: 1900, silences: [] };
+  duration_ms: 2000, speech_onset_ms: 100, speech_offset_ms: 1900, silences: [], client_transcript: 'The browser reference.' };
 function fixture(options = {}) {
   const state = { row: null, calls: 0, transcribeCalls: 0, logs: [], legacyCalls: 0, ...options };
   const db = {
@@ -46,7 +46,8 @@ function fixture(options = {}) {
   const legacyHandler = async (req, res) => {
     state.legacyCalls++;
     assert.equal(req.body.questionContent, state.row.reference_text);
-    assert.equal(req.body.transcript, state.row.transcript);
+    assert.equal(req.body.transcript, state.row.client_transcript);
+    assert.notEqual(req.body.transcript, state.row.transcript);
     if (state.legacyFails) res.status(502).json({ error: 'provider_failed' });
     else res.json({ overall: 70, provider_used: 'groq' });
   };
@@ -71,6 +72,25 @@ test('diagnosis uses server reference, persists scoreless log and versions', asy
   assert.equal(state.logs.length, 1);
   assert.equal(state.logs[0].overall, undefined);
   assert.ok(result.data.timings_ms.transcribe >= 0);
+  assert.equal(state.row.client_transcript, body.client_transcript);
+  assert.equal(state.row.transcript, 'The server reference.');
+});
+test('browser transcript accepts empty and missing text, preserves up to 5000 characters', async () => {
+  for (const client_transcript of ['', undefined, 'x'.repeat(5000)]) {
+    const { invoke, state } = fixture();
+    assert.equal((await invoke({ ...body, client_transcript })).code, 200);
+    assert.equal(state.row.client_transcript, client_transcript ?? '');
+  }
+});
+test('invalid browser transcripts fail before claiming or transcribing', async () => {
+  for (const client_transcript of [null, 1, {}, [], 'x'.repeat(5001)]) {
+    const { invoke, state } = fixture();
+    const result = await invoke({ ...body, client_transcript });
+    assert.equal(result.code, 400);
+    assert.equal(result.data.error, 'invalid_client_transcript');
+    assert.equal(state.row, null);
+    assert.equal(state.calls, 0);
+  }
 });
 test('repeat attempt does not charge or log twice', async () => {
   const { invoke, state } = fixture();
@@ -133,6 +153,19 @@ test('shadow failure leaves diagnosis intact and logs no duplicate', async () =>
   assert.equal((await invoke({ action: 'legacy_score', attempt_id: body.attempt_id })).data.legacy_status, 'failed');
   assert.equal(state.row.status, 'done'); assert.equal(state.row.legacy_score, null); assert.equal(state.logs.length, 1);
 });
+test('empty browser transcript fails shadow without substituting Whisper or charging on retry', async () => {
+  for (const client_transcript of ['', '   ', undefined]) {
+    const { invoke, state } = fixture();
+    await invoke({ ...body, client_transcript });
+    const request = { action: 'legacy_score', attempt_id: body.attempt_id };
+    assert.equal((await invoke(request)).data.legacy_status, 'failed');
+    assert.equal((await invoke(request)).data.legacy_status, 'failed');
+    assert.equal(state.legacyCalls, 0);
+    assert.equal(state.row.status, 'done');
+    assert.equal(state.row.legacy_score, null);
+    assert.equal(state.logs.length, 1);
+  }
+});
 test('shadow cannot read another account attempt', async () => {
   const { invoke, state } = fixture(); await invoke(); state.row.user_id = 'other';
   assert.equal((await invoke({ action: 'legacy_score', attempt_id: body.attempt_id })).code, 404);
@@ -145,4 +178,15 @@ test('silent browser signal returns unusable without provider charge or fabricat
   assert.equal(result.code, 200); assert.equal(result.data.status, 'unusable_audio');
   assert.equal(state.transcribeCalls, 0); assert.equal(state.logs.length, 0);
   assert.deepEqual(result.data.evidence, []); assert.equal(result.data.overall, undefined);
+});
+
+test('diagnosis retains original Whisper words for eval replay without normalizing twice', async () => {
+  const words = [{ text: "Don't", start_ms: 100, end_ms: 500 }, { text: 'stop', start_ms: 600, end_ms: 1000 }];
+  const result = await diagnoseRecording({
+    db: { storage: { from: () => ({ download: async () => ({ data: new Blob(['audio']) }) }) } },
+    row: { reference_text: "Don't stop.", audio_path: body.audio_path }, body,
+    transcribe: async () => ({ text: "Don't stop.", words, provider: 'groq', model: 'whisper-large-v3' })
+  });
+  assert.deepEqual(result.aligned.words, words);
+  assert.equal(result.transcript, "Don't stop.");
 });

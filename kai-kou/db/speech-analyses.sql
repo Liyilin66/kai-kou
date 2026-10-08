@@ -21,6 +21,8 @@ create table if not exists public.speech_analyses (
   updated_at timestamptz not null default now(),
   unique (user_id, attempt_id)
 );
+-- Existing installations only need this additive, repeatable migration.
+alter table public.speech_analyses add column if not exists client_transcript text;
 alter table public.speech_analyses enable row level security;
 revoke all on public.speech_analyses from anon, authenticated;
 grant select on public.speech_analyses to authenticated;

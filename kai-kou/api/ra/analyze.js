@@ -38,7 +38,11 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
         if (!claimed.data) return res.status(202).json({ legacy_status: 'processing' });
         let status = 200, payload;
         const capture = { setHeader() {}, status(code) { status = code; return this; }, json(value) { payload = value; return this; }, end() { return this; } };
-        try { await legacyHandler({ method: 'POST', headers: { authorization: bearer }, body: { taskType: 'RA', transcript: row.transcript, questionContent: row.reference_text } }, capture); } catch { status = 500; /* Shadow failure must not alter diagnosis. */ }
+        // Only browser recognition reproduces the old scoring input. Never replace
+        // missing browser text with the new provider's more accurate transcript.
+        if (typeof row.client_transcript === 'string' && row.client_transcript.trim()) {
+          try { await legacyHandler({ method: 'POST', headers: { authorization: bearer }, body: { taskType: 'RA', transcript: row.client_transcript, questionContent: row.reference_text } }, capture); } catch { status = 500; /* Shadow failure must not alter diagnosis. */ }
+        }
         const successful = status === 200 && payload && !payload.error && Number.isFinite(payload.overall) && payload.provider_used && payload.provider_used !== 'none';
         const saved = await db.from('speech_analyses').update({ legacy_score: successful ? payload : null, legacy_status: successful ? 'done' : 'failed' }).eq('id', row.id).eq('user_id', user.id);
         if (saved.error) throw new Error('legacy_save_failed');
@@ -51,7 +55,7 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
       if (!question?.content) return res.status(404).json({ error: 'question_not_found' });
       const claim = await db.from('speech_analyses').insert({ user_id: user.id, attempt_id: body.attempt_id, task_type: 'RA',
         question_id: String(question.id), reference_text: question.content, audio_path: body.audio_path,
-        status: 'processing', client_silences: body.silences }).select('*').single();
+        status: 'processing', client_silences: body.silences, client_transcript: body.client_transcript ?? '' }).select('*').single();
       if (claim.error?.code === '23505') {
         const concurrent = await lookup();
         if (concurrent.error || !concurrent.data) throw new Error('analysis_read_failed');

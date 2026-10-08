@@ -8,6 +8,7 @@ export const AUDIO_BUCKET = 'practice-audio';
 export function validateAnalysisInput(body, userId) {
   if (typeof body.attempt_id !== 'string' || !/^[A-Za-z0-9_-]{8,100}$/.test(body.attempt_id)) return [400, 'invalid_attempt_id'];
   if (body.action === 'legacy_score') return null;
+  if (body.client_transcript !== undefined && (typeof body.client_transcript !== 'string' || body.client_transcript.length > 5000)) return [400, 'invalid_client_transcript'];
   if (typeof body.audio_path !== 'string' || !body.audio_path.startsWith(`ra/${userId}/`) || body.audio_path.length > 500
     || body.audio_path.includes('..') || /[\\%?#\u0000-\u001f]/.test(body.audio_path)) return [403, 'invalid_audio_path'];
   if (!['string', 'number'].includes(typeof body.question_id) || !String(body.question_id).trim() || String(body.question_id).length > 100) return [400, 'invalid_question_id'];
@@ -58,6 +59,6 @@ export async function diagnoseRecording({ db, row, body, transcribe = transcribe
   timings.total = Math.round(performance.now() - started);
   return { status: recognized.words.length ? 'done' : 'unusable_audio', transcript: recognized.text,
     provider: recognized.provider, model: recognized.model, rules_version: RULES_VERSION,
-    aligned: alignment, metrics: features.metrics, evidence, timings_ms: timings,
+    aligned: { ...alignment, words: recognized.words }, metrics: features.metrics, evidence, timings_ms: timings,
     error_code: recognized.words.length ? null : 'no_speech_detected' };
 }

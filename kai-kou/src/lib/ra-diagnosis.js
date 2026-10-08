@@ -3,9 +3,9 @@ import { normalizeTokens } from "../../backend/speech/align.js";
 // One submission object belongs to one finalized recording. Retrying analysis
 // reuses both the upload and attempt ID; recording again creates a new object.
 export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createId = () => crypto.randomUUID() }) {
-  const attemptId = createId();
+  let attemptId = createId();
   let audioPath = '';
-  return async function submit({ blob, questionId, speechDiagnosis }) {
+  return async function submit({ blob, questionId, speechDiagnosis, clientTranscript = '' }) {
     const { data, error } = await client.auth.getSession();
     const session = data?.session;
     if (error || !session?.access_token || !session.user?.id) throw new Error('请先登录，再提交诊断。');
@@ -25,12 +25,18 @@ export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createI
     try {
       response = await fetchImpl('/api/ra/analyze', {
         method: 'POST', headers, signal: controller.signal,
-        body: JSON.stringify({ attempt_id: attemptId, question_id: questionId, audio_path: audioPath,
+        body: JSON.stringify({ attempt_id: attemptId, question_id: questionId, audio_path: audioPath, client_transcript: clientTranscript,
           silences: speechDiagnosis.silences, speech_onset_ms: speechDiagnosis.speech_onset_ms,
           speech_offset_ms: speechDiagnosis.speech_offset_ms, duration_ms: speechDiagnosis.duration_ms })
       });
     } finally { clearTimeout(timeout); }
     const result = await response.json();
+    if (result.status === 'unusable_audio') {
+      audioPath = ''; attemptId = createId();
+      const error = new Error('没有检测到朗读声音，请检查麦克风后重录');
+      error.code = 'unusable_audio';
+      throw error;
+    }
     if (!response.ok || result.status !== 'done') throw new Error(result.message || result.error?.message || result.error || '录音诊断失败，请稍后重试。');
     // Server reads the saved transcript and reference, and writes the shadow
     // score itself. No client-provided score is trusted or shown to the learner.
