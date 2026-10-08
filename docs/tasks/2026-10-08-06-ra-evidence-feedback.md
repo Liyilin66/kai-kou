@@ -131,7 +131,7 @@ alter table public.speech_analyses
 
 ### 必须执行的完整迁移
 
-在 Supabase SQL Editor 执行 **`kai-kou/db/ra-feedback.sql` 全文**。除三个字段外，文件还创建 `complete_ra_feedback` 原子函数并限制为 service_role 调用。仅执行原任务上面的三字段 SQL 不足以启用持久化。
+在 Supabase SQL Editor 执行 **`db/ra-feedback.sql` 全文**。除三个字段外，文件还创建 `complete_ra_feedback` 原子函数并限制为 service_role 调用。仅执行原任务上面的三字段 SQL 不足以启用持久化。
 
 函数仅更新同一用户、同一 analysis_id 的 RA 历史记录，匹配数异常时整笔回滚。保存失败时保留 processing 占位，避免重试导致重复模型调用；这种异常需要检查数据库并人工恢复状态。用户已确认本次迁移执行成功；完整线上存储验收仍待新版本预览环境验证。
 

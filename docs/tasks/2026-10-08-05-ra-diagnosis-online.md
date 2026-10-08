@@ -106,7 +106,7 @@ LLM 文字反馈**不在本任务**（任务 6）。本任务的结果页只展�
 - [ ] Preview真实手机录音→分析→结果，验证speech_analyses、practice_logs、legacy_score保存。
 - [ ] Claude独立审查通过后用户确认合并main。
 
-SQL步骤：在当前Supabase项目的SQL Editor粘贴并执行`kai-kou/db/speech-analyses.sql`全文，然后通知Codex进行只读验证。
+SQL步骤：在当前Supabase项目的SQL Editor粘贴并执行`db/speech-analyses.sql`全文，然后通知Codex进行只读验证。
 
 ### 影子评分实现取舍
 
@@ -116,7 +116,7 @@ SQL步骤：在当前Supabase项目的SQL Editor粘贴并执行`kai-kou/db/speec
 
 当前Supabase尚未创建speech_analyses表，不能宣称实际持久化或影子评分已通过。保存失败/请求中断可能保留processing占用；不会自动重新识别收费，需要运营排查恢复。客户端静音属于浏览器观测值，服务端校验范围并原样保存，不将其作为官方分数。录音签名链接在浏览器按用户权限生成，不公开存储桶。
 
-本地手机截图：仓库忽略目录`output/playwright/ra-diagnosis/`。真实分析详情：`kai-kou/output/qa/task5-real-analysis.json`。两者均不提交。
+本地手机截图：仓库忽略目录`output/playwright/ra-diagnosis/`。真实分析详情：`output/qa/task5-real-analysis.json`。两者均不提交。
 
 ## 审查结果（Claude，2026-10-08）
 

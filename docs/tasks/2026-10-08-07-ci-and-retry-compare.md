@@ -9,7 +9,7 @@
 新增仓库根目录 `.github/workflows/test.yml`：
 
 - 触发：推送到 `lyl` / `main`，以及指向这两个分支的 Pull Request。
-- 工作目录 `kai-kou`；Node 版本与本机一致（24）；`npm ci` → `npm test`。
+- 工作目录仓库根（任务 8 已迁移）；Node 版本与本机一致（24）；`npm ci` → `npm test`。
 - 构建矩阵：`VITE_RA_DIAGNOSIS=on` 和 `off` 各跑一次 `npm run build`。
 - 不需要任何密钥（现有测试全部离线）。如果某个测试依赖本机 `.env.local`，修测试，不要往 CI 里加密钥。
 - 验收：推送后 GitHub Actions 页面两种构建都为绿色。
@@ -59,7 +59,7 @@
 
 ### A：CI
 
-新增根目录 `.github/workflows/test.yml`，push 和 PR 覆盖 lyl/main，Node 24，工作目录 kai-kou，npm 缓存依据 app lockfile，npm ci / npm test / on-off 矩阵构建，不配置密钥。测试现有数据和服务调用均走本地 fixture 或 mock。
+新增根目录 `.github/workflows/test.yml`，push 和 PR 覆盖 lyl/main，Node 24，原工作目录 kai-kou（任务 8 后为仓库根），npm 缓存依据 app lockfile，npm ci / npm test / on-off 矩阵构建，不配置密钥。测试现有数据和服务调用均走本地 fixture 或 mock。
 
 GitHub Actions 的实际运行状态待推送后验证并记录，不以本地构建替代远端绿色检查。
 

@@ -25,7 +25,7 @@ Use stable paths such as `wfd/WFD_001.mp3` in question data when uploaded files 
 
 ## Generate Audio
 
-From `kai-kou/`:
+From ``:
 
 ```bash
 npm run wfd:tts:generate -- --inputFile "d:\Desktop\WFD_cleaned_with_wordcount_difficulty.xlsx" --sheetName WFD --outputDir "d:\PTE\wfd\audio" --outputQuestionFile "d:\PTE\wfd\WFD_with_generated_audio.xlsx" --reportFile "d:\PTE\wfd\tts_generation_report.json" --skipExisting true

@@ -26,11 +26,62 @@
 .playwright-cli/
 
 # Private speech evaluation recordings
-/kai-kou/eval/speech/audio/
+/eval/speech/audio/
 
 # Local speech provider response cache
-/kai-kou/eval/speech/cache/
+/eval/speech/cache/
 
 # Private listening labeling kit and manifest backups
-/kai-kou/eval/speech/labeling/
+/eval/speech/labeling/
 *.json.bak
+
+# Application ignore rules (merged during flattening)
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.local
+db/*.db
+db/*.db-*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vercel
+.agents/
+.claude/
+.codex/
+.omc/
+.omx/
+.playwright-cli/
+.tmp-opinion/
+.playwright-cli/*.png
+.playwright-cli/*.yml
+output/
+test-results/
+
+# Generated script reports
+scripts/reports/*.json
+
+# Generated scrape outputs; keep data/ available for deliberate source data.
+data/firefly-rs-predictions.csv
+data/firefly-rs-predictions.json
+data/firefly-rs-predictions.report.md
+.env*

@@ -79,7 +79,7 @@ export function extractFeatures({ alignment, silences, speech_onset_ms, speech_o
 - `ffmpeg` 只作为**本机开发工具**（`brew install ffmpeg`），不加入项目依赖。脚本检测不到时给出安装提示并退出。
 - 修改 `scripts/eval-speech.js`：当识别结果带 `words` 和 `silences` 时，用 `features.js` 产出 `hesitation` / `long_pause` 预测，参与评测；浏览器基线保持原逻辑。
 - `eval-speech.js` 增加 `--compare browser_asr,groq_whisper`：在同一批已标注样本上并排输出两种识别的各类指标。
-- `.gitignore` 增加 `kai-kou/eval/speech/cache/`。
+- `.gitignore` 增加 `eval/speech/cache/`。
 
 ## 不做
 
@@ -146,7 +146,7 @@ export function extractFeatures({ alignment, silences, speech_onset_ms, speech_o
 
 时间位置是能量区间与最近识别词边界的算法定位，尚未完成人工逐段回听校准。恒定非零噪声与连续发声仅靠能量无法区分；默认保守处理。`late_start` 初始阈值 3000ms 是开发规则，不是 PTE 自动结束录音规则。
 
-运行（在 kai-kou/ 下）：
+运行（在  下）：
 
 ```bash
 node scripts/eval-run-provider.js

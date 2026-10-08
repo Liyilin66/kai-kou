@@ -504,10 +504,10 @@ create table public.learner_skill_state (
 
 ### 9.2 仓库结构扁平化
 
-仓库已于 2026-10-07 从 `PTE` 改名为 `kai-kou`，但代码仍在 `kai-kou/` 子目录中，路径呈现为 `kai-kou/kai-kou/...`。计划在 README 重写时一并处理：
+仓库已于 2026-10-07 从 `PTE` 改名为 `kai-kou`，应用目录现已在任务 8 分支移至仓库根，待 Claude 审查后与生产设置同步发布：
 
-- 将 `kai-kou/` 下的内容移到仓库根目录，合并根目录与子目录的 `README.md`、`AGENTS.md`、`.gitignore`。
-- **同步修改 Vercel 项目的 Root Directory 设置**（当前应指向 `kai-kou`），否则线上部署会失败。
+- 将旧应用子目录下的内容移到仓库根目录，合并根目录与子目录的 `README.md`、`AGENTS.md`、`.gitignore`。
+- **同步修改 Vercel 项目的 Root Directory 设置**（待发布时由 `kai-kou` 改为空），否则线上部署会失败。
 - 用 `git mv` 保留文件历史；迁移后验证本地 `npm run dev`、`npm run dev:api` 和一次预览部署。
 
 ### 9.3 演示视频（2–3 分钟）
@@ -601,7 +601,7 @@ create table public.learner_skill_state (
 - [ ] 私教上下文接入弱项证据
 
 ### 第五轮
-- [ ] 仓库结构扁平化（`kai-kou/` 移到根目录 + 改 Vercel Root Directory）
+- [ ] 仓库结构扁平化（`` 移到根目录 + 改 Vercel Root Directory）
 - [ ] README 重写
 - [ ] 演示视频
 - [ ] 简历更新

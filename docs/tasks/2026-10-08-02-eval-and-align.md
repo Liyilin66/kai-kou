@@ -30,7 +30,7 @@
 3. `eval/speech/` 评测集目录与标注格式
 4. `scripts/eval-import-practice-log.js`：把线上练习记录导入评测集
 5. `scripts/eval-speech.js`：跑评测、输出指标
-6. 根目录 `.gitignore` 增加 `kai-kou/eval/speech/audio/`
+6. 根目录 `.gitignore` 增加 `eval/speech/audio/`
 
 **不做**：接入任何语音服务、修改 RA 页面或 `/api/score`、修改旧的结果页本地对齐逻辑（它将被替换）。
 
@@ -254,7 +254,7 @@ node scripts/eval-speech.js [--split dev|test|all] [--hypothesis browser_asr]
 
 ### 操作示例与数据边界
 
-在 `kai-kou/` 下运行：
+在 `` 下运行：
 
 ```bash
 node scripts/eval-import-practice-log.js --log-id <id> --user-id <本人账号UUID> --speaker spk01 --device iphone-chrome --split dev
