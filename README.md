@@ -132,7 +132,7 @@ Example:
 ```bash
 GEMINI_API_KEY=your_real_gemini_api_key
 GROQ_API_KEY=your_real_groq_api_key
-LLM_GROQ_MODEL=llama-3.3-70b-versatile
+LLM_GROQ_MODEL=openai/gpt-oss-120b
 LLM_PRIMARY_TIMEOUT_MS=8000
 LLM_FALLBACK_TIMEOUT_MS=8000
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
