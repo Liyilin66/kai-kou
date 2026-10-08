@@ -204,7 +204,7 @@ Server-side only (never expose to frontend):
 
 - `GEMINI_API_KEY`: required, primary provider key
 - `GROQ_API_KEY`: recommended Groq key name
-- `LLM_GROQ_MODEL`: default `llama-3.3-70b-versatile`
+- `LLM_GROQ_MODEL`: default `openai/gpt-oss-120b`
 - `LLM_PRIMARY_TIMEOUT_MS`: Gemini timeout (ms), default `8000`
 - `LLM_FALLBACK_TIMEOUT_MS`: Groq timeout (ms), default `8000`
 
