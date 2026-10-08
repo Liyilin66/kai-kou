@@ -1,59 +1,114 @@
-# Kai-Kou（开口）
+# 开口（Kai-Kou）
 
-Kai-Kou (开口) is an AI practice platform for the PTE Academic speaking and writing tasks.
+[![Test and build](https://github.com/Liyilin66/kai-kou/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Liyilin66/kai-kou/actions/workflows/test.yml)
 
-## Main App
+> Kai-Kou is a PTE Academic speaking practice app that diagnoses Read Aloud recordings word by word, with every flagged issue linked back to the audio so learners can verify it.
 
-The product source lives at the repository root.
+开口是一个 PTE 口语练习平台。RA（朗读）题基于**真实录音**逐词诊断，每个标出的问题都能点击回听核验。
+
+线上地址：<https://www.yli.cc.cd>
+
+<p align="center">
+  <img src="docs/images/ra-diagnosis-result-mobile.png" width="320" alt="RA 诊断结果页（手机）：指标卡、练习建议、原文逐词标注与可回听证据">
+</p>
+<p align="center"><sub>RA_024 一条真实录音的诊断结果：指标 → 练习建议 → 原文标注 → 可回听证据。截图由当前代码在本地渲染，不含账号信息。</sub></p>
+
+## 问题：文字评分看不到声音
+
+旧方案是"浏览器语音识别 → LLM 读识别文字打分"。模型看不到停顿和发音，只能根据一段可能已经出错的文字推测。
+
+- **同一段录音，结论差很多。** RA_023 的同一条录音：浏览器识别的完整度 84%、标出 9 处问题；Groq Whisper 识别完整度 98%、标出 1 处。旧方案据浏览器文字给出内容分 58。
+- **分数随模型变化。** 同水平的朗读，因主备模型不同，总分相差约 20 分（6 次练习的观察，样本很小，仅作现象记录）。
+
+问题不在提示词，而在输入：分数缺少可以核验的依据。
+
+## 方案：代码出证据，用户回听核验
+
+```mermaid
+flowchart LR
+    A["录音"] --> B["浏览器端<br/>能量检测停顿"]
+    B --> C["上传私有存储<br/>Supabase Storage"]
+    C --> D["Groq Whisper<br/>词级时间戳"]
+    D --> E["与原文逐词对齐<br/>数字 / 同音词 / 复合词 / 英美拼写归一化"]
+    E --> F["停顿分类与语速"]
+    F --> G["证据列表<br/>原文位置 + 录音时间段"]
+    G --> H["结果页标注<br/>点击回听"]
+    H --> I["重录同一题<br/>与上次对比"]
+```
+
+每条证据记录原文位置、识别到的词和录音时间段。结果页上的标注、练习建议和"可回听的证据"都指向同一组编号，点击即跳到对应录音片段。
+
+## 设计取舍
+
+- **代码负责判断，模型不打分。** 对齐、停顿、语速、问题类型都由确定性代码计算。诊断页不再展示发音分和 10–90 总分：没有可靠依据的数字，宁可不给。
+- **识别不确定时不下结论。** 同音词、低置信度的位置不算用户错误。替换类问题只写"可能读错或识别不清，请回听"，因为"识别结果不同"不等于"用户读错"（评测中 Whisper 的 2 处误报正是这种情况）。
+- **选通用识别（方案 A），而不是按原文做发音评估。** 通用识别成本和外部依赖更低，接入快。代价是识别模型会按语境"纠正"读错的词，文本对齐就看不到这些问题，评测中的低召回率正来自这里。
+- **停顿改由音频能量检测。** Whisper 的词级时间戳会把停顿吸收进相邻词的时长，按时间戳算停顿不可靠。因此停顿和开口延迟在浏览器端按音频能量计算，再与词对齐结果合并。
+- **LLM 练习建议按预定规则退回模板。** 先定好门槛（首次通过率 ≥ 80%，最终 ≥ 95%，与模板相同 ≤ 20%），连续 3 轮评测未达标：最终通过率 33%，与模板相同的建议 78%。按事先约定改为由证据直接生成的确定性模板；模型生成和校验代码保留，可随时重新评测。
+
+## 评测：浏览器识别 vs Whisper
+
+7 条真实 RA 录音、48 个人工听音确认的明确位置；"报错"指原文位置被文本对齐标记为有问题。
+
+| 识别来源 | 报错精确率 Precision | 召回率 Recall | 误报 FP | 位置准确率 Accuracy |
+|---|---:|---:|---:|---:|
+| 浏览器 Web Speech API | 27.7%（13/47） | 100.0%（13/13） | 34 | 29.2%（14/48） |
+| Groq Whisper large-v3 | 71.4%（5/7） | 38.5%（5/13） | 2 | 79.2%（38/48） |
+
+**结论：** 误报 34 → 2，精确率 27.7% → 71.4%。召回率只有 38.5%：漏报的 8 处，Whisper 转写都与原文相同，文本对齐无法发现。
+
+**局限：** 只有 1 位说话人、48 个位置；候选位置由两套识别结果挑出，会富集浏览器的错误，表中数字不是全文词准确率，也不能推广到其他用户。完整口径、逐样本数据和漏报分析见 [RA 诊断评测报告](docs/ra-diagnosis-eval.md)。
+
+**停顿检测：** 待构造样本验证（录音完成后更新）。本轮标注未覆盖停顿，以上数字只评测词语对齐。
+
+## 工程
+
+- **模型主备切换：** 修复切换规则，主模型 401 / 402 / 403 / 404 / 500 都会切到备用，此前欠费（402）会直接失败。
+- **结果服务端写库：** 诊断结果由服务端保存，`attempt_id` 作幂等键，重复提交直接返回已有结果，不重复调用识别服务。
+- **版本记录：** 每条结果记录识别模型、诊断规则版本和反馈版本，历史结果可解释、新旧方案可对比。
+- **发布流程：** 新诊断由功能开关控制，先在 Vercel 预览部署用真实录音验收，再经独立审查后合并 `main` 上线。
+- **CI 双构建：** GitHub Actions 运行全部测试，并分别在功能开关开、关两种状态下构建。
+- **数据库保活：** Vercel Cron 每天调用健康检查做一次轻量查询，防止 Supabase 免费项目因无活动被暂停。
+
+## 技术栈
+
+Vue 3 · Vite · Tailwind CSS · Vercel Serverless · Supabase（Postgres / Storage / RLS）· Groq Whisper · Node `node:test`
+
+## 局限与下一步
+
+- **召回率偏低** → 引入按原文的发音评估，捕捉被识别模型"纠正"掉的问题。
+- **只覆盖 RA** → 推广到 RS / DI / RTS。
+- **建议还不针对个人** → 建立学习者错误模型，按反复出现的问题安排练习和复测。
+
+## 本地运行
 
 ```bash
 npm install
 npm run dev
-```
-
-For the local scoring API:
-
-```bash
 npm run dev:api
+npm test
 ```
 
-App setup, environment variables, deployment notes and verification steps follow below.
+`ffmpeg` 只有评测脚本需要（`scripts/eval-run-provider.js`、`scripts/eval-build-labeling-kit.js`），应用本身不依赖。
 
-## Repository Layout
+### 仓库结构
 
 ```text
-src/          Frontend routes, views, stores, and components
-api/          Vercel serverless API entrypoints
-backend/      Shared backend services and scoring logic
-db/           Database SQL files
-seeds/        Seed data
-scripts/      Operational scripts
-docs/         Product and operations documentation
+src/          前端路由、页面、状态和组件
+api/          Vercel Serverless 接口
+backend/      后端服务、评分与语音诊断逻辑
+db/           数据库 SQL
+seeds/        种子数据
+scripts/      运维与评测脚本
+tests/        node:test 测试
+docs/         方案、评测报告和任务记录
 ```
 
-## Local Artifacts
+以下目录只在本地使用，不提交：`.agents/`、`.claude/`、`.codex/`、`.omx/`、`.omc/`、`output/`、`wfd/`、`dist/`、`node_modules/`。
 
-The following are local-only and should not be committed:
+## 开发与部署细节
 
-```text
-.agents/
-.claude/
-.codex/
-.omx/
-.omc/
-output/
-wfd/
-dist/
-node_modules/
-```
-
-WFD audio generation docs live at `docs/wfd/audio-workflow.md`.
-
----
-
-# Kai-Kou (PTE Coach)
-
-## Local Development
+### Local Development
 
 ```bash
 npm install
@@ -64,7 +119,7 @@ npm run dev:api
 `WE/RA/RS/RL` scoring needs both the Vite app and local API service running at the same time.
 If you see `Score API failed with status 404`, it usually means `/api/score` was proxied to a different app.
 
-## Environment Variables
+### Environment Variables
 
 Create one local env file in project root, for example `.env.local` or `.env.development.local`.
 
@@ -106,7 +161,7 @@ REGISTER_OTP_FROM_NAME=开口
 
 You can use `.env.example` as a template.
 
-### Local API Routing Checks
+#### Local API Routing Checks
 
 ```bash
 npm run check:score-api
@@ -124,31 +179,26 @@ VITE_API_BASE=
 
 For production/preview deployment, do not set `VITE_API_BASE` to any localhost address.
 
-## LLM Fallback Architecture (Scoring API)
+### LLM Fallback Architecture (Scoring API)
 
-### Strategy
+#### Strategy
 
 - Primary provider: `Gemini`
 - Fallback provider: `Groq`
 - Fallback only applies in backend scoring flow (`/api/score`)
 - Frontend request protocol remains unchanged
 
-### Fallback Trigger Rules
+#### Fallback Trigger Rules
 
-Gemini will fallback to Groq only for:
-
-1. HTTP `429`
-2. timeout
-3. HTTP `502` / `503` / `504`
-4. provider network errors (e.g. `fetch failed`, `ETIMEDOUT`, `ECONNRESET`, `ENOTFOUND`)
+Gemini falls back to Groq for timeouts, provider network errors (e.g. `fetch failed`, `ETIMEDOUT`, `ECONNRESET`, `ENOTFOUND`), and every HTTP error status except the request-shape errors below — including `401` / `402` / `403` / `404` / `429` / `5xx` (see `backend/llm/provider-error.js`).
 
 The following do **not** trigger fallback:
 
-1. HTTP `400` / `401` / `403`
+1. HTTP `400` / `413` / `422`
 2. prompt construction/local code errors
 3. JSON parse/normalize errors
 
-### Scoring LLM Environment Variables
+#### Scoring LLM Environment Variables
 
 Server-side only (never expose to frontend):
 
@@ -163,7 +213,7 @@ Compatibility note:
 - `GROP_API_KEY` is a legacy typo and is only kept for compatibility.
 - New setup should always use `GROQ_API_KEY`.
 
-### Register / Email Verification Environment Variables
+#### Register / Email Verification Environment Variables
 
 Server-side only:
 
@@ -175,7 +225,7 @@ Server-side only:
 
 Do not put `SUPABASE_SERVICE_ROLE_KEY`, `BREVO_API_KEY`, or `REGISTER_OTP_FROM_EMAIL` into any `VITE_*` variable.
 
-### Billing / Alipay Environment Variables
+#### Billing / Alipay Environment Variables
 
 Server-side only:
 
@@ -190,7 +240,7 @@ Server-side only:
 For billing routes, the browser bearer token is only used to identify the current user.
 All order writes, profile updates, and SQL RPC calls use `SUPABASE_SERVICE_ROLE_KEY` on the server.
 
-### Local Verification
+#### Local Verification
 
 1. Start app and API:
    - `npm run dev`
@@ -209,7 +259,7 @@ All order writes, profile updates, and SQL RPC calls use `SUPABASE_SERVICE_ROLE_
    - run a controlled dev-only test that makes model output invalid JSON
    - ensure error stage is parse/normalize and no additional fallback is attempted
 
-### Preview Verification (Vercel)
+#### Preview Verification (Vercel)
 
 1. Configure env vars in Vercel for `Preview`:
    - `GEMINI_API_KEY`
@@ -223,12 +273,12 @@ All order writes, profile updates, and SQL RPC calls use `SUPABASE_SERVICE_ROLE_
 5. Re-test scoring and confirm fallback to Groq.
 6. Check runtime logs for fallback fields: `provider_used`, `fallback_reason`, `raw_error_type`, `latency_*`.
 
-## WFD Audio Workflow
+### WFD Audio Workflow
 
 WFD audio generation and upload notes live in `docs/wfd/audio-workflow.md`.
 Generated WFD audio, exported workbooks, and run reports are local artifacts and should not be committed.
 
-## Supabase Setup
+### Supabase Setup
 
 Run these SQL statements in Supabase SQL Editor:
 
@@ -297,7 +347,7 @@ That file creates `vip_orders`, adds the timed VIP profile fields, and installs 
 - payment confirmation + entitlement grant idempotency
 - order query throttling
 
-## Deploy to Vercel
+### Deploy to Vercel
 
 1. Install and log in:
 
@@ -337,7 +387,7 @@ vercel
 
 1. Redeploy after saving env vars.
 
-## Verify After Deployment
+### Verify After Deployment
 
 - Home page loads correctly.
 - Register can receive confirmation email and sign in successfully.
