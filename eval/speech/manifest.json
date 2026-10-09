@@ -2774,5 +2774,2100 @@
       "labeled_by": "user-listening",
       "notes": "reprint (40): 听不清；rationed (46): 听不清；up (53): 听不清"
     }
+  },
+  {
+    "id": "ra-con-0001",
+    "task_type": "RA",
+    "question_id": "RA_024",
+    "reference_text": "Not a lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to five thousand years ago. However, sea trade became more widespread when large sailing boats travelled between ports, carrying spices, perfumes and objects made by hand.",
+    "source": "constructed",
+    "script_id": "ra024-mixed-4",
+    "speaker_id": "spk01",
+    "device": "iphone-chrome",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-con-0001.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/cf69839e-4007-4631-9f5f-2dd0879bf00f.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "How loud is knowing about how the transportation of goods by water water should begin large cargo boats were being used in some parts of the world up to 5000 years ago however C3 became more widespread with large Selling boats traveled between ports carrying species performance and objects made by Selling boats traveled between ports carrying species performance and objects made by hand",
+        "practice_log_id": "419"
+      },
+      "groq_whisper": {
+        "text": " A lot is known about how the transportation of goods by water first began. Large cargo boats were being used in some parts of the world up to 5,000 years ago. However, C3 became more widespread with large sailing boats traveled between ports carrying species, performs, and objects made by hand.",
+        "words": [
+          {
+            "text": "A",
+            "end_ms": 1380,
+            "start_ms": 1120,
+            "confidence": null
+          },
+          {
+            "text": "lot",
+            "end_ms": 1540,
+            "start_ms": 1380,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "end_ms": 1760,
+            "start_ms": 1540,
+            "confidence": null
+          },
+          {
+            "text": "known",
+            "end_ms": 2180,
+            "start_ms": 1760,
+            "confidence": null
+          },
+          {
+            "text": "about",
+            "end_ms": 3320,
+            "start_ms": 2180,
+            "confidence": null
+          },
+          {
+            "text": "how",
+            "end_ms": 4920,
+            "start_ms": 3320,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 5160,
+            "start_ms": 4920,
+            "confidence": null
+          },
+          {
+            "text": "transportation",
+            "end_ms": 5780,
+            "start_ms": 5160,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 6300,
+            "start_ms": 5780,
+            "confidence": null
+          },
+          {
+            "text": "goods",
+            "end_ms": 6640,
+            "start_ms": 6300,
+            "confidence": null
+          },
+          {
+            "text": "by",
+            "end_ms": 7080,
+            "start_ms": 6640,
+            "confidence": null
+          },
+          {
+            "text": "water",
+            "end_ms": 7700,
+            "start_ms": 7080,
+            "confidence": null
+          },
+          {
+            "text": "first",
+            "end_ms": 9020,
+            "start_ms": 7700,
+            "confidence": null
+          },
+          {
+            "text": "began.",
+            "end_ms": 9960,
+            "start_ms": 9020,
+            "confidence": null
+          },
+          {
+            "text": "Large",
+            "end_ms": 10700,
+            "start_ms": 10340,
+            "confidence": null
+          },
+          {
+            "text": "cargo",
+            "end_ms": 11280,
+            "start_ms": 10700,
+            "confidence": null
+          },
+          {
+            "text": "boats",
+            "end_ms": 12020,
+            "start_ms": 11280,
+            "confidence": null
+          },
+          {
+            "text": "were",
+            "end_ms": 12500,
+            "start_ms": 12020,
+            "confidence": null
+          },
+          {
+            "text": "being",
+            "end_ms": 13000,
+            "start_ms": 12500,
+            "confidence": null
+          },
+          {
+            "text": "used",
+            "end_ms": 13440,
+            "start_ms": 13000,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "end_ms": 13800,
+            "start_ms": 13440,
+            "confidence": null
+          },
+          {
+            "text": "some",
+            "end_ms": 14160,
+            "start_ms": 13800,
+            "confidence": null
+          },
+          {
+            "text": "parts",
+            "end_ms": 14460,
+            "start_ms": 14160,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 14600,
+            "start_ms": 14460,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 14700,
+            "start_ms": 14600,
+            "confidence": null
+          },
+          {
+            "text": "world",
+            "end_ms": 14980,
+            "start_ms": 14700,
+            "confidence": null
+          },
+          {
+            "text": "up",
+            "end_ms": 15480,
+            "start_ms": 14980,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 16160,
+            "start_ms": 15480,
+            "confidence": null
+          },
+          {
+            "text": "5,000",
+            "end_ms": 16800,
+            "start_ms": 16160,
+            "confidence": null
+          },
+          {
+            "text": "years",
+            "end_ms": 17120,
+            "start_ms": 16800,
+            "confidence": null
+          },
+          {
+            "text": "ago.",
+            "end_ms": 17460,
+            "start_ms": 17120,
+            "confidence": null
+          },
+          {
+            "text": "However,",
+            "end_ms": 18720,
+            "start_ms": 17980,
+            "confidence": null
+          },
+          {
+            "text": "C3",
+            "end_ms": 19000,
+            "start_ms": 18720,
+            "confidence": null
+          },
+          {
+            "text": "became",
+            "end_ms": 19860,
+            "start_ms": 19000,
+            "confidence": null
+          },
+          {
+            "text": "more",
+            "end_ms": 20360,
+            "start_ms": 19860,
+            "confidence": null
+          },
+          {
+            "text": "widespread",
+            "end_ms": 20900,
+            "start_ms": 20360,
+            "confidence": null
+          },
+          {
+            "text": "with",
+            "end_ms": 21840,
+            "start_ms": 20900,
+            "confidence": null
+          },
+          {
+            "text": "large",
+            "end_ms": 22400,
+            "start_ms": 21840,
+            "confidence": null
+          },
+          {
+            "text": "sailing",
+            "end_ms": 23720,
+            "start_ms": 22400,
+            "confidence": null
+          },
+          {
+            "text": "boats",
+            "end_ms": 24580,
+            "start_ms": 23720,
+            "confidence": null
+          },
+          {
+            "text": "traveled",
+            "end_ms": 25440,
+            "start_ms": 24580,
+            "confidence": null
+          },
+          {
+            "text": "between",
+            "end_ms": 26180,
+            "start_ms": 25440,
+            "confidence": null
+          },
+          {
+            "text": "ports",
+            "end_ms": 26720,
+            "start_ms": 26180,
+            "confidence": null
+          },
+          {
+            "text": "carrying",
+            "end_ms": 27220,
+            "start_ms": 26720,
+            "confidence": null
+          },
+          {
+            "text": "species,",
+            "end_ms": 28540,
+            "start_ms": 27220,
+            "confidence": null
+          },
+          {
+            "text": "performs,",
+            "end_ms": 29440,
+            "start_ms": 28540,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "end_ms": 29640,
+            "start_ms": 29440,
+            "confidence": null
+          },
+          {
+            "text": "objects",
+            "end_ms": 30260,
+            "start_ms": 29640,
+            "confidence": null
+          },
+          {
+            "text": "made",
+            "end_ms": 30720,
+            "start_ms": 30260,
+            "confidence": null
+          },
+          {
+            "text": "by",
+            "end_ms": 31040,
+            "start_ms": 30720,
+            "confidence": null
+          },
+          {
+            "text": "hand.",
+            "end_ms": 31300,
+            "start_ms": 31040,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "end_ms": 4500,
+            "start_ms": 2720
+          },
+          {
+            "end_ms": 8380,
+            "start_ms": 7840
+          },
+          {
+            "end_ms": 10280,
+            "start_ms": 9880
+          },
+          {
+            "end_ms": 15860,
+            "start_ms": 15600
+          },
+          {
+            "end_ms": 18040,
+            "start_ms": 17560
+          },
+          {
+            "end_ms": 19600,
+            "start_ms": 19300
+          },
+          {
+            "end_ms": 22960,
+            "start_ms": 22380
+          }
+        ],
+        "speech_onset_ms": 0,
+        "speech_offset_ms": 31320,
+        "duration_ms": 31795,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 35,
+      "pronunciation": 45,
+      "overall": 43
+    },
+    "labels": {
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "omission",
+          "word": "Not",
+          "occurrence": 1
+        },
+        {
+          "type": "long_pause",
+          "word": "how",
+          "occurrence": 1,
+          "duration_ms": 2000
+        },
+        {
+          "type": "repetition",
+          "word": "water",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "sailing",
+          "occurrence": 1,
+          "spoken_as": "selling"
+        }
+      ],
+      "labeled_by": "recording-script",
+      "notes": "Planned errors from ra024-mixed-4; verify that recording followed instructions."
+    }
+  },
+  {
+    "id": "ra-con-0002",
+    "task_type": "RA",
+    "question_id": "RA_002",
+    "reference_text": "When countries assess their annual carbon emissions, they count up their cars and power stations, but bush fires are not included – presumably because they are deemed to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burn each year; in both 2004 and more recently, the figure has been over one million hectares.",
+    "source": "constructed",
+    "script_id": "ra002-mixed-4",
+    "speaker_id": "spk01",
+    "device": "iphone-chrome",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-con-0002.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/6d42f7a3-4c3b-40a3-a136-2d1c50497c29.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Countries associate their annual carbon emissions they count up their cards and power stations But fish Files are not included press assembly because they are demand demand demanded demand demanded to be you wouldn't beyond human control Australia Victoria allows several hundred thousand actors born each year in both 2004 and most recently the figure has been over 1 million Hector",
+        "practice_log_id": "420"
+      },
+      "groq_whisper": {
+        "text": " Countries assess their annual carbon emissions. They count up their cars and power stations, but fish fires are not included, presumably because they are demanded to be events beyond human control. In Australia, Victoria alone sees several hundred thousand hectares burned each year. In both 2004 and more recently, the figure has been over one million hectares.",
+        "words": [
+          {
+            "text": "Countries",
+            "end_ms": 1920,
+            "start_ms": 1440,
+            "confidence": null
+          },
+          {
+            "text": "assess",
+            "end_ms": 2540,
+            "start_ms": 1920,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "end_ms": 2800,
+            "start_ms": 2540,
+            "confidence": null
+          },
+          {
+            "text": "annual",
+            "end_ms": 3160,
+            "start_ms": 2800,
+            "confidence": null
+          },
+          {
+            "text": "carbon",
+            "end_ms": 3500,
+            "start_ms": 3160,
+            "confidence": null
+          },
+          {
+            "text": "emissions.",
+            "end_ms": 4320,
+            "start_ms": 3500,
+            "confidence": null
+          },
+          {
+            "text": "They",
+            "end_ms": 4600,
+            "start_ms": 3900,
+            "confidence": null
+          },
+          {
+            "text": "count",
+            "end_ms": 5040,
+            "start_ms": 4600,
+            "confidence": null
+          },
+          {
+            "text": "up",
+            "end_ms": 5280,
+            "start_ms": 5040,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "end_ms": 6120,
+            "start_ms": 5280,
+            "confidence": null
+          },
+          {
+            "text": "cars",
+            "end_ms": 6640,
+            "start_ms": 6120,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "end_ms": 7200,
+            "start_ms": 6640,
+            "confidence": null
+          },
+          {
+            "text": "power",
+            "end_ms": 7760,
+            "start_ms": 7200,
+            "confidence": null
+          },
+          {
+            "text": "stations,",
+            "end_ms": 9860,
+            "start_ms": 7760,
+            "confidence": null
+          },
+          {
+            "text": "but",
+            "end_ms": 10200,
+            "start_ms": 9860,
+            "confidence": null
+          },
+          {
+            "text": "fish",
+            "end_ms": 10920,
+            "start_ms": 10200,
+            "confidence": null
+          },
+          {
+            "text": "fires",
+            "end_ms": 13840,
+            "start_ms": 10920,
+            "confidence": null
+          },
+          {
+            "text": "are",
+            "end_ms": 14220,
+            "start_ms": 13840,
+            "confidence": null
+          },
+          {
+            "text": "not",
+            "end_ms": 14480,
+            "start_ms": 14220,
+            "confidence": null
+          },
+          {
+            "text": "included,",
+            "end_ms": 15600,
+            "start_ms": 14480,
+            "confidence": null
+          },
+          {
+            "text": "presumably",
+            "end_ms": 16320,
+            "start_ms": 15600,
+            "confidence": null
+          },
+          {
+            "text": "because",
+            "end_ms": 17260,
+            "start_ms": 15900,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "end_ms": 17940,
+            "start_ms": 17260,
+            "confidence": null
+          },
+          {
+            "text": "are",
+            "end_ms": 18440,
+            "start_ms": 17940,
+            "confidence": null
+          },
+          {
+            "text": "demanded",
+            "end_ms": 19380,
+            "start_ms": 18440,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 20440,
+            "start_ms": 19380,
+            "confidence": null
+          },
+          {
+            "text": "be",
+            "end_ms": 21220,
+            "start_ms": 20440,
+            "confidence": null
+          },
+          {
+            "text": "events",
+            "end_ms": 21840,
+            "start_ms": 21220,
+            "confidence": null
+          },
+          {
+            "text": "beyond",
+            "end_ms": 22420,
+            "start_ms": 21840,
+            "confidence": null
+          },
+          {
+            "text": "human",
+            "end_ms": 22920,
+            "start_ms": 22420,
+            "confidence": null
+          },
+          {
+            "text": "control.",
+            "end_ms": 24320,
+            "start_ms": 22920,
+            "confidence": null
+          },
+          {
+            "text": "In",
+            "end_ms": 23860,
+            "start_ms": 23840,
+            "confidence": null
+          },
+          {
+            "text": "Australia,",
+            "end_ms": 24540,
+            "start_ms": 23860,
+            "confidence": null
+          },
+          {
+            "text": "Victoria",
+            "end_ms": 25220,
+            "start_ms": 24540,
+            "confidence": null
+          },
+          {
+            "text": "alone",
+            "end_ms": 25780,
+            "start_ms": 25220,
+            "confidence": null
+          },
+          {
+            "text": "sees",
+            "end_ms": 26180,
+            "start_ms": 25780,
+            "confidence": null
+          },
+          {
+            "text": "several",
+            "end_ms": 26700,
+            "start_ms": 26180,
+            "confidence": null
+          },
+          {
+            "text": "hundred",
+            "end_ms": 27120,
+            "start_ms": 26700,
+            "confidence": null
+          },
+          {
+            "text": "thousand",
+            "end_ms": 28200,
+            "start_ms": 27120,
+            "confidence": null
+          },
+          {
+            "text": "hectares",
+            "end_ms": 29040,
+            "start_ms": 28200,
+            "confidence": null
+          },
+          {
+            "text": "burned",
+            "end_ms": 29740,
+            "start_ms": 29040,
+            "confidence": null
+          },
+          {
+            "text": "each",
+            "end_ms": 30000,
+            "start_ms": 29740,
+            "confidence": null
+          },
+          {
+            "text": "year.",
+            "end_ms": 30460,
+            "start_ms": 30000,
+            "confidence": null
+          },
+          {
+            "text": "In",
+            "end_ms": 30660,
+            "start_ms": 30060,
+            "confidence": null
+          },
+          {
+            "text": "both",
+            "end_ms": 30880,
+            "start_ms": 30660,
+            "confidence": null
+          },
+          {
+            "text": "2004",
+            "end_ms": 31740,
+            "start_ms": 30880,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "end_ms": 32040,
+            "start_ms": 31740,
+            "confidence": null
+          },
+          {
+            "text": "more",
+            "end_ms": 32480,
+            "start_ms": 32040,
+            "confidence": null
+          },
+          {
+            "text": "recently,",
+            "end_ms": 33500,
+            "start_ms": 32480,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 33620,
+            "start_ms": 33500,
+            "confidence": null
+          },
+          {
+            "text": "figure",
+            "end_ms": 34040,
+            "start_ms": 33620,
+            "confidence": null
+          },
+          {
+            "text": "has",
+            "end_ms": 34380,
+            "start_ms": 34040,
+            "confidence": null
+          },
+          {
+            "text": "been",
+            "end_ms": 34580,
+            "start_ms": 34380,
+            "confidence": null
+          },
+          {
+            "text": "over",
+            "end_ms": 35060,
+            "start_ms": 34580,
+            "confidence": null
+          },
+          {
+            "text": "one",
+            "end_ms": 35380,
+            "start_ms": 35060,
+            "confidence": null
+          },
+          {
+            "text": "million",
+            "end_ms": 35920,
+            "start_ms": 35380,
+            "confidence": null
+          },
+          {
+            "text": "hectares.",
+            "end_ms": 37200,
+            "start_ms": 35920,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "end_ms": 1000,
+            "start_ms": 300
+          },
+          {
+            "end_ms": 6180,
+            "start_ms": 5620
+          },
+          {
+            "end_ms": 9400,
+            "start_ms": 8640
+          },
+          {
+            "end_ms": 11260,
+            "start_ms": 10920
+          },
+          {
+            "end_ms": 12520,
+            "start_ms": 11300
+          },
+          {
+            "end_ms": 12940,
+            "start_ms": 12560
+          },
+          {
+            "end_ms": 28360,
+            "start_ms": 28040
+          },
+          {
+            "end_ms": 36460,
+            "start_ms": 36200
+          }
+        ],
+        "speech_onset_ms": 180,
+        "speech_offset_ms": 37220,
+        "duration_ms": 37702.5,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 35,
+      "pronunciation": 30,
+      "overall": 37
+    },
+    "labels": {
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "omission",
+          "word": "When",
+          "occurrence": 1
+        },
+        {
+          "type": "substitution",
+          "word": "cars",
+          "occurrence": 1,
+          "spoken_as": "cards"
+        },
+        {
+          "type": "long_pause",
+          "word": "fires",
+          "occurrence": 1,
+          "duration_ms": 2000
+        },
+        {
+          "type": "repetition",
+          "word": "deemed",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "recording-script",
+      "notes": "Planned errors from ra002-mixed-4; verify that recording followed instructions."
+    }
+  },
+  {
+    "id": "ra-con-0003",
+    "task_type": "RA",
+    "question_id": "RA_003",
+    "reference_text": "Tesla's theoretical work formed the basis of modern alternating current electric power systems. Thomas Edison promised him almost one million dollars in today's money to undertake motor and generator improvement. However, when Tesla, the ethical Serb, asked about the money, Edison’s reportedly reply was \"Tesla, you don't understand our American humor.\" The pair became arch-rivals.",
+    "source": "constructed",
+    "script_id": "ra003-mixed-4",
+    "speaker_id": "spk01",
+    "device": "iphone-chrome",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-con-0003.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/e87904cf-8d21-49f1-8aef-e7695912c228.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Tesla the article was farmed at the basis of more than a native current electric Power system Thomas Edison promises him almost $1 million in today's money money to undertake motor and generator improvement however when Tesla ethical song ask about the money Edison's report reply was Tesla you don't understand how American humor the pier became arch travel",
+        "practice_log_id": "421"
+      },
+      "groq_whisper": {
+        "text": " Tesla's theoretical words formed the basis of modern alternative current electric power system. Thomas Edison promised him almost $1 million in today's money to undertake a motor and generator improvement. However, when Tesla's ethical son asked about the money. Edison's reported reply was, Tesla, you don't understand our American humor. The pair became arch-rivals.",
+        "words": [
+          {
+            "text": "Tesla's",
+            "end_ms": 1580,
+            "start_ms": 1000,
+            "confidence": null
+          },
+          {
+            "text": "theoretical",
+            "end_ms": 2220,
+            "start_ms": 1580,
+            "confidence": null
+          },
+          {
+            "text": "words",
+            "end_ms": 2680,
+            "start_ms": 2220,
+            "confidence": null
+          },
+          {
+            "text": "formed",
+            "end_ms": 3240,
+            "start_ms": 2680,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 3620,
+            "start_ms": 3240,
+            "confidence": null
+          },
+          {
+            "text": "basis",
+            "end_ms": 4280,
+            "start_ms": 3620,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 4620,
+            "start_ms": 4280,
+            "confidence": null
+          },
+          {
+            "text": "modern",
+            "end_ms": 5100,
+            "start_ms": 4620,
+            "confidence": null
+          },
+          {
+            "text": "alternative",
+            "end_ms": 6020,
+            "start_ms": 5100,
+            "confidence": null
+          },
+          {
+            "text": "current",
+            "end_ms": 8120,
+            "start_ms": 6020,
+            "confidence": null
+          },
+          {
+            "text": "electric",
+            "end_ms": 9120,
+            "start_ms": 8120,
+            "confidence": null
+          },
+          {
+            "text": "power",
+            "end_ms": 10780,
+            "start_ms": 9120,
+            "confidence": null
+          },
+          {
+            "text": "system.",
+            "end_ms": 11780,
+            "start_ms": 10620,
+            "confidence": null
+          },
+          {
+            "text": "Thomas",
+            "end_ms": 12240,
+            "start_ms": 11780,
+            "confidence": null
+          },
+          {
+            "text": "Edison",
+            "end_ms": 12680,
+            "start_ms": 12240,
+            "confidence": null
+          },
+          {
+            "text": "promised",
+            "end_ms": 13280,
+            "start_ms": 12680,
+            "confidence": null
+          },
+          {
+            "text": "him",
+            "end_ms": 13620,
+            "start_ms": 13280,
+            "confidence": null
+          },
+          {
+            "text": "almost $1",
+            "end_ms": 14560,
+            "start_ms": 13620,
+            "confidence": null
+          },
+          {
+            "text": "million",
+            "end_ms": 14860,
+            "start_ms": 14560,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "end_ms": 15620,
+            "start_ms": 14860,
+            "confidence": null
+          },
+          {
+            "text": "today's",
+            "end_ms": 16140,
+            "start_ms": 15620,
+            "confidence": null
+          },
+          {
+            "text": "money",
+            "end_ms": 17120,
+            "start_ms": 16140,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 18420,
+            "start_ms": 17120,
+            "confidence": null
+          },
+          {
+            "text": "undertake",
+            "end_ms": 19280,
+            "start_ms": 18420,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "end_ms": 19840,
+            "start_ms": 19340,
+            "confidence": null
+          },
+          {
+            "text": "motor",
+            "end_ms": 20080,
+            "start_ms": 19840,
+            "confidence": null
+          },
+          {
+            "text": "and",
+            "end_ms": 20860,
+            "start_ms": 20080,
+            "confidence": null
+          },
+          {
+            "text": "generator",
+            "end_ms": 21560,
+            "start_ms": 20860,
+            "confidence": null
+          },
+          {
+            "text": "improvement.",
+            "end_ms": 22480,
+            "start_ms": 21560,
+            "confidence": null
+          },
+          {
+            "text": "However,",
+            "end_ms": 22920,
+            "start_ms": 22480,
+            "confidence": null
+          },
+          {
+            "text": "when",
+            "end_ms": 23120,
+            "start_ms": 22920,
+            "confidence": null
+          },
+          {
+            "text": "Tesla's",
+            "end_ms": 24340,
+            "start_ms": 23120,
+            "confidence": null
+          },
+          {
+            "text": "ethical",
+            "end_ms": 25780,
+            "start_ms": 24340,
+            "confidence": null
+          },
+          {
+            "text": "son",
+            "end_ms": 26300,
+            "start_ms": 25780,
+            "confidence": null
+          },
+          {
+            "text": "asked",
+            "end_ms": 27240,
+            "start_ms": 26300,
+            "confidence": null
+          },
+          {
+            "text": "about",
+            "end_ms": 27600,
+            "start_ms": 27240,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 27820,
+            "start_ms": 27600,
+            "confidence": null
+          },
+          {
+            "text": "money.",
+            "end_ms": 28260,
+            "start_ms": 27800,
+            "confidence": null
+          },
+          {
+            "text": "Edison's",
+            "end_ms": 28900,
+            "start_ms": 28260,
+            "confidence": null
+          },
+          {
+            "text": "reported",
+            "end_ms": 29460,
+            "start_ms": 28900,
+            "confidence": null
+          },
+          {
+            "text": "reply",
+            "end_ms": 30260,
+            "start_ms": 29460,
+            "confidence": null
+          },
+          {
+            "text": "was,",
+            "end_ms": 30740,
+            "start_ms": 30260,
+            "confidence": null
+          },
+          {
+            "text": "Tesla,",
+            "end_ms": 31520,
+            "start_ms": 30740,
+            "confidence": null
+          },
+          {
+            "text": "you",
+            "end_ms": 31560,
+            "start_ms": 31520,
+            "confidence": null
+          },
+          {
+            "text": "don't",
+            "end_ms": 32000,
+            "start_ms": 31560,
+            "confidence": null
+          },
+          {
+            "text": "understand",
+            "end_ms": 32660,
+            "start_ms": 32000,
+            "confidence": null
+          },
+          {
+            "text": "our",
+            "end_ms": 33020,
+            "start_ms": 32660,
+            "confidence": null
+          },
+          {
+            "text": "American",
+            "end_ms": 33540,
+            "start_ms": 33020,
+            "confidence": null
+          },
+          {
+            "text": "humor.",
+            "end_ms": 33960,
+            "start_ms": 33540,
+            "confidence": null
+          },
+          {
+            "text": "The",
+            "end_ms": 35000,
+            "start_ms": 34700,
+            "confidence": null
+          },
+          {
+            "text": "pair",
+            "end_ms": 35340,
+            "start_ms": 35000,
+            "confidence": null
+          },
+          {
+            "text": "became",
+            "end_ms": 36160,
+            "start_ms": 35340,
+            "confidence": null
+          },
+          {
+            "text": "arch-rivals.",
+            "end_ms": 37080,
+            "start_ms": 36160,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "end_ms": 6800,
+            "start_ms": 6220
+          },
+          {
+            "end_ms": 9940,
+            "start_ms": 9400
+          },
+          {
+            "end_ms": 11840,
+            "start_ms": 11500
+          },
+          {
+            "end_ms": 17080,
+            "start_ms": 16560
+          },
+          {
+            "end_ms": 20560,
+            "start_ms": 20220
+          },
+          {
+            "end_ms": 24100,
+            "start_ms": 23760
+          },
+          {
+            "end_ms": 25140,
+            "start_ms": 24880
+          },
+          {
+            "end_ms": 26800,
+            "start_ms": 26400
+          },
+          {
+            "end_ms": 34640,
+            "start_ms": 34020
+          }
+        ],
+        "speech_onset_ms": 560,
+        "speech_offset_ms": 37400,
+        "duration_ms": 37832.5,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 45,
+      "pronunciation": 40,
+      "overall": 45
+    },
+    "labels": {
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "substitution",
+          "word": "formed",
+          "occurrence": 1,
+          "spoken_as": "farmed"
+        },
+        {
+          "type": "omission",
+          "word": "current",
+          "occurrence": 1
+        },
+        {
+          "type": "long_pause",
+          "word": "promised",
+          "occurrence": 1,
+          "duration_ms": 2000
+        },
+        {
+          "type": "repetition",
+          "word": "money",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "recording-script",
+      "notes": "Planned errors from ra003-mixed-4; verify that recording followed instructions."
+    }
+  },
+  {
+    "id": "ra-con-0004",
+    "task_type": "RA",
+    "question_id": "RA_016",
+    "reference_text": "Few things in the world produce such amazement as one's first glimpse of the Grand Canyon. It took nature more than 2 billion years to create this vast wonder - in some places, 17 miles wide - largely through the relentless force of the Colorado River, which runs 277 miles along its length, a mile beneath its towering rims.",
+    "source": "constructed",
+    "script_id": "ra016-mixed-4",
+    "speaker_id": "spk01",
+    "device": "iphone-chrome",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-con-0004.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/cdf88699-1d42-41b5-8095-f9d3b79e0cc6.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Since in the world produce Such amendment as once first glimpse of the grand Kanye It took it took nature more than 2 billion years to create this was a wonder in some places 70 miles white largely through the relentless force for the current river which was 277 miles along it's a mile bad is it to",
+        "practice_log_id": "422"
+      },
+      "groq_whisper": {
+        "text": " Since the world produced such amazement as one's first glimpse of the Grand Canyon, it took nature more than two billion years to create this vast wonder in some places, 70 miles wide largely through the relentless force for the Corondo River, which runs 277 miles along its length, a mile behind its towering rims.",
+        "words": [
+          {
+            "text": "Since",
+            "end_ms": 1740,
+            "start_ms": 1380,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 1980,
+            "start_ms": 1740,
+            "confidence": null
+          },
+          {
+            "text": "world",
+            "end_ms": 2320,
+            "start_ms": 1980,
+            "confidence": null
+          },
+          {
+            "text": "produced",
+            "end_ms": 2940,
+            "start_ms": 2320,
+            "confidence": null
+          },
+          {
+            "text": "such",
+            "end_ms": 5400,
+            "start_ms": 2940,
+            "confidence": null
+          },
+          {
+            "text": "amazement",
+            "end_ms": 5900,
+            "start_ms": 5400,
+            "confidence": null
+          },
+          {
+            "text": "as",
+            "end_ms": 6320,
+            "start_ms": 5900,
+            "confidence": null
+          },
+          {
+            "text": "one's",
+            "end_ms": 6940,
+            "start_ms": 6320,
+            "confidence": null
+          },
+          {
+            "text": "first",
+            "end_ms": 8700,
+            "start_ms": 6940,
+            "confidence": null
+          },
+          {
+            "text": "glimpse",
+            "end_ms": 9300,
+            "start_ms": 8700,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 9760,
+            "start_ms": 9300,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 11000,
+            "start_ms": 9760,
+            "confidence": null
+          },
+          {
+            "text": "Grand",
+            "end_ms": 11400,
+            "start_ms": 11000,
+            "confidence": null
+          },
+          {
+            "text": "Canyon,",
+            "end_ms": 13240,
+            "start_ms": 11400,
+            "confidence": null
+          },
+          {
+            "text": "it",
+            "end_ms": 15120,
+            "start_ms": 14580,
+            "confidence": null
+          },
+          {
+            "text": "took",
+            "end_ms": 15700,
+            "start_ms": 15120,
+            "confidence": null
+          },
+          {
+            "text": "nature",
+            "end_ms": 16720,
+            "start_ms": 15700,
+            "confidence": null
+          },
+          {
+            "text": "more",
+            "end_ms": 17040,
+            "start_ms": 16720,
+            "confidence": null
+          },
+          {
+            "text": "than",
+            "end_ms": 17260,
+            "start_ms": 17040,
+            "confidence": null
+          },
+          {
+            "text": "two",
+            "end_ms": 17420,
+            "start_ms": 17260,
+            "confidence": null
+          },
+          {
+            "text": "billion",
+            "end_ms": 17800,
+            "start_ms": 17420,
+            "confidence": null
+          },
+          {
+            "text": "years",
+            "end_ms": 18020,
+            "start_ms": 17800,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 18220,
+            "start_ms": 18020,
+            "confidence": null
+          },
+          {
+            "text": "create",
+            "end_ms": 18880,
+            "start_ms": 18220,
+            "confidence": null
+          },
+          {
+            "text": "this",
+            "end_ms": 19960,
+            "start_ms": 18880,
+            "confidence": null
+          },
+          {
+            "text": "vast",
+            "end_ms": 20700,
+            "start_ms": 19960,
+            "confidence": null
+          },
+          {
+            "text": "wonder",
+            "end_ms": 21140,
+            "start_ms": 20700,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "end_ms": 21440,
+            "start_ms": 21140,
+            "confidence": null
+          },
+          {
+            "text": "some",
+            "end_ms": 21740,
+            "start_ms": 21440,
+            "confidence": null
+          },
+          {
+            "text": "places,",
+            "end_ms": 22640,
+            "start_ms": 21740,
+            "confidence": null
+          },
+          {
+            "text": "70",
+            "end_ms": 23420,
+            "start_ms": 22840,
+            "confidence": null
+          },
+          {
+            "text": "miles",
+            "end_ms": 24200,
+            "start_ms": 23420,
+            "confidence": null
+          },
+          {
+            "text": "wide",
+            "end_ms": 24620,
+            "start_ms": 24200,
+            "confidence": null
+          },
+          {
+            "text": "largely",
+            "end_ms": 25220,
+            "start_ms": 24620,
+            "confidence": null
+          },
+          {
+            "text": "through",
+            "end_ms": 25760,
+            "start_ms": 25220,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 27140,
+            "start_ms": 25760,
+            "confidence": null
+          },
+          {
+            "text": "relentless",
+            "end_ms": 28040,
+            "start_ms": 27140,
+            "confidence": null
+          },
+          {
+            "text": "force",
+            "end_ms": 28820,
+            "start_ms": 28040,
+            "confidence": null
+          },
+          {
+            "text": "for",
+            "end_ms": 29320,
+            "start_ms": 28820,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 30300,
+            "start_ms": 29320,
+            "confidence": null
+          },
+          {
+            "text": "Corondo",
+            "end_ms": 30860,
+            "start_ms": 30300,
+            "confidence": null
+          },
+          {
+            "text": "River,",
+            "end_ms": 31480,
+            "start_ms": 30860,
+            "confidence": null
+          },
+          {
+            "text": "which",
+            "end_ms": 31740,
+            "start_ms": 31480,
+            "confidence": null
+          },
+          {
+            "text": "runs",
+            "end_ms": 32020,
+            "start_ms": 31740,
+            "confidence": null
+          },
+          {
+            "text": "277",
+            "end_ms": 33480,
+            "start_ms": 32020,
+            "confidence": null
+          },
+          {
+            "text": "miles",
+            "end_ms": 33920,
+            "start_ms": 33180,
+            "confidence": null
+          },
+          {
+            "text": "along",
+            "end_ms": 34440,
+            "start_ms": 33920,
+            "confidence": null
+          },
+          {
+            "text": "its",
+            "end_ms": 34800,
+            "start_ms": 34440,
+            "confidence": null
+          },
+          {
+            "text": "length,",
+            "end_ms": 35480,
+            "start_ms": 34800,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "end_ms": 35640,
+            "start_ms": 35480,
+            "confidence": null
+          },
+          {
+            "text": "mile",
+            "end_ms": 36160,
+            "start_ms": 35640,
+            "confidence": null
+          },
+          {
+            "text": "behind",
+            "end_ms": 36500,
+            "start_ms": 36160,
+            "confidence": null
+          },
+          {
+            "text": "its",
+            "end_ms": 37300,
+            "start_ms": 36500,
+            "confidence": null
+          },
+          {
+            "text": "towering",
+            "end_ms": 38180,
+            "start_ms": 37300,
+            "confidence": null
+          },
+          {
+            "text": "rims.",
+            "end_ms": 38640,
+            "start_ms": 38180,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "end_ms": 860,
+            "start_ms": 260
+          },
+          {
+            "end_ms": 5040,
+            "start_ms": 2980
+          },
+          {
+            "end_ms": 8020,
+            "start_ms": 7720
+          },
+          {
+            "end_ms": 13300,
+            "start_ms": 12720
+          },
+          {
+            "end_ms": 16239.999999999998,
+            "start_ms": 15960
+          },
+          {
+            "end_ms": 19420,
+            "start_ms": 19160
+          },
+          {
+            "end_ms": 27060,
+            "start_ms": 26800
+          },
+          {
+            "end_ms": 30220,
+            "start_ms": 29700
+          }
+        ],
+        "speech_onset_ms": 0,
+        "speech_offset_ms": 38560,
+        "duration_ms": 38707.5,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
+      }
+    },
+    "old_scores": {
+      "content": 50,
+      "fluency": 30,
+      "pronunciation": 30,
+      "overall": 34
+    },
+    "labels": {
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "omission",
+          "word": "Few",
+          "occurrence": 1
+        },
+        {
+          "type": "long_pause",
+          "word": "such",
+          "occurrence": 1,
+          "duration_ms": 2000
+        },
+        {
+          "type": "repetition",
+          "word": "the",
+          "occurrence": 2
+        },
+        {
+          "type": "substitution",
+          "word": "force",
+          "occurrence": 1,
+          "spoken_as": "forth"
+        }
+      ],
+      "labeled_by": "recording-script",
+      "notes": "Planned errors from ra016-mixed-4; verify that recording followed instructions."
+    }
+  },
+  {
+    "id": "ra-con-0005",
+    "task_type": "RA",
+    "question_id": "RA_041",
+    "reference_text": "A unique characteristic of online shopping environments is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactivity from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual preferences.",
+    "source": "constructed",
+    "script_id": "ra041-mixed-4",
+    "speaker_id": "spk01",
+    "device": "iphone-chrome",
+    "split": "dev",
+    "consent": true,
+    "audio": {
+      "local_file": "ra-con-0005.webm",
+      "storage_path": "ra/f462d9d0-bdff-4fd8-9721-c55ad2b8eaa6/d6880742-bbc4-45dc-8f13-7ba0165dffe1.webm"
+    },
+    "hypotheses": {
+      "browser_asr": {
+        "text": "Characteristic of online shopping environment is That they allow wonders to create retail interfaces with highly with highly interactive features one form of interactive from our consumer perspective is implication of self physical towards us to assist the shoppers in their purchase decisions by cost amazing the electronic shopping environment to That they allow wonders to create retail interfaces with highly with highly interactive features one form of interactive from our consumer perspective is implication of self physical towards us to assist the shoppers in their purchase decisions by cost amazing the electronic shopping environment to their",
+        "practice_log_id": "423"
+      },
+      "groq_whisper": {
+        "text": " A characteristic of online shopping environment is that they allow vendors to create retail interfaces with highly interactive features. One desirable form of interactive from a consumer perspective is the implementation of sophisticated tools to assist shoppers in their purchase decisions by customizing the electronic shopping environment to their individual needs.",
+        "words": [
+          {
+            "text": "A",
+            "end_ms": 1680,
+            "start_ms": 1220,
+            "confidence": null
+          },
+          {
+            "text": "characteristic",
+            "end_ms": 2800,
+            "start_ms": 1680,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 3420,
+            "start_ms": 2800,
+            "confidence": null
+          },
+          {
+            "text": "online",
+            "end_ms": 4020,
+            "start_ms": 3420,
+            "confidence": null
+          },
+          {
+            "text": "shopping",
+            "end_ms": 4700,
+            "start_ms": 4020,
+            "confidence": null
+          },
+          {
+            "text": "environment",
+            "end_ms": 5600,
+            "start_ms": 4700,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "end_ms": 6220,
+            "start_ms": 5600,
+            "confidence": null
+          },
+          {
+            "text": "that",
+            "end_ms": 8620,
+            "start_ms": 6220,
+            "confidence": null
+          },
+          {
+            "text": "they",
+            "end_ms": 9120,
+            "start_ms": 8620,
+            "confidence": null
+          },
+          {
+            "text": "allow",
+            "end_ms": 9800,
+            "start_ms": 9120,
+            "confidence": null
+          },
+          {
+            "text": "vendors",
+            "end_ms": 10280,
+            "start_ms": 9800,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 10620,
+            "start_ms": 10280,
+            "confidence": null
+          },
+          {
+            "text": "create",
+            "end_ms": 11220,
+            "start_ms": 10620,
+            "confidence": null
+          },
+          {
+            "text": "retail",
+            "end_ms": 12180,
+            "start_ms": 11220,
+            "confidence": null
+          },
+          {
+            "text": "interfaces",
+            "end_ms": 13240,
+            "start_ms": 11820,
+            "confidence": null
+          },
+          {
+            "text": "with",
+            "end_ms": 13760,
+            "start_ms": 13240,
+            "confidence": null
+          },
+          {
+            "text": "highly",
+            "end_ms": 16580,
+            "start_ms": 13760,
+            "confidence": null
+          },
+          {
+            "text": "interactive",
+            "end_ms": 17540,
+            "start_ms": 16580,
+            "confidence": null
+          },
+          {
+            "text": "features.",
+            "end_ms": 18360,
+            "start_ms": 17540,
+            "confidence": null
+          },
+          {
+            "text": "One",
+            "end_ms": 18780,
+            "start_ms": 18520,
+            "confidence": null
+          },
+          {
+            "text": "desirable",
+            "end_ms": 19500,
+            "start_ms": 18780,
+            "confidence": null
+          },
+          {
+            "text": "form",
+            "end_ms": 20260,
+            "start_ms": 19500,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 21120,
+            "start_ms": 20260,
+            "confidence": null
+          },
+          {
+            "text": "interactive",
+            "end_ms": 22460,
+            "start_ms": 21120,
+            "confidence": null
+          },
+          {
+            "text": "from",
+            "end_ms": 23220,
+            "start_ms": 22460,
+            "confidence": null
+          },
+          {
+            "text": "a",
+            "end_ms": 23580,
+            "start_ms": 23220,
+            "confidence": null
+          },
+          {
+            "text": "consumer",
+            "end_ms": 24140,
+            "start_ms": 23580,
+            "confidence": null
+          },
+          {
+            "text": "perspective",
+            "end_ms": 24880,
+            "start_ms": 24140,
+            "confidence": null
+          },
+          {
+            "text": "is",
+            "end_ms": 25460,
+            "start_ms": 24880,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 25840,
+            "start_ms": 25460,
+            "confidence": null
+          },
+          {
+            "text": "implementation",
+            "end_ms": 27480,
+            "start_ms": 25840,
+            "confidence": null
+          },
+          {
+            "text": "of",
+            "end_ms": 28620,
+            "start_ms": 27480,
+            "confidence": null
+          },
+          {
+            "text": "sophisticated",
+            "end_ms": 29860,
+            "start_ms": 28620,
+            "confidence": null
+          },
+          {
+            "text": "tools",
+            "end_ms": 31080,
+            "start_ms": 30060,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 31540,
+            "start_ms": 31080,
+            "confidence": null
+          },
+          {
+            "text": "assist",
+            "end_ms": 32540,
+            "start_ms": 31540,
+            "confidence": null
+          },
+          {
+            "text": "shoppers",
+            "end_ms": 33260,
+            "start_ms": 32540,
+            "confidence": null
+          },
+          {
+            "text": "in",
+            "end_ms": 33820,
+            "start_ms": 33260,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "end_ms": 34260,
+            "start_ms": 33820,
+            "confidence": null
+          },
+          {
+            "text": "purchase",
+            "end_ms": 34980,
+            "start_ms": 34260,
+            "confidence": null
+          },
+          {
+            "text": "decisions",
+            "end_ms": 35660,
+            "start_ms": 34980,
+            "confidence": null
+          },
+          {
+            "text": "by",
+            "end_ms": 36100,
+            "start_ms": 35660,
+            "confidence": null
+          },
+          {
+            "text": "customizing",
+            "end_ms": 36940,
+            "start_ms": 36100,
+            "confidence": null
+          },
+          {
+            "text": "the",
+            "end_ms": 37280,
+            "start_ms": 36940,
+            "confidence": null
+          },
+          {
+            "text": "electronic",
+            "end_ms": 38000,
+            "start_ms": 37280,
+            "confidence": null
+          },
+          {
+            "text": "shopping",
+            "end_ms": 38420,
+            "start_ms": 38000,
+            "confidence": null
+          },
+          {
+            "text": "environment",
+            "end_ms": 38940,
+            "start_ms": 38160,
+            "confidence": null
+          },
+          {
+            "text": "to",
+            "end_ms": 39260,
+            "start_ms": 38940,
+            "confidence": null
+          },
+          {
+            "text": "their",
+            "end_ms": 39740,
+            "start_ms": 39260,
+            "confidence": null
+          },
+          {
+            "text": "individual",
+            "end_ms": 40480,
+            "start_ms": 39740,
+            "confidence": null
+          },
+          {
+            "text": "needs.",
+            "end_ms": 40580,
+            "start_ms": 40480,
+            "confidence": null
+          }
+        ],
+        "silences": [
+          {
+            "end_ms": 1240,
+            "start_ms": 780
+          },
+          {
+            "end_ms": 8300,
+            "start_ms": 6360
+          },
+          {
+            "end_ms": 14940,
+            "start_ms": 14620
+          },
+          {
+            "end_ms": 20680,
+            "start_ms": 20360
+          },
+          {
+            "end_ms": 32040,
+            "start_ms": 31760
+          }
+        ],
+        "speech_onset_ms": 760,
+        "speech_offset_ms": 40242.5,
+        "duration_ms": 40242.5,
+        "model": "whisper-large-v3",
+        "rules_version": "ra-diag-0.1"
+      }
+    },
+    "old_scores": {
+      "content": 55,
+      "fluency": 25,
+      "pronunciation": 30,
+      "overall": 33
+    },
+    "labels": {
+      "status": "labeled",
+      "errors": [
+        {
+          "type": "omission",
+          "word": "unique",
+          "occurrence": 1
+        },
+        {
+          "type": "long_pause",
+          "word": "that",
+          "occurrence": 1,
+          "duration_ms": 2000
+        },
+        {
+          "type": "substitution",
+          "word": "retail",
+          "occurrence": 1,
+          "spoken_as": "retain"
+        },
+        {
+          "type": "repetition",
+          "word": "desirable",
+          "occurrence": 1
+        }
+      ],
+      "labeled_by": "recording-script",
+      "notes": "Planned errors from ra041-mixed-4; verify that recording followed instructions."
+    }
   }
 ]
