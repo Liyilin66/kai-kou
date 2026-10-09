@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { supabase } from "@/lib/supabase";
-import NavBar from "@/components/NavBar.vue";
+import SpeakingPracticeShell from "@/components/SpeakingPracticeShell.vue";
 import RecordingWave from "@/components/RecordingWave.vue";
 import TimerBar from "@/components/TimerBar.vue";
 import { useRecorder } from "@/composables/useRecorder";
@@ -39,6 +39,18 @@ const questionLoading = ref(true);
 const question = ref({ ...defaultQuestion });
 
 const canSubmit = computed(() => recordingSeconds.value >= 3);
+const steps = [
+  { label: "播放原音" },
+  { label: "开始复述" },
+  { label: "提交评测" },
+  { label: "查看结果" }
+];
+const currentStep = computed(() => {
+  if (phase.value === "processing") return 2;
+  if (phase.value === "recording") return 1;
+  return 0;
+});
+const stepQuestionInfo = computed(() => `Question ${questionIndex.value}`);
 
 const barHeights = [10, 18, 24, 30, 24, 16, 28, 20, 12];
 
@@ -310,6 +322,11 @@ function debugSubmit(event, payload) {
   console.info(`[rs-submit:${submitCallCount}] ${event}`, payload);
 }
 
+async function handleLogout() {
+  await authStore.logout();
+  router.replace("/auth");
+}
+
 function shouldRetryWithToast(stopResult, transcript) {
   if (stopResult?.blobTooLarge) {
     uiStore.showToast("Recording is too long. Please try a shorter response.", "warning");
@@ -377,10 +394,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="Repeat Sentence" back-to="/home" />
-
-    <main class="mx-auto max-w-2xl px-4 py-6">
+  <SpeakingPracticeShell
+    data-testid="rs-practice-page"
+    back-label="Repeat Sentence"
+    title="Repeat Sentence"
+    :steps="steps"
+    :current-step="currentStep"
+    :question-info="stepQuestionInfo"
+    :member-label="authStore.statusText || '未开通'"
+    @back="router.push('/home')"
+    @exit="handleLogout"
+  >
+    <main class="mx-auto max-w-2xl px-4 py-6 rs-practice-main">
       <p class="mb-4 text-sm text-muted">Question {{ questionIndex }}</p>
 
       <div v-if="questionLoading" class="py-16 text-center">
@@ -497,5 +522,5 @@ onUnmounted(() => {
         </section>
       </template>
     </main>
-  </div>
+  </SpeakingPracticeShell>
 </template>

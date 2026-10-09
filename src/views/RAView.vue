@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from
 import { useRoute, useRouter } from "vue-router";
 import { supabase } from "@/lib/supabase";
 import { createRADiagnosisSubmission } from "@/lib/ra-diagnosis";
+import SpeakingPracticeShell from "@/components/SpeakingPracticeShell.vue";
 import RecordingWave from "@/components/RecordingWave.vue";
 import { fetchQuestions, getQuestionById, getRandomQuestion } from "@/lib/questions";
 import {
@@ -88,6 +89,7 @@ const sessionProgressPercent = computed(() => (
   questionTotal.value ? Math.round((completedQuestionCount.value / questionTotal.value) * 100) : 0
 ));
 const stepProgressPercent = computed(() => Math.round(((currentStep.value + 1) / steps.length) * 100));
+const stepQuestionInfo = computed(() => `第 ${currentQuestionNumber.value} 题 / 共 ${questionTotal.value} 题`);
 const timerRemainingSeconds = computed(() => {
   if (phase.value === "recording" && !hasFinalizedRecording.value) return timer.remaining.value;
   if (phase.value === "preparing") return timer.remaining.value;
@@ -890,12 +892,6 @@ function syncQuestionToStore() {
   });
 }
 
-function stepClass(index) {
-  if (index < currentStep.value) return "done";
-  if (index === currentStep.value) return "act";
-  return "wait";
-}
-
 function goBackToRAHome() {
   router.push("/ra");
 }
@@ -1481,32 +1477,26 @@ async function startRecordingNow() {
 </script>
 
 <template>
-  <div class="ra-practice-shell" data-testid="ra-practice-page">
-    <header class="ra-topbar">
-      <button class="tb-back" type="button" data-testid="ra-back" @click="goBackToRAHome">
-        <span class="tb-arr">‹</span>
-        <span>朗读题 · RA</span>
-      </button>
-      <div class="tb-title">RA 朗读练习</div>
-      <div class="tb-right">
-        <div class="vip-pill"><span class="vip-dot"></span> VIP · 无限练习</div>
-        <button class="exit-btn" type="button" @click="goBackToRAHome">退出</button>
-      </div>
-    </header>
-
-    <div class="step-bar" data-testid="ra-stepper">
-      <div v-for="(step, i) in steps" :key="step.label" class="step-wrap">
-        <div class="step-item">
-          <div class="step-num" :class="stepClass(i)">
-            <span v-if="currentStep > i">✓</span>
-            <span v-else>{{ i + 1 }}</span>
-          </div>
-          <span class="step-label" :class="stepClass(i)">{{ step.label }}</span>
+  <SpeakingPracticeShell
+    data-testid="ra-practice-page"
+    stepper-testid="ra-stepper"
+    :steps="steps"
+    :current-step="currentStep"
+    :question-info="stepQuestionInfo"
+  >
+    <template #topbar>
+      <header class="ra-topbar">
+        <button class="tb-back" type="button" data-testid="ra-back" @click="goBackToRAHome">
+          <span class="tb-arr">‹</span>
+          <span>朗读题 · RA</span>
+        </button>
+        <div class="tb-title">RA 朗读练习</div>
+        <div class="tb-right">
+          <div class="vip-pill"><span class="vip-dot"></span> VIP · 无限练习</div>
+          <button class="exit-btn" type="button" @click="goBackToRAHome">退出</button>
         </div>
-        <div v-if="i < steps.length - 1" class="step-sep"></div>
-      </div>
-      <div class="step-q-info">第 {{ currentQuestionNumber }} 题 / 共 {{ questionTotal }} 题</div>
-    </div>
+      </header>
+    </template>
 
     <div class="practice-body">
       <aside class="left-col">
@@ -1759,32 +1749,13 @@ async function startRecordingNow() {
         </section>
       </aside>
     </div>
-  </div>
+  </SpeakingPracticeShell>
 </template>
 
 <style scoped>
 *,*::before,*::after{box-sizing:border-box;}
-.ra-practice-shell{--c0:#1e1208;--c1:#3a2510;--c2:#7c5c3e;--c3:#a07850;--bg1:#ede8dc;--bg2:#e4ddd0;--card:#faf6ef;--card2:#f2ebe0;--bdr:#d4c8b4;--bdr2:#c4b49c;--muted:#a89070;--green:#5a9e6a;--green2:#dff0e4;--green3:#a8d4b4;--orange:#c07840;--orange2:#f2e4d0;--orange3:#d4b090;--red:#b84040;--red2:#f5e0dc;--red3:#d4a8a0;width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg1);color:var(--c0);font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;}
-.ra-topbar{height:52px;flex:0 0 52px;background:var(--c2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
-.tb-back,.exit-btn,.ai-hd-link{border:0;background:transparent;font:inherit;cursor:pointer;}
-.tb-back{display:flex;align-items:center;gap:6px;color:rgba(250,246,239,.72);font-size:13px;}
-.tb-arr{font-size:18px;line-height:1;}
-.tb-title{position:absolute;left:50%;transform:translateX(-50%);font-size:15px;font-weight:800;color:#faf6ef;}
-.tb-right{display:flex;align-items:center;gap:10px;}
-.vip-pill{display:flex;align-items:center;gap:6px;background:#dff0e4;border:1px solid #a8d4b4;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;color:#2d6a3a;}
-.vip-dot{width:5px;height:5px;border-radius:50%;background:#5a9e6a;}
-.exit-btn{font-size:12px;color:rgba(250,246,239,.66);}
-.step-bar{height:44px;flex:0 0 44px;background:var(--bg2);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 28px;}
-.step-wrap{display:flex;align-items:center;}
-.step-item{display:flex;align-items:center;gap:8px;padding:0 8px;}
-.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
-.step-num.act{background:var(--c2);color:#faf6ef;}
-.step-num.done{background:var(--green);color:#fff;}
-.step-num.wait{background:var(--bdr);color:var(--muted);}
-.step-label{font-size:11.5px;font-weight:600;}
-.step-label.act{color:var(--c2);}.step-label.done{color:var(--green);}.step-label.wait{color:var(--muted);}
-.step-sep{width:22px;height:1px;background:var(--bdr);}
-.step-q-info{margin-left:auto;font-size:11px;color:var(--muted);}
+.ra-practice-shell{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg1);color:var(--c0);font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;}
+.ai-hd-link{border:0;background:transparent;font:inherit;cursor:pointer;}
 .practice-body{flex:1;min-height:0;display:grid;grid-template-columns:276px minmax(620px,1fr) 292px;overflow:hidden;}
 .left-col,.right-col{min-height:0;overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;}
 .left-col{border-right:1px solid var(--bdr);padding:18px 14px;}
@@ -1807,7 +1778,7 @@ async function startRecordingNow() {
 .status-banner{min-height:104px;border-radius:14px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;}.status-banner--prep{background:linear-gradient(135deg,var(--c2),var(--c3));}.status-banner--rec{background:linear-gradient(135deg,#b84040,#c06050);}.status-banner--done{background:linear-gradient(135deg,var(--green),#80b980);}
 .sb-title{font-size:17px;font-weight:900;color:#faf6ef;}.sb-sub{margin-top:5px;font-size:12px;color:rgba(250,246,239,.7);}.countdown-wrap{text-align:center;min-width:76px;}.countdown-num{font-size:48px;line-height:1;font-weight:900;color:#faf6ef;}.countdown-lbl{margin-top:3px;font-size:9px;font-weight:800;letter-spacing:.08em;color:rgba(250,246,239,.55);}
 .timer-card{padding:14px 18px;display:flex;flex-direction:column;gap:11px;}.timer-row{display:flex;align-items:center;gap:10px;}.timer-label{font-size:11px;color:var(--muted);white-space:nowrap;}.timer-track{flex:1;height:8px;border-radius:999px;background:var(--bdr);overflow:hidden;}.timer-fill{height:100%;border-radius:999px;transition:width .25s ease;}.timer-fill--prep{background:linear-gradient(90deg,var(--c2),var(--c3));}.timer-fill--rec{background:linear-gradient(90deg,var(--red),#e06040);}.timer-fill--done{background:linear-gradient(90deg,var(--green),#80c080);}.timer-val{width:42px;text-align:right;font-size:12px;font-weight:900;color:var(--c2);}.timer-skip{border:0;background:transparent;color:var(--muted);text-decoration:underline;text-underline-offset:2px;font-size:11.5px;white-space:nowrap;cursor:pointer;}
-.primary-action{width:100%;border:1.5px solid var(--c2);background:transparent;border-radius:10px;padding:11px;color:var(--c2);font:inherit;font-size:14px;font-weight:800;cursor:pointer;}.primary-action:hover:not(:disabled){background:var(--card2);}.primary-action:disabled{opacity:.55;cursor:not-allowed;}
+
 .recording-card{padding:15px 18px;display:flex;flex-direction:column;gap:11px;}.record-state{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--c0);}.state-dot{width:10px;height:10px;border-radius:50%;}.state-dot--recording{background:var(--red);animation:pulse 1s infinite;}.state-dot--done{background:var(--green);}.state-dot--warn{background:#d18b35;}@keyframes pulse{50%{opacity:.45;transform:scale(1.25);}}
 .audio-preview{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;}.audio-preview audio{width:100%;height:34px;}.play-preview{width:30px;height:30px;border:0;border-radius:50%;background:var(--c2);color:#fff;cursor:pointer;}.record-actions{display:flex;gap:10px;}.ghost-action,.submit-action{flex:1;border-radius:10px;padding:11px;border:1px solid var(--bdr2);font:inherit;font-size:13px;font-weight:800;cursor:pointer;}.ghost-action{background:var(--card2);color:var(--c1);}.submit-action{border-color:var(--c2);background:var(--c2);color:#faf6ef;}.submit-action:disabled{background:#d8d1c5;border-color:#d8d1c5;color:#948674;cursor:not-allowed;}.rec-valid-note{font-size:11.5px;color:var(--green);}
 .article-card{padding:22px 26px;}.article-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;}.article-text{font-family:'Noto Serif SC','Georgia',serif;font-size:16px;line-height:2;color:#463829;letter-spacing:0;}

@@ -1,0 +1,313 @@
+.speaking-practice-shell {
+  --speaking-card-radius: 13px;
+  --speaking-overlay: #0007;
+  --c0: #1e1208;
+  --c1: #3a2510;
+  --c2: #7c5c3e;
+  --c3: #a07850;
+  --bg1: #ede8dc;
+  --bg2: #e4ddd0;
+  --card: #faf6ef;
+  --card2: #f2ebe0;
+  --bdr: #d4c8b4;
+  --bdr2: #c4b49c;
+  --muted: #a89070;
+  --green: #5a9e6a;
+  --green2: #dff0e4;
+  --green3: #a8d4b4;
+  --orange: #c07840;
+  --orange2: #f2e4d0;
+  --orange3: #d4b090;
+  --red: #b84040;
+  --red2: #f5e0dc;
+  --red3: #d4a8a0;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg1);
+  color: var(--c0);
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  box-sizing: border-box;
+}
+
+.speaking-practice-shell *,
+.speaking-practice-shell *::before,
+.speaking-practice-shell *::after {
+  box-sizing: border-box;
+}
+
+.speaking-practice-shell button {
+  font: inherit;
+}
+
+.speaking-practice-shell .ra-topbar {
+  height: 52px;
+  flex: 0 0 52px;
+  background: var(--c2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+
+.speaking-practice-shell .tb-back,
+.speaking-practice-shell .exit-btn,
+.speaking-practice-shell .ai-hd-link {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.speaking-practice-shell .tb-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(250, 246, 239, .72);
+  font-size: 13px;
+}
+
+.speaking-practice-shell .tb-arr {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.speaking-practice-shell .tb-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  font-weight: 800;
+  color: #faf6ef;
+}
+
+.speaking-practice-shell .tb-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.speaking-practice-shell .vip-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  background: var(--green2);
+  border: 1px solid var(--green3);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2d6a3a;
+  white-space: nowrap;
+}
+
+.speaking-practice-shell .vip-dot {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.speaking-practice-shell .exit-btn {
+  font-size: 12px;
+  color: rgba(250, 246, 239, .66);
+}
+
+.speaking-practice-shell .step-bar {
+  height: 44px;
+  flex: 0 0 44px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--bdr);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.speaking-practice-shell .step-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.speaking-practice-shell .step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.speaking-practice-shell .step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.speaking-practice-shell .step-num.act {
+  background: var(--c2);
+  color: #faf6ef;
+}
+
+.speaking-practice-shell .step-num.done {
+  background: var(--green);
+  color: #fff;
+}
+
+.speaking-practice-shell .step-num.wait {
+  background: var(--bdr);
+  color: var(--muted);
+}
+
+.speaking-practice-shell .step-label {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.speaking-practice-shell .step-label.act {
+  color: var(--c2);
+}
+
+.speaking-practice-shell .step-label.done {
+  color: var(--green);
+}
+
+.speaking-practice-shell .step-label.wait {
+  color: var(--muted);
+}
+
+.speaking-practice-shell .step-sep {
+  width: 22px;
+  height: 1px;
+  background: var(--bdr);
+}
+
+.speaking-practice-shell .step-q-info {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.speaking-practice-shell .rs-practice-main {
+  width: 100%;
+}
+
+@media (max-width: 1320px) {
+  .speaking-practice-shell .ra-topbar {
+    padding: 0 24px;
+  }
+
+  .speaking-practice-shell .step-bar {
+    padding: 0 24px;
+  }
+
+  .speaking-practice-shell .step-sep {
+    width: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .speaking-practice-shell {
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .speaking-practice-shell .ra-topbar {
+    height: auto;
+    min-height: 52px;
+    flex-basis: auto;
+    padding: 4px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .speaking-practice-shell .tb-title {
+    position: static;
+    transform: none;
+    font-size: 13px;
+  }
+
+  .speaking-practice-shell .tb-back,
+  .speaking-practice-shell .exit-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .speaking-practice-shell .tb-right {
+    margin-left: auto;
+    max-width: 100%;
+  }
+
+  .speaking-practice-shell .vip-pill {
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .speaking-practice-shell .step-bar {
+    height: auto;
+    flex-basis: auto;
+    min-height: 44px;
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .speaking-practice-shell .step-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .speaking-practice-shell .step-item {
+    padding: 0;
+    gap: 4px;
+  }
+
+  .speaking-practice-shell .step-num {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .speaking-practice-shell .step-label {
+    font-size: 10px;
+  }
+
+  .speaking-practice-shell .step-sep {
+    display: none;
+  }
+
+  .speaking-practice-shell .step-q-info {
+    width: 100%;
+    margin-left: 0;
+    text-align: right;
+  }
+}
+
+/* The same primary control serves practice and diagnosis pages. */
+.speaking-practice-shell .primary-action {
+  width: 100%;
+  border: 1.5px solid var(--c2);
+  background: transparent;
+  border-radius: 10px;
+  padding: 11px;
+  color: var(--c2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.speaking-practice-shell .primary-action:hover:not(:disabled) { background: var(--card2); }
+.speaking-practice-shell .primary-action:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 767px) {
+  .speaking-practice-shell .primary-action { min-height: 48px; background: var(--card); }
+}
