@@ -27,7 +27,7 @@ const dashboard = ref(createEmptyDesktopDashboardState(null, { diEnabled: isDIEn
 const TASK_VISUALS = {
   RA: { accent: "#7765F6", glow: "rgba(119, 101, 246, 0.14)", icon: "🎙", title: "RA", subtitle: "朗读句子\n流利表达", path: "/ra" },
   WFD: { accent: "#1BC58E", glow: "rgba(27, 197, 142, 0.14)", icon: "✎", title: "WFD", subtitle: "写作填空\n语法拼写", path: "/wfd" },
-  RTS: { accent: "#FF9348", glow: "rgba(255, 147, 72, 0.14)", icon: "▤", title: "RTS", subtitle: "复述句子\n逻辑重组", path: "/rts" },
+  RTS: { accent: "#FF9348", glow: "rgba(255, 147, 72, 0.14)", icon: "▤", title: "RTS", subtitle: "情景回应\n情境沟通", path: "/rts" },
   DI: { accent: "#7B6CFF", glow: "rgba(123, 108, 255, 0.14)", icon: "◔", title: "DI", subtitle: "描述图表\n数据分析", path: "/di" },
   WE: { accent: "#4E8BFF", glow: "rgba(78, 139, 255, 0.14)", icon: "▣", title: "WE", subtitle: "写作议论文\n结构论证", path: "/we" }
 };

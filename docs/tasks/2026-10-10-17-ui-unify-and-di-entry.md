@@ -83,3 +83,11 @@
 - 浏览器在375/768/1440验证首页空态、数据库夹具记录、关闭DI旧建议过滤及目标弹窗；1440侧栏滚动/高亮与跨页面锚点通过。
 - 私教页面C/D残留同步处理：快捷DI提问在关闭时隐藏，资料入口为WE模板库并可点击。所有8个相关UI文件style块与改前完全一致，未做配色/响应式改版。
 - 无新增SQL、依赖、产品页面或评分/API修改；既有布局问题按盘点表进入后续批次。截图留 output/task17，不进Git。
+
+## 第一批审查后修改（2026-10-10）
+
+- 审查问题：`buildDesktopDashboardState` 的“最近练习”按首页卡片的 5 个题型过滤，RS、RL 记录被误删；最近只练 RS 时显示“暂无练习记录”。
+- 修复：最近练习改为按 `getEnabledTaskTypes({ diEnabled })`（全部已开放题型，只排除关闭的 DI）过滤，再取前 3 条；原 `displayTaskSet` 无其他用途，已删除。
+- 新增测试：DI 关闭时输入 RS、RS、RA、DI，最近练习依次为 RS、RS、RA；DI 开启时 RL 记录也能显示。该测试在修复前失败、修复后通过。
+- 题型中文名按 `src/stores/practice.js` 统一：RS 为“复述句子”，RTS 为“情景回应”。修改 `enabled-task-types.js`、`home-desktop-dashboard.js`（RTS 及误写为“细节理解”的 RS）、`HomeView.vue`、`AgentView.vue`、`HomeDesktopDashboard.vue`、`HomeReplicaView.vue`；卡片第二行“逻辑连贯 / 逻辑重组”改为与 practice.js 一致的“情境沟通”；`AgentView.vue` 中 RTS 的练习要点“再复述动作”改为“再给出得体回应”。新增名称一致性测试。
+- 480 项测试通过；RA/RS 诊断开关同时开启、同时关闭构建通过。

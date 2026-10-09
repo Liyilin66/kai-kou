@@ -262,11 +262,11 @@ const TASK_META = {
     focus: "先说主图信息，再补关键细节"
   },
   RTS: {
-    label: "复述句子",
+    label: "情景回应",
     route: "/rts/practice",
     color: "#d98a1b",
     minutes: 10,
-    focus: "抓住场景和任务，再复述动作"
+    focus: "抓住场景和任务，再给出得体回应"
   }
 };
 

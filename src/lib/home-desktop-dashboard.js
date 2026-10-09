@@ -23,10 +23,10 @@ const ESTIMATED_TASK_DURATION_MINUTES = {
 const TASK_META = {
   RA: { label: "RA", title: "朗读句子", accent: "#5B6FFF" },
   WFD: { label: "WFD", title: "写作填空", accent: "#20C997" },
-  RTS: { label: "RTS", title: "复述句子", accent: "#FF9B42" },
+  RTS: { label: "RTS", title: "情景回应", accent: "#FF9B42" },
   DI: { label: "DI", title: "描述图表", accent: "#7B6CFF" },
   WE: { label: "WE", title: "写作议论文", accent: "#4D8DFF" },
-  RS: { label: "RS", title: "细节理解", accent: "#F67C4A" },
+  RS: { label: "RS", title: "复述句子", accent: "#F67C4A" },
   RL: { label: "RL", title: "复述讲座", accent: "#4D8DFF" }
 };
 
@@ -220,12 +220,13 @@ export function buildDesktopDashboardState(homeAnalytics, rows, options = {}) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const displayTasks = getEnabledTaskTypes({ types: DISPLAY_TASKS, diEnabled: options.diEnabled !== false });
   const weaknessTasks = getEnabledTaskTypes({ types: WEAKNESS_TASKS, diEnabled: options.diEnabled !== false });
-  const displayTaskSet = new Set(displayTasks);
   const weeklyRows = Array.isArray(options.weeklyRows) ? options.weeklyRows : safeRows;
   const optionWeaknessRows = Array.isArray(options.weaknessRows) ? options.weaknessRows : [];
   const weaknessRows = optionWeaknessRows.length ? optionWeaknessRows : safeRows.slice(0, DASHBOARD_WEAKNESS_PAGE_SIZE);
+  // Recent practice lists every open task type (RS and RL have no home card), only hiding a closed DI.
+  const recentTaskSet = new Set(getEnabledTaskTypes({ diEnabled: options.diEnabled !== false }));
   const recentRows = (Array.isArray(options.recentRows) ? options.recentRows : safeRows)
-    .filter((row) => displayTaskSet.has(normalizeTaskType(row?.task_type)))
+    .filter((row) => recentTaskSet.has(normalizeTaskType(row?.task_type)))
     .slice(0, DASHBOARD_RECENT_PRACTICE_LIMIT);
   const trendRows = normalizeTrendRows(options.trendRows);
   const weeklyStudy = buildWeeklyStudySummary(weeklyRows, displayTasks);

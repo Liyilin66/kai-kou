@@ -72,3 +72,31 @@ test('empty dashboard state and homepage source do not expose fake coach or rece
   assert.doesNotMatch(homeSource, /10:32|10:33|2 天内可见提升|免费领取|PTE 备考资料包/);
   assert.doesNotMatch(desktopSource, /placeholder-di|72\/90|64\/90|05-16|免费领取|PTE 备考资料包/);
 });
+
+test('recent practice keeps RS and RL records and only hides a closed DI', () => {
+  const context = loadDashboardContext();
+  const rows = [
+    { id: 'rs-1', task_type: 'RS', question_id: 'RS_001', created_at: '2026-10-09T04:00:00.000Z', score_json: { score_version: 'rs-score-0.1', scores: { overall: 70 } } },
+    { id: 'rs-2', task_type: 'RS', question_id: 'RS_002', created_at: '2026-10-09T03:00:00.000Z', score_json: { score_version: 'rs-score-0.1', scores: { overall: 64 } } },
+    { id: 'ra-1', task_type: 'RA', question_id: 'RA_024', created_at: '2026-10-09T02:00:00.000Z', score_json: { scores: { overall: 62 } } },
+    { id: 'di-1', task_type: 'DI', question_id: 'DI_Q001', created_at: '2026-10-09T01:00:00.000Z', score_json: { ai_review: { scores: { overall: 71 } } } }
+  ];
+  const recent = state => Array.from(state.recentPractices.map((item) => item.taskType));
+  const closed = vm.runInContext(`buildDesktopDashboardState({}, ${JSON.stringify(rows)}, { diEnabled: false, recentRows: ${JSON.stringify(rows)} })`, context);
+  assert.deepEqual(recent(closed), ['RS', 'RS', 'RA']);
+  const rl = [{ id: 'rl-1', task_type: 'RL', question_id: 'RL_001', created_at: '2026-10-09T05:00:00.000Z', score_json: { overall: 60 } }, ...rows];
+  const open = vm.runInContext(`buildDesktopDashboardState({}, ${JSON.stringify(rl)}, { diEnabled: true, recentRows: ${JSON.stringify(rl)} })`, context);
+  assert.deepEqual(recent(open), ['RL', 'RS', 'RS']);
+});
+
+test('task names follow the practice store: RS is 复述句子 and RTS is 情景回应', () => {
+  const context = loadDashboardContext();
+  assert.equal(vm.runInContext('HOME_TASK_TYPE_META.RTS.name', context), '情景回应');
+  assert.match(readProjectFile('src/stores/practice.js'), /title: "RS - 复述句子"[\s\S]*title: "RTS - 情景回应"/);
+  assert.match(readProjectFile('src/lib/home-desktop-dashboard.js'), /RTS: \{ label: "RTS", title: "情景回应"[\s\S]*RS: \{ label: "RS", title: "复述句子"/);
+  for (const file of ['src/views/HomeView.vue', 'src/views/AgentView.vue', 'src/components/home/HomeDesktopDashboard.vue', 'src/views/HomeReplicaView.vue', 'src/lib/enabled-task-types.js']) {
+    const source = readProjectFile(file);
+    assert.doesNotMatch(source, /RTS[^\n]*复述句子|复述句子\\n逻辑|逻辑连贯|逻辑重组/, file);
+    assert.match(source, /情景回应/, file);
+  }
+});

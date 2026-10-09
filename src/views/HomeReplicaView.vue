@@ -32,7 +32,7 @@ const WEEKLY_GOAL_TASKS = [
   { type: "WFD", name: "写作填空", accent: "#6d8f72" },
   { type: "WE", name: "写作议论文", accent: "#9a7a54" },
   { type: "DI", name: "描述图表", accent: "#8f735b" },
-  { type: "RTS", name: "复述句子", accent: "#b07a4b" }
+  { type: "RTS", name: "情景回应", accent: "#b07a4b" }
 ];
 
 const router = useRouter();
@@ -87,7 +87,7 @@ const heatLegendLevels = [1, 2, 3, 4];
 const taskVisuals = {
   RA: { title: "RA", subtitle: "朗读句子\n流利表达", color: "#8a6845", icon: "●", path: "/ra" },
   WFD: { title: "WFD", subtitle: "写作填空\n语法拼写", color: "#6d8f72", icon: "◆", path: "/wfd" },
-  RTS: { title: "RTS", subtitle: "复述句子\n逻辑连贯", color: "#b07a4b", icon: "▤", path: "/rts" },
+  RTS: { title: "RTS", subtitle: "情景回应\n情境沟通", color: "#b07a4b", icon: "▤", path: "/rts" },
   DI: { title: "DI", subtitle: "描述图表\n数据分析", color: "#8f735b", icon: "◔", path: "/di" },
   WE: { title: "WE", subtitle: "写作议论文\n结构论证", color: "#9a7a54", icon: "▣", path: "/we" }
 };

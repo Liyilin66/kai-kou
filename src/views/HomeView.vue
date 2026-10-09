@@ -1033,7 +1033,7 @@ const aiActions = ref([
 const moduleCardConfigs = [
   { code: "RA", icon: "🎙", iconBg: "#F2E4D0", desc: "朗读句子\n语流表达", tagBg: "#F2E4D0", tagColor: "#C07840", tagBorder: "#D4B090", to: "/ra" },
   { code: "WFD", icon: "✍", iconBg: "#DFF0E4", desc: "写作填空\n语法拼写", tagBg: "#DFF0E4", tagColor: "#3A7E50", tagBorder: "#A8D4B4", to: "/wfd" },
-  { code: "RTS", icon: "🔁", iconBg: "#F2E4D0", desc: "复述句子\n逻辑连贯", tagBg: "#F0E0D8", tagColor: "#B05040", tagBorder: "#D4B0A0", to: "/rts/practice" },
+  { code: "RTS", icon: "🔁", iconBg: "#F2E4D0", desc: "情景回应\n情境沟通", tagBg: "#F0E0D8", tagColor: "#B05040", tagBorder: "#D4B0A0", to: "/rts/practice" },
   { code: "DI", icon: "📊", iconBg: "#E8E4F4", desc: "描述图表\n数据分析", tagBg: "#E8E4F4", tagColor: "#6050A0", tagBorder: "#C0B8E0", to: "/di" },
   { code: "WE", icon: "📝", iconBg: "#F0EAF4", desc: "写作议论\n结构论证", tagBg: "#F0EAF4", tagColor: "#7050A0", tagBorder: "#C8B8DC", to: "/we" }
 ];
@@ -1075,7 +1075,7 @@ const WEEKLY_GOAL_COLORS = {
 const WEEKLY_GOAL_LABELS = {
   WFD: "写作填空",
   RA: "朗读句子",
-  RTS: "复述句子",
+  RTS: "情景回应",
   DI: "描述图表",
   WE: "写作议论"
 };
