@@ -36,3 +36,10 @@ test('same-question retry preserves the question id for RS too', () => {
  assert.match(source, /query: questionId \? \{ questionId \} : \{\}/);
  assert.doesNotMatch(source, /questionId && taskType.value === 'RA'/);
 });
+test('zero-content results say fluency is not scored and the rules explain why', () => {
+  assert.match(source, /v-if="score\.fluency\.band === null"><strong>内容为 0，不评分<\/strong>/);
+  assert.match(source, /内容比例为 0 时总分直接为 10，流利度不评分/);
+  assert.match(source, /内容为 0 档时总分直接为 10，流利度不评分/);
+  assert.match(source, /Score Guide 第 8 页/);
+  assert.match(source, /\{\{ rulesCopy\.zero \}\}/);
+});

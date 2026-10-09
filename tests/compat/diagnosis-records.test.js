@@ -105,3 +105,16 @@ test('unscored RS diagnoses are activity, never a weak zero or stale legacy scor
   assert.equal(invoke('src/lib/home-desktop-dashboard.js', `extractOverallScore(${JSON.stringify(row)})`), null);
   assert.equal(invoke('backend/agent/build-agent-context.js', `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([row])}), []).recent_average_score_90_scale`), null);
 });
+test('zero-content RA and RS reference scores keep overall 10 and never infer fluency', () => {
+  for (const [taskType, version] of [['RA', 'ra-score-0.1'], ['RS', 'rs-score-0.1']]) {
+    const row = { ...reference, task_type: taskType, score_json: { ...reference.score_json, score_version: version, scores: { overall: 10, content: 10, fluency: null, pronunciation: null } } };
+    if (taskType === 'RA') {
+      const log = invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(row)})`);
+      assert.equal(log.overall, 10); assert.equal(log.scores.fluency, null);
+    }
+    assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([row])}).averageScore`), 10);
+    assert.equal(invoke('backend/agent/build-agent-context.js', `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([row])}), []).recent_average_score_90_scale`), 10);
+    const buckets = invoke('src/lib/profile-portrait.js', `(() => { const buckets = createMetricBuckets(); applyRowSignalsToBuckets(${JSON.stringify(row)}, buckets); return buckets; })()`);
+    assert.equal(buckets.fluency.signalCount, 0); assert.equal(buckets.pronunciation.signalCount, 0); assert.ok(buckets.content.signalCount > 0);
+  }
+});

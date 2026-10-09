@@ -10,6 +10,7 @@
 
 可复核页码：
 
+- Score Guide 第 8 页：Content 或 Form 为 0 的回答不得分；Describe Image 示例图显示 Content 为 0 时“No further scoring”，不再评 Pronunciation 与 Oral Fluency。
 - Score Guide 第 15 页：RA 的题量、计分方式、评分项、Content 规则、Pronunciation 档名。
 - Score Guide 第 16 页：RA 的 Oral Fluency 档名。
 - Score Guide 第 45 页：Pronunciation 0-5 详细标准。
@@ -165,7 +166,9 @@ Score Guide 第 15 页公开的 RA 评分配置是：
 total = round(10 + 80 × (0.5 × content_ratio + 0.5 × fluency_band / 5))
 ```
 
-总分范围10–90。两项各50%的权重及10–90换算是项目自定，**不包含发音，不等于 Pearson 官方单题分**。历史存储：`scores.overall=total`、`scores.content=round(10+80×ratio)`、`scores.fluency=round(10+80×band/5)`、`scores.pronunciation=null`，同时保存 `score_version=ra-score-0.1` 与全部原始依据。旧无版本诊断记录仍不将旧影子模型数字当作本版本分数；回填只处理已有 done 诊断，不从音频重新调用模型。
+**内容为 0：** `content_ratio = 0` 时总分直接为 10，流利度不评分（`fluency.band = null`、`status = not_scored`、`reason = content_zero`，保留 D/L/W/R 依据），卡片显示“内容为 0，不评分”。官方依据：Score Guide 第 8 页，Content 为 0 的回答不得分，也不再评其他项。“不得分”在本项目 10–90 换算中显示为最低分 10，这是项目换算，不是 Pearson 公布的数值。
+
+总分范围10–90。两项各50%的权重及10–90换算是项目自定，**不包含发音，不等于 Pearson 官方单题分**。历史存储：`scores.overall=total`、`scores.content=round(10+80×ratio)`、`scores.fluency=round(10+80×band/5)`（内容为 0 时为 null）、`scores.pronunciation=null`，同时保存 `score_version=ra-score-0.1` 与全部原始依据。旧无版本诊断记录仍不将旧影子模型数字当作本版本分数；回填只处理已有 done 诊断，不从音频重新调用模型。
 
 ## Repeat Sentence（RS）诊断参考分 · rs-score-0.1
 
@@ -175,5 +178,9 @@ total = round(10 + 80 × (0.5 × content_ratio + 0.5 × fluency_band / 5))
 - **第 17 页**：另含 Pronunciation 和 Oral Fluency；具体档位描述在第 45、46 页。
 - 官方没有公布“几乎没有”的数字阈值或专有顺序匹配算法。项目以零个可信顺序匹配词近似 0 档，其余正匹配不足一半为 1 档；词级对齐是项目实现，不声称复刻官方引擎。同音词按语音等价兼容匹配；低置信度不作为确定用户错误，也不计为已确认正确。部分不确定时仅按已确认内容给保守参考档并显示不确定数量；全部只有不确定识别时内容档和总分为 null，待回听确认。
 - RS Content 按上述档位评定，**不使用 RA 的逐错减词比例作为内容参考分**。流利度沿用本页 `ra-score-0.1` 的可观测特征和分档；语速、停顿阈值仍为项目自定。
-- RS 总参考分的项目换算为 `round(10 + 80 × (0.5 × Content档/3 + 0.5 × Fluency档/5))`。这不是 Pearson 最终考试分数公式；内容为零时仍显示项目换算参考值，不声称与官方零内容时的整题处理相同。
+- RS 总参考分的项目换算为 `round(10 + 80 × (0.5 × Content档/3 + 0.5 × Fluency档/5))`。这不是 Pearson 最终考试分数公式；内容 0 档时总分直接为 10，流利度不评分（同 RA，依据 Score Guide 第 8 页：Content 为 0 不得分、不再评其他项）；内容待确认（全部只有低置信度识别）不算 0 档，总分仍为 null。
 - 发音保持 `not_assessed`，页面显示“本版本未评估”，历史记录存 `pronunciation: null`，不能显示为 0 或参与画像推算。
+
+## 修订记录
+
+- 2026-10-09：`ra-score-0.1`、`rs-score-0.1` 增加内容为 0 的处理（总分 10、流利度不评分），依据 Score Guide 第 8 页。版本号未变：修订前数据库中 6 条 RA 参考分均无内容为 0 的记录，按新规则重放结果逐项相同；RS 尚未在生产写入。

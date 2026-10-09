@@ -57,3 +57,30 @@ test('RS low-confidence observations cannot manufacture a perfect content band',
  const partial=input({N:3,ops:[{type:'match',ref_index:0,hyp_index:0},{type:'substitution',tag:'low_confidence',ref_index:1,hyp_index:1},{type:'match',ref_index:2,hyp_index:2}]});
  assert.equal(scoreRS(partial).content.band,2);assert.equal(scoreRS(partial).content.uncertain,1);
 });
+test('RA zero content ratio scores 10 and leaves fluency unscored',()=>{
+ const ops=Array.from({length:4},(_,i)=>({type:'omission',ref_index:i}));
+ const s=scoreRA(input({N:4,W:120,ops}));
+ assert.equal(s.content.ratio,0);assert.equal(s.total,10);
+ assert.deepEqual(s.fluency,{band:null,label:null,status:'not_scored',reason:'content_zero',evidence:{D:0,L:0,W:120,R:0}});
+ assert.deepEqual(scoreToPracticeScores(s),{overall:10,content:10,fluency:null,pronunciation:null});
+});
+test('RA content just above zero is still scored on both traits',()=>{
+ const s=scoreRA(input({N:4,ops:[1,2,3].map(i=>({type:'omission',ref_index:i}))}));
+ assert.equal(s.content.ratio,.25);assert.equal(s.fluency.band,5);assert.equal(s.total,60);
+});
+test('RS content band 0 scores 10 and leaves fluency unscored',()=>{
+ const s=scoreRS(input({N:4,ops:[{type:'substitution',ref_index:0,hyp_index:0},{type:'insertion',ref_index:null,hyp_index:1}]}));
+ assert.equal(s.content.band,0);assert.equal(s.total,10);
+ assert.equal(s.fluency.band,null);assert.equal(s.fluency.status,'not_scored');assert.equal(s.fluency.reason,'content_zero');
+ assert.deepEqual(scoreToPracticeScores(s),{overall:10,content:10,fluency:null,pronunciation:null});
+});
+test('RS fluency stays scored when RS content is above zero even if RA ratio would be zero',()=>{
+ const ops=[{type:'match',ref_index:0,hyp_index:0},...[1,2,3].map(i=>({type:'insertion',ref_index:null,hyp_index:i}))];
+ const data=input({N:2,ops});
+ assert.equal(scoreRA(data).content.ratio,0);
+ const s=scoreRS(data);assert.equal(s.content.band,2);assert.equal(s.fluency.band,5);assert.equal(s.total,77);
+});
+test('RS content pending on uncertain words is not treated as zero content',()=>{
+ const s=scoreRS(input({N:2,ops:[0,1].map(i=>({type:'substitution',tag:'low_confidence',ref_index:i,hyp_index:i}))}));
+ assert.equal(s.content.band,null);assert.equal(s.total,null);assert.equal(s.fluency.band,5);
+});

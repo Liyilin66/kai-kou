@@ -29,18 +29,8 @@ export function longestContinuousRun(alignment={},pauses=[]) {
  for(let i=0;i<spoken.length;i++){run+=Math.max(1,count(spoken[i].hyp_count)??1);longest=Math.max(longest,run);if(breaks.has(i))run=0;}
  return longest;
 }
-export function scoreRA({alignment={},pauses=[],metrics={}}={}){
- const total=Array.isArray(alignment.reference)?alignment.reference.length:(count(alignment.summary?.ref_count)??0);
- const seen=new Set();let errors=0,repetitions=0;
- for(const [index,op]of (alignment.ops||[]).entries()){
-  if(UNCERTAIN.has(op.tag)||op.tag==='filler')continue;
-  if(op.tag==='repetition'||op.type==='repetition')repetitions++;
-  if(['substitution','omission'].includes(op.type)){
-   const key=Number.isInteger(op.ref_index)?`ref:${op.ref_index}`:`unknown:${index}`;
-   if(!seen.has(key)){seen.add(key);errors++;}
-  }else if(['insertion','repetition'].includes(op.type))errors++;
- }
- const correct=Math.max(0,total-errors),ratio=total?correct/total:0;
+function scoreFluency({alignment={},pauses=[],metrics={}}={}){
+ const repetitions=(alignment.ops||[]).filter(op=>!UNCERTAIN.has(op.tag)&&(op.tag==='repetition'||op.type==='repetition')).length;
  const D=(count(metrics.hesitation_count)??pauses.filter(p=>p.type==='hesitation').length)+repetitions;
  const L=count(metrics.long_pause_count)??pauses.filter(p=>p.type==='long_pause').length;
  const W=Number.isFinite(metrics.wpm)&&metrics.wpm>=0?metrics.wpm:0;
@@ -52,9 +42,25 @@ export function scoreRA({alignment={},pauses=[],metrics={}}={}){
  else if(D>=2)band=3;
  else if(D===1||W<90)band=4;
  else band=5;
+ return {band,label:LABELS[band],evidence:{D,L,W,R}};
+}
+// Score Guide p.8: a zero Content score earns no score points and stops further trait scoring.
+function contentZeroFluency(fluency){return {band:null,label:null,status:'not_scored',reason:'content_zero',evidence:fluency.evidence};}
+export function scoreRA({alignment={},pauses=[],metrics={}}={}){
+ const total=Array.isArray(alignment.reference)?alignment.reference.length:(count(alignment.summary?.ref_count)??0);
+ const seen=new Set();let errors=0;
+ for(const [index,op]of (alignment.ops||[]).entries()){
+  if(UNCERTAIN.has(op.tag)||op.tag==='filler')continue;
+  if(['substitution','omission'].includes(op.type)){
+   const key=Number.isInteger(op.ref_index)?`ref:${op.ref_index}`:`unknown:${index}`;
+   if(!seen.has(key)){seen.add(key);errors++;}
+  }else if(['insertion','repetition'].includes(op.type))errors++;
+ }
+ const correct=Math.max(0,total-errors),ratio=total?correct/total:0;
+ const fluency=scoreFluency({alignment,pauses,metrics});
  return {score_version:RA_SCORE_VERSION,content:{correct,total,errors,ratio},
-  fluency:{band,label:LABELS[band],evidence:{D,L,W,R}},pronunciation:{status:'not_assessed'},
-  total:Math.round(10+80*(.5*ratio+.5*band/5))};
+  fluency:ratio===0?contentZeroFluency(fluency):fluency,pronunciation:{status:'not_assessed'},
+  total:ratio===0?10:Math.round(10+80*(.5*ratio+.5*fluency.band/5))};
 }
 export function scoreRS({alignment={},pauses=[],metrics={}}={}){
  const total=Array.isArray(alignment.reference)?alignment.reference.length:(count(alignment.summary?.ref_count)??0);
@@ -79,13 +85,14 @@ export function scoreRS({alignment={},pauses=[],metrics={}}={}){
  if(total&&correct===total&&!middleInsertion&&!uncertain)band=3;
  else if(ratio>=.5)band=2;
  else if(correct>0)band=1;
- const fluency=scoreRA({alignment,pauses,metrics}).fluency;
- return {score_version:RS_SCORE_VERSION,content:{band:uncertain&&correct===0?null:band,matched:correct,total,ratio,...(uncertain?{uncertain}: {})},fluency,pronunciation:{status:'not_assessed'},
-  total:uncertain&&correct===0?null:Math.round(10+80*(.5*(band/3)+.5*fluency.band/5))};
+ const fluency=scoreFluency({alignment,pauses,metrics});
+ const pending=uncertain&&correct===0,zero=band===0&&!pending;
+ return {score_version:RS_SCORE_VERSION,content:{band:pending?null:band,matched:correct,total,ratio,...(uncertain?{uncertain}: {})},fluency:zero?contentZeroFluency(fluency):fluency,pronunciation:{status:'not_assessed'},
+  total:pending?null:zero?10:Math.round(10+80*(.5*(band/3)+.5*fluency.band/5))};
 }
 export function scoreToPracticeScores(score){
  const content=score?.score_version===RS_SCORE_VERSION
   ? score.content?.band===null?null:Math.round(10+80*((score.content?.band??0)/3))
   : Math.round(10+80*(score.content?.ratio??0));
- return {overall:score.total,content,fluency:Math.round(10+80*score.fluency.band/5),pronunciation:null};
+ return {overall:score.total,content,fluency:score.fluency.band===null?null:Math.round(10+80*score.fluency.band/5),pronunciation:null};
 }

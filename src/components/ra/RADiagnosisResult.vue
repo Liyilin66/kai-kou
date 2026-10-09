@@ -64,12 +64,14 @@ const rulesCopy = computed(() => taskType.value === 'RS'
   ? {
       official: 'Pearson Score Guide 第 16 页：RS 为部分得分，涉及 Listening 与 Speaking；Content 规则按正确顺序内容给 0–3 档。第 17 页另含 Pronunciation 与 Oral Fluency，第 46 页为 Oral Fluency 档位。',
       content: 'RS 不照搬 RA 的逐错扣分。本项目按可信顺序匹配词数判定：全部参考词按顺序匹配且无句中多词为 3；至少一半为 2；不足一半但有原句内容为 1；无原句内容为 0；全部只有低置信度识别时内容与总分待确认。同音词按语音等价处理；低置信度不算已确认正确，不标为用户错误，填充词不计内容。',
-      formula: 'round(10 + 80 × (0.5 × Content档 / 3 + 0.5 × Fluency档 / 5))'
+      formula: 'round(10 + 80 × (0.5 × Content档 / 3 + 0.5 × Fluency档 / 5))',
+      zero: '内容为 0 档时总分直接为 10，流利度不评分。依据 Score Guide 第 8 页：Content 为 0 的回答不得分，也不再评其他项；10 是本项目换算的最低分。'
     }
   : {
       official: 'Pearson Score Guide 第 15 页：内容每处 replacement、omission、insertion 计一个错误；第 46 页：流利度按 0–5 分档描述。我们使用这些公开评分项，不声称复刻 Pearson 专有评分。',
       content: 'N 为归一化参考词数，内容比例=max(0,N−错误数)/N。同音词、低置信度、填充词不扣内容；同一原文位置替换与漏读只扣一次，多读含重复分别计错。',
-      formula: 'round(10 + 80 × (0.5 × 内容比例 + 0.5 × 流利度档位 / 5))'
+      formula: 'round(10 + 80 × (0.5 × 内容比例 + 0.5 × 流利度档位 / 5))',
+      zero: '内容比例为 0 时总分直接为 10，流利度不评分。依据 Score Guide 第 8 页：Content 为 0 的回答不得分，也不再评其他项；10 是本项目换算的最低分。'
     });
 const fluencyEvidence = computed(() => (props.result.evidence || []).filter(item => ['hesitation','long_pause','repetition'].includes(item.type)));
 const cards = computed(() => [
@@ -134,8 +136,10 @@ function retrySameQuestion() {
       <div class="score-heading"><div><span class="eyebrow">{{ taskLabels.eyebrow }}</span><div><strong class="total-score" data-testid="ra-reference-total">{{ score.total ?? '—' }}</strong><span> / 90</span></div></div><button type="button" @click="openScoringRules">评分规则</button></div>
       <div class="score-grid">
         <article data-testid="ra-score-card-content"><h2>内容</h2><strong>{{ contentCard.heading }}</strong><p>{{ contentCard.detail }}</p></article>
-        <article data-testid="ra-score-card-fluency"><h2>流利度</h2><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
-          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div>
+        <article data-testid="ra-score-card-fluency"><h2>流利度</h2>
+          <template v-if="score.fluency.band === null"><strong>内容为 0，不评分</strong><p>Score Guide 第 8 页：内容为 0 时，本题不再评流利度和发音。</p></template>
+          <template v-else><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
+          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div></template>
         </article>
         <article data-testid="ra-score-card-pronunciation"><h2>发音</h2><strong>本版本未评估</strong><p>现有技术无法可靠测量发音，测不出来的项不给分。</p></article>
       </div>
@@ -146,7 +150,7 @@ function retrySameQuestion() {
         <h3>项目判定与阈值</h3><p>{{ rulesCopy.content }}</p>
         <p>D=犹豫次数＋识别重复次数，L=长停顿次数，W=词/分，R=最长无≥0.5秒停顿片段的词数。犹豫沿用句中≥0.5秒，长停顿沿用≥2秒，均为项目自定。</p>
         <ol start="0"><li>Disfluent：L≥2且R&lt;3，或W&lt;40。</li><li>Limited：否则L≥2，或D≥6。</li><li>Intermediate：否则L=1，或D为4–5。</li><li>Good：否则D为2–3。</li><li>Advanced：否则D=1，或D=0且W&lt;90。</li><li>Highly proficient：否则D=0、L=0、W≥90。</li></ol>
-        <h3>总分换算与未评估项</h3><p class="score-formula">{{ rulesCopy.formula }}</p><p>这是项目自定 10–90 换算，不包含发音，不等于 Pearson 官方单题分。官方未公开单题合成公式及两项权重。本版本不为发音提供数字；假开头无法检测，重复依赖识别且可能漏检。</p>
+        <h3>总分换算与未评估项</h3><p class="score-formula">{{ rulesCopy.formula }}</p><p data-testid="score-rules-zero-content">{{ rulesCopy.zero }}</p><p>这是项目自定 10–90 换算，不包含发音，不等于 Pearson 官方单题分。官方未公开单题合成公式及两项权重。本版本不为发音提供数字；假开头无法检测，重复依赖识别且可能漏检。</p>
         <a href="https://www.pearsonpte.com/content/dam/ELL/pte/pearsonpte/resources/PTE-Academic-Test-Taker-Score-Guide.pdf" target="_blank" rel="noopener noreferrer">查看 Pearson 官方 Score Guide</a>
       </section>
     </div>

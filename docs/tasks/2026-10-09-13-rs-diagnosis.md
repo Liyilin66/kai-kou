@@ -81,3 +81,13 @@
 - RA 预览完成诊断，发音未评估，当前新转写得 88 分。与前次 80 分的流利度差异来自这次录制/转写特征（D=0 而非 1），不宣称在线分数一致。另对 7 条存量 RA 同输入重放 main 与本分支评分函数，JSON 输出 7/7 完全相同，证明 RA 评分规则未改。
 - 最新 412 项测试通过；生成音频、缓存和运行报告只留忽略目录，不进 Git。本轮不合并 main。
 - 实际第二次 apply：0 次合成、0 新字符、60 次缓存命中，数据库仍 60 道 RS 题；测试账号与测试练习/音频已清理。
+
+## 审查后修改：内容为 0（2026-10-09）
+
+- 审查要求：RS 内容 0 档、RA 内容比例为 0 时，总分直接为 10，流利度显示“内容为 0，不评分”。
+- 官方依据：Score Guide 第 8 页，Content 为 0 的回答不得分，Describe Image 示例为“No further scoring”。10 为项目换算最低分。
+- 实现：流利度计算抽为 RA/RS 共用函数，避免 RS 借用 RA 内容比例；内容为 0 时 `fluency = {band:null, status:'not_scored', reason:'content_zero', evidence}`，`scores.fluency = null`。RS 内容待确认（只有低置信度）不算 0 档。
+- 读取方：RA 历史显示“F 不评分”；画像不再用语速或总分代理推算这类记录的流利度；首页与私教按总分 10 计入。
+- 数据库：无需再执行 SQL。`complete_ra_analysis` 对 null 档位写入 `fluency: null`。`backfill_ra_score` 仍要求档位为数字，只影响历史回填；当前 6 条 RA 记录均非零内容，按新规则重放逐项相同。
+- 版本号保持 `ra-score-0.1` / `rs-score-0.1`，修订记录见 `docs/ra-scoring-rules.md`。
+- 验证：419 项测试通过；RA/RS 同时 on、同时 off 构建通过。

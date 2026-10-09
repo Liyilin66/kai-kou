@@ -1,4 +1,4 @@
-import { isRADiagnosis, hasSpeakingReferenceScore } from "./ra-diagnosis-score.js";
+import { isRADiagnosis, hasSpeakingReferenceScore, hasNumericScore } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const MAX_ANALYTICS_DURATION_SEC = 60 * 60 * 3;
@@ -184,6 +184,8 @@ function applyRowSignalsToBuckets(row, buckets) {
   const contentScore = resolveContentScore(score, taskType);
   pushSignal(buckets.content, contentScore, 1.25, "direct");
 
+  // Zero-content reference scores leave fluency unscored; no proxy may stand in for it.
+  const fluencyUnscored = hasSpeakingReferenceScore(score) && !hasNumericScore(score?.scores?.fluency);
   const fluencyScore = resolveFluencyScore(score);
   pushSignal(buckets.fluency, fluencyScore, 1.15, "direct");
 
@@ -204,7 +206,7 @@ function applyRowSignalsToBuckets(row, buckets) {
     score?.display_scores?.speech_rate,
     score?.ai_review?.display_scores?.speech_rate
   );
-  pushSignal(buckets.fluency, speedDirectScore, 0.65, "proxy");
+  if (!fluencyUnscored) pushSignal(buckets.fluency, speedDirectScore, 0.65, "proxy");
 
   const lexicalProxyScore = resolveLexicalRichnessScore(transcript);
   pushSignal(buckets.vocabulary, lexicalProxyScore, 0.7, "proxy");
@@ -213,12 +215,12 @@ function applyRowSignalsToBuckets(row, buckets) {
   pushSignal(buckets.coherence, coherenceProxyScore, 0.7, "proxy");
 
   const speedProxyScore = resolveSpeechSpeedScore({ score, transcript, taskType });
-  pushSignal(buckets.fluency, speedProxyScore, 0.85, "proxy");
+  if (!fluencyUnscored) pushSignal(buckets.fluency, speedProxyScore, 0.85, "proxy");
 
   const overallScore = resolveOverallScore(score, taskType);
   const softenedOverall = Number.isFinite(overallScore) ? clampScore(overallScore * 0.92) : null;
   pushSignal(buckets.content, softenedOverall, 0.35, "proxy");
-  pushSignal(buckets.fluency, softenedOverall, 0.25, "proxy");
+  if (!fluencyUnscored) pushSignal(buckets.fluency, softenedOverall, 0.25, "proxy");
   if (!hasSpeakingReferenceScore(score)) pushSignal(buckets.pronunciation, softenedOverall, 0.25, "proxy");
 }
 

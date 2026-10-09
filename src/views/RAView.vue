@@ -1675,7 +1675,7 @@ async function startRecordingNow() {
                     <p>{{ getHistoryQuestionText(record) || "暂无题目快照" }}</p>
                     <div v-if="!record.diagnosisLabel" class="score-mini">
                       <span>P {{ record.scores?.pronunciation == null ? "未评估" : Number(record.scores.pronunciation) }}</span>
-                      <span>F {{ Number(record.scores?.fluency || 0) }}</span>
+                      <span>F {{ record.scores?.fluency == null ? "不评分" : Number(record.scores.fluency) }}</span>
                       <span>C {{ Number(record.scores?.content || 0) }}</span>
                     </div>
                     <audio v-if="getHistoryPlaybackState(record.id).url" :src="getHistoryPlaybackState(record.id).url" controls preload="metadata"></audio>
