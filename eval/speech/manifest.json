@@ -3175,7 +3175,119 @@
         }
       ],
       "labeled_by": "recording-script",
-      "notes": "Planned errors from ra024-mixed-4; verify that recording followed instructions."
+      "notes": "Planned errors from ra024-mixed-4; verify that recording followed instructions.",
+      "extra_review": {
+        "version": 1,
+        "source": "mixed-extras-2026-10-09",
+        "labeled_by": "user-listening",
+        "counts": {
+          "wrong": 6,
+          "correct": 1,
+          "unclear": 0
+        },
+        "items": [
+          {
+            "id": "mixed-extra:ra-con-0001:substitution:33:0",
+            "type": "substitution",
+            "ref_index": 33,
+            "word": "sea",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:substitution:34:1",
+            "type": "substitution",
+            "ref_index": 34,
+            "word": "trade",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:substitution:38:2",
+            "type": "substitution",
+            "ref_index": 38,
+            "word": "when",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:substitution:46:3",
+            "type": "substitution",
+            "ref_index": 46,
+            "word": "spices",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:substitution:47:4",
+            "type": "substitution",
+            "ref_index": 47,
+            "word": "perfumes",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:hesitation:12:5",
+            "type": "hesitation",
+            "ref_index": 12,
+            "word": "water",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0001:hesitation:39:6",
+            "type": "hesitation",
+            "ref_index": 39,
+            "word": "large",
+            "choice": "wrong"
+          }
+        ],
+        "notes": "Script-planned labels stay in labels.errors; these reviewed extras are not mixed-script ground truth."
+      },
+      "supplemental_errors": [
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:substitution:33:0",
+          "type": "substitution",
+          "ref_index": 33,
+          "word": "sea",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:substitution:34:1",
+          "type": "substitution",
+          "ref_index": 34,
+          "word": "trade",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:substitution:46:3",
+          "type": "substitution",
+          "ref_index": 46,
+          "word": "spices",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:substitution:47:4",
+          "type": "substitution",
+          "ref_index": 47,
+          "word": "perfumes",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:hesitation:12:5",
+          "type": "hesitation",
+          "ref_index": 12,
+          "word": "water",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0001:hesitation:39:6",
+          "type": "hesitation",
+          "ref_index": 39,
+          "word": "large",
+          "choice": "wrong"
+        }
+      ]
     }
   },
   {
@@ -3618,7 +3730,73 @@
         }
       ],
       "labeled_by": "recording-script",
-      "notes": "Planned errors from ra002-mixed-4; verify that recording followed instructions."
+      "notes": "Planned errors from ra002-mixed-4; verify that recording followed instructions.",
+      "extra_review": {
+        "version": 1,
+        "source": "mixed-extras-2026-10-09",
+        "labeled_by": "user-listening",
+        "counts": {
+          "wrong": 2,
+          "correct": 3,
+          "unclear": 0
+        },
+        "items": [
+          {
+            "id": "mixed-extra:ra-con-0002:substitution:16:7",
+            "type": "substitution",
+            "ref_index": 16,
+            "word": "bush",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0002:substitution:24:8",
+            "type": "substitution",
+            "ref_index": 24,
+            "word": "deemed",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0002:substitution:40:9",
+            "type": "substitution",
+            "ref_index": 40,
+            "word": "burn",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0002:hesitation:1:10",
+            "type": "hesitation",
+            "ref_index": 1,
+            "word": "countries",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0002:hesitation:10:11",
+            "type": "hesitation",
+            "ref_index": 10,
+            "word": "their",
+            "choice": "correct"
+          }
+        ],
+        "notes": "Script-planned labels stay in labels.errors; these reviewed extras are not mixed-script ground truth."
+      },
+      "supplemental_errors": [
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0002:substitution:16:7",
+          "type": "substitution",
+          "ref_index": 16,
+          "word": "bush",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0002:substitution:24:8",
+          "type": "substitution",
+          "ref_index": 24,
+          "word": "deemed",
+          "choice": "wrong"
+        }
+      ]
     }
   },
   {
@@ -4041,7 +4219,147 @@
         }
       ],
       "labeled_by": "recording-script",
-      "notes": "Planned errors from ra003-mixed-4; verify that recording followed instructions."
+      "notes": "Planned errors from ra003-mixed-4; verify that recording followed instructions.",
+      "extra_review": {
+        "version": 1,
+        "source": "mixed-extras-2026-10-09",
+        "labeled_by": "user-listening",
+        "counts": {
+          "wrong": 6,
+          "correct": 3,
+          "unclear": 2
+        },
+        "items": [
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:2:12",
+            "type": "substitution",
+            "ref_index": 2,
+            "word": "work",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:8:13",
+            "type": "substitution",
+            "ref_index": 8,
+            "word": "alternating",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:12:14",
+            "type": "substitution",
+            "ref_index": 12,
+            "word": "systems",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:insertion:25:15",
+            "type": "insertion",
+            "ref_index": 25,
+            "word": "motor",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:31:16",
+            "type": "substitution",
+            "ref_index": 31,
+            "word": "Tesla",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:omission:32:17",
+            "type": "omission",
+            "ref_index": 32,
+            "word": "the",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:34:18",
+            "type": "substitution",
+            "ref_index": 34,
+            "word": "Serb",
+            "choice": "unclear"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:substitution:40:19",
+            "type": "substitution",
+            "ref_index": 40,
+            "word": "reportedly",
+            "choice": "unclear"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:hesitation:8:20",
+            "type": "hesitation",
+            "ref_index": 8,
+            "word": "alternating",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:hesitation:10:21",
+            "type": "hesitation",
+            "ref_index": 10,
+            "word": "electric",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0003:hesitation:22:22",
+            "type": "hesitation",
+            "ref_index": 22,
+            "word": "money",
+            "choice": "wrong"
+          }
+        ],
+        "notes": "Script-planned labels stay in labels.errors; these reviewed extras are not mixed-script ground truth."
+      },
+      "supplemental_errors": [
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:substitution:2:12",
+          "type": "substitution",
+          "ref_index": 2,
+          "word": "work",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:substitution:8:13",
+          "type": "substitution",
+          "ref_index": 8,
+          "word": "alternating",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:substitution:12:14",
+          "type": "substitution",
+          "ref_index": 12,
+          "word": "systems",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:hesitation:8:20",
+          "type": "hesitation",
+          "ref_index": 8,
+          "word": "alternating",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:hesitation:10:21",
+          "type": "hesitation",
+          "ref_index": 10,
+          "word": "electric",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0003:hesitation:22:22",
+          "type": "hesitation",
+          "ref_index": 22,
+          "word": "money",
+          "choice": "wrong"
+        }
+      ]
     }
   },
   {
@@ -4472,7 +4790,125 @@
         }
       ],
       "labeled_by": "recording-script",
-      "notes": "Planned errors from ra016-mixed-4; verify that recording followed instructions."
+      "notes": "Planned errors from ra016-mixed-4; verify that recording followed instructions.",
+      "extra_review": {
+        "version": 1,
+        "source": "mixed-extras-2026-10-09",
+        "labeled_by": "user-listening",
+        "counts": {
+          "wrong": 5,
+          "correct": 2,
+          "unclear": 2
+        },
+        "items": [
+          {
+            "id": "mixed-extra:ra-con-0004:omission:1:23",
+            "type": "omission",
+            "ref_index": 1,
+            "word": "things",
+            "choice": "unclear"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:2:24",
+            "type": "substitution",
+            "ref_index": 2,
+            "word": "in",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:5:25",
+            "type": "substitution",
+            "ref_index": 5,
+            "word": "produce",
+            "choice": "correct"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:31:26",
+            "type": "substitution",
+            "ref_index": 31,
+            "word": "17",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:39:27",
+            "type": "substitution",
+            "ref_index": 39,
+            "word": "of",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:41:28",
+            "type": "substitution",
+            "ref_index": 41,
+            "word": "Colorado",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:substitution:52:29",
+            "type": "substitution",
+            "ref_index": 52,
+            "word": "beneath",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:hesitation:2:30",
+            "type": "hesitation",
+            "ref_index": 2,
+            "word": "in",
+            "choice": "unclear"
+          },
+          {
+            "id": "mixed-extra:ra-con-0004:hesitation:40:31",
+            "type": "hesitation",
+            "ref_index": 40,
+            "word": "the",
+            "choice": "wrong"
+          }
+        ],
+        "notes": "Script-planned labels stay in labels.errors; these reviewed extras are not mixed-script ground truth."
+      },
+      "supplemental_errors": [
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0004:substitution:31:26",
+          "type": "substitution",
+          "ref_index": 31,
+          "word": "17",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0004:substitution:39:27",
+          "type": "substitution",
+          "ref_index": 39,
+          "word": "of",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0004:substitution:41:28",
+          "type": "substitution",
+          "ref_index": 41,
+          "word": "Colorado",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0004:substitution:52:29",
+          "type": "substitution",
+          "ref_index": 52,
+          "word": "beneath",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0004:hesitation:40:31",
+          "type": "hesitation",
+          "ref_index": 40,
+          "word": "the",
+          "choice": "wrong"
+        }
+      ]
     }
   },
   {
@@ -4867,7 +5303,67 @@
         }
       ],
       "labeled_by": "recording-script",
-      "notes": "Planned errors from ra041-mixed-4; verify that recording followed instructions."
+      "notes": "Planned errors from ra041-mixed-4; verify that recording followed instructions.",
+      "extra_review": {
+        "version": 1,
+        "source": "mixed-extras-2026-10-09",
+        "labeled_by": "user-listening",
+        "counts": {
+          "wrong": 3,
+          "correct": 0,
+          "unclear": 0
+        },
+        "items": [
+          {
+            "id": "mixed-extra:ra-con-0005:substitution:6:32",
+            "type": "substitution",
+            "ref_index": 6,
+            "word": "environments",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0005:substitution:24:33",
+            "type": "substitution",
+            "ref_index": 24,
+            "word": "interactivity",
+            "choice": "wrong"
+          },
+          {
+            "id": "mixed-extra:ra-con-0005:substitution:51:34",
+            "type": "substitution",
+            "ref_index": 51,
+            "word": "preferences",
+            "choice": "wrong"
+          }
+        ],
+        "notes": "Script-planned labels stay in labels.errors; these reviewed extras are not mixed-script ground truth."
+      },
+      "supplemental_errors": [
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0005:substitution:6:32",
+          "type": "substitution",
+          "ref_index": 6,
+          "word": "environments",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0005:substitution:24:33",
+          "type": "substitution",
+          "ref_index": 24,
+          "word": "interactivity",
+          "choice": "wrong"
+        },
+        {
+          "source": "mixed-extra-review",
+          "id": "mixed-extra:ra-con-0005:substitution:51:34",
+          "type": "substitution",
+          "ref_index": 51,
+          "word": "preferences",
+          "choice": "wrong"
+        }
+      ]
     }
   }
 ]
