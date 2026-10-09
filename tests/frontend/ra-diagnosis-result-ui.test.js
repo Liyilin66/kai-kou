@@ -10,9 +10,18 @@ test('RA diagnosis result reads reference score and renders score cards', () => 
   assert.match(source, /data-testid="ra-score-card-content"/);
   assert.match(source, /data-testid="ra-score-card-fluency"/);
   assert.match(source, /data-testid="ra-score-card-pronunciation"/);
-  assert.match(source, /正确\s*\{\{\s*score\.content\.correct\s*\}\}\s*\/\s*\{\{\s*score\.content\.total\s*\}\}\s*词/);
+  assert.match(source, /contentCard/);
+  assert.match(source, /正确 \$\{score\.value\?\.content\?\.correct \?\? 0\} \/ \$\{score\.value\?\.content\?\.total \?\? 0\} 词/);
   assert.match(source, /\{\{\s*score\.fluency\.band\s*\}\}\s*\/\s*5/);
   assert.match(source, /本版本未评估/);
+});
+
+test('shared diagnosis result has RS copy and preserves RS retry route', () => {
+  assert.match(source, /taskType/);
+  assert.match(source, /REPEAT SENTENCE/);
+  assert.match(source, /内容档位 \$\{score\.value\?\.content\?\.band \?\? '待确认'\} \/ 3/);
+  assert.match(source, /顺序匹配 \$\{score\.value\?\.content\?\.matched \?\? 0\} \/ \$\{score\.value\?\.content\?\.total \?\? 0\} 词/);
+  assert.match(source, /router\.push\(\{ path: taskLabels\.value\.practiceRoute/);
 });
 
 test('RA diagnosis result exposes scoring-rule boundary in app', () => {
@@ -22,4 +31,8 @@ test('RA diagnosis result exposes scoring-rule boundary in app', () => {
   assert.match(source, /项目自定/);
   assert.match(source, /不等于 Pearson 官方单题分/);
   assert.match(source, /showScoringRules/);
+});
+test('same-question retry preserves the question id for RS too', () => {
+ assert.match(source, /query: questionId \? \{ questionId \} : \{\}/);
+ assert.doesNotMatch(source, /questionId && taskType.value === 'RA'/);
 });

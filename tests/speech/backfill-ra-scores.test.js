@@ -8,3 +8,7 @@ test('dry run never writes and apply uses one atomic RPC per changed done result
 test('unchanged JSONB score with different key order is not rewritten',async()=>{
  const score=scoreStoredDiagnosis(row);const reordered=Object.fromEntries(Object.entries(score).reverse());const{client,state}=fake([{...row,metrics:{...row.metrics,score:reordered}}]);const r=await backfillRAScores(client,{apply:true});assert.equal(r.changed,0);assert.equal(state.calls.length,0);
 });
+test('RA backfill explicitly selects RA rows so it cannot relabel RS scores', async () => {
+ const filters=[];const q={select:()=>q,eq:(key,value)=>{filters.push([key,value]);return q;},order:()=>q,range:async()=>({data:[]})};
+ await backfillRAScores({from:()=>q});assert.ok(filters.some(([key,value])=>key==='task_type'&&value==='RA'));
+});

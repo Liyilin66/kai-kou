@@ -1,4 +1,4 @@
-import { isRADiagnosis, hasRAReferenceScore } from "./ra-diagnosis-score.js";
+import { isRADiagnosis, hasSpeakingReferenceScore } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const MAX_ANALYTICS_DURATION_SEC = 60 * 60 * 3;
@@ -179,7 +179,7 @@ function applyRowSignalsToBuckets(row, buckets) {
   const taskType = normalizeTaskType(row?.task_type);
   const transcript = normalizeText(row?.transcript);
   const score = parseScoreJson(row?.score_json);
-  if (taskType === "RA" && isRADiagnosis(score)) return;
+  if (["RA", "RS"].includes(taskType) && isRADiagnosis(score)) return;
 
   const contentScore = resolveContentScore(score, taskType);
   pushSignal(buckets.content, contentScore, 1.25, "direct");
@@ -188,7 +188,7 @@ function applyRowSignalsToBuckets(row, buckets) {
   pushSignal(buckets.fluency, fluencyScore, 1.15, "direct");
 
   const pronunciationScore = resolvePronunciationScore(score);
-  if (!hasRAReferenceScore(score)) pushSignal(buckets.pronunciation, pronunciationScore, 1.15, "direct");
+  if (!hasSpeakingReferenceScore(score)) pushSignal(buckets.pronunciation, pronunciationScore, 1.15, "direct");
 
   const vocabularyDirectScore = resolveVocabularyDirectScore(score);
   pushSignal(buckets.vocabulary, vocabularyDirectScore, 1.1, "direct");
@@ -219,7 +219,7 @@ function applyRowSignalsToBuckets(row, buckets) {
   const softenedOverall = Number.isFinite(overallScore) ? clampScore(overallScore * 0.92) : null;
   pushSignal(buckets.content, softenedOverall, 0.35, "proxy");
   pushSignal(buckets.fluency, softenedOverall, 0.25, "proxy");
-  if (!hasRAReferenceScore(score)) pushSignal(buckets.pronunciation, softenedOverall, 0.25, "proxy");
+  if (!hasSpeakingReferenceScore(score)) pushSignal(buckets.pronunciation, softenedOverall, 0.25, "proxy");
 }
 
 function resolveContentScore(score, taskType) {

@@ -1,6 +1,8 @@
 export const RA_SCORE_VERSION='ra-score-0.1';
+export const RS_SCORE_VERSION='rs-score-0.1';
 const LABELS=['Disfluent','Limited','Intermediate','Good','Advanced','Highly proficient'];
 const UNCERTAIN=new Set(['homophone','low_confidence']);
+const EDGE_INSERTION_TAGS=new Set(['filler']);
 const count=value=>Number.isFinite(value)&&value>=0?Math.floor(value):null;
 
 export function longestContinuousRun(alignment={},pauses=[]) {
@@ -54,6 +56,36 @@ export function scoreRA({alignment={},pauses=[],metrics={}}={}){
   fluency:{band,label:LABELS[band],evidence:{D,L,W,R}},pronunciation:{status:'not_assessed'},
   total:Math.round(10+80*(.5*ratio+.5*band/5))};
 }
+export function scoreRS({alignment={},pauses=[],metrics={}}={}){
+ const total=Array.isArray(alignment.reference)?alignment.reference.length:(count(alignment.summary?.ref_count)??0);
+ const ops=alignment.ops||[];
+ const credibleMatch=op=>(op.type==='match'||op.tag==='homophone')&&op.tag!=='low_confidence'&&Number.isInteger(op.ref_index);
+ const uncertain=new Set(ops.filter(op=>op.tag==='low_confidence'&&Number.isInteger(op.ref_index)).map(op=>op.ref_index)).size;
+ const firstMatch=ops.findIndex(credibleMatch);
+ const lastMatch=ops.findLastIndex(credibleMatch);
+ const matched=new Set();
+ let last=-1,middleInsertion=false;
+ for(const op of ops){
+  const index=ops.indexOf(op);
+  if(op.type==='insertion'&&op.hyp_index!==null&&!EDGE_INSERTION_TAGS.has(op.tag)
+   &&firstMatch>=0&&lastMatch>=0&&index>firstMatch&&index<lastMatch)middleInsertion=true;
+  if(op.tag==='filler')continue;
+  if(!credibleMatch(op))continue;
+  if(op.ref_index<=last)continue;
+  matched.add(op.ref_index);last=op.ref_index;
+ }
+ const correct=matched.size,ratio=total?correct/total:0;
+ let band=0;
+ if(total&&correct===total&&!middleInsertion&&!uncertain)band=3;
+ else if(ratio>=.5)band=2;
+ else if(correct>0)band=1;
+ const fluency=scoreRA({alignment,pauses,metrics}).fluency;
+ return {score_version:RS_SCORE_VERSION,content:{band:uncertain&&correct===0?null:band,matched:correct,total,ratio,...(uncertain?{uncertain}: {})},fluency,pronunciation:{status:'not_assessed'},
+  total:uncertain&&correct===0?null:Math.round(10+80*(.5*(band/3)+.5*fluency.band/5))};
+}
 export function scoreToPracticeScores(score){
- return {overall:score.total,content:Math.round(10+80*score.content.ratio),fluency:Math.round(10+80*score.fluency.band/5),pronunciation:null};
+ const content=score?.score_version===RS_SCORE_VERSION
+  ? score.content?.band===null?null:Math.round(10+80*((score.content?.band??0)/3))
+  : Math.round(10+80*(score.content?.ratio??0));
+ return {overall:score.total,content,fluency:Math.round(10+80*score.fluency.band/5),pronunciation:null};
 }

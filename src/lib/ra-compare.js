@@ -6,6 +6,7 @@ const ANALYSIS_SELECT = [
   'attempt_id',
   'status',
   'question_id',
+  'task_type',
   'reference_text',
   'audio_path',
   'transcript',
@@ -58,7 +59,7 @@ export async function loadPreviousRADiagnosis({ client, result }) {
 
   const { data: current, error: currentError } = await client
     .from('speech_analyses')
-    .select('id, attempt_id, question_id, created_at')
+    .select('id, attempt_id, question_id, task_type, created_at')
     .eq('attempt_id', attemptId)
     .eq('status', 'done')
     .maybeSingle();
@@ -69,6 +70,7 @@ export async function loadPreviousRADiagnosis({ client, result }) {
     .from('speech_analyses')
     .select(ANALYSIS_SELECT)
     .eq('question_id', current.question_id)
+    .eq('task_type', current.task_type || result?.task_type || 'RA')
     .eq('status', 'done')
     .lt('created_at', current.created_at)
     .order('created_at', { ascending: false })
@@ -86,6 +88,7 @@ export function rowToDiagnosis(row) {
     analysis_id: row.id,
     attempt_id: row.attempt_id,
     status: row.status,
+    task_type: row.task_type || 'RA',
     alignment: row.aligned,
     metrics: row.metrics,
     evidence: row.evidence,
@@ -95,7 +98,7 @@ export function rowToDiagnosis(row) {
     diagnosis_version: row.rules_version,
     timings_ms: row.timings_ms,
     created_at: row.created_at,
-    question: { id: row.question_id, content: row.reference_text },
+    question: { id: row.question_id, content: row.reference_text, task_type: row.task_type || 'RA' },
     audio: row.audio_path ? { bucket: AUDIO_BUCKET, path: row.audio_path } : null,
     transcript: row.transcript,
     error_code: row.error_code

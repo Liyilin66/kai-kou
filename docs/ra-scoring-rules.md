@@ -166,3 +166,14 @@ total = round(10 + 80 × (0.5 × content_ratio + 0.5 × fluency_band / 5))
 ```
 
 总分范围10–90。两项各50%的权重及10–90换算是项目自定，**不包含发音，不等于 Pearson 官方单题分**。历史存储：`scores.overall=total`、`scores.content=round(10+80×ratio)`、`scores.fluency=round(10+80×band/5)`、`scores.pronunciation=null`，同时保存 `score_version=ra-score-0.1` 与全部原始依据。旧无版本诊断记录仍不将旧影子模型数字当作本版本分数；回填只处理已有 done 诊断，不从音频重新调用模型。
+
+## Repeat Sentence（RS）诊断参考分 · rs-score-0.1
+
+核实日期：2026-10-09。使用上文同一份 [Pearson 当前 Score Guide](https://www.pearsonpte.com/content/dam/ELL/pte/pearsonpte/resources/PTE-Academic-Test-Taker-Score-Guide.pdf)，页码为 PDF 印刷页码。
+
+- **第 16 页**：RS 为部分得分，涉及 Listening 与 Speaking；Content 处理替换、漏词、多词，忽略犹豫、填充/静默停顿和首尾附加内容。内容档为 0–3：全部词顺序正确为 3；正确顺序内容至少一半为 2；不足一半为 1；几乎没有原句内容为 0。
+- **第 17 页**：另含 Pronunciation 和 Oral Fluency；具体档位描述在第 45、46 页。
+- 官方没有公布“几乎没有”的数字阈值或专有顺序匹配算法。项目以零个可信顺序匹配词近似 0 档，其余正匹配不足一半为 1 档；词级对齐是项目实现，不声称复刻官方引擎。同音词按语音等价兼容匹配；低置信度不作为确定用户错误，也不计为已确认正确。部分不确定时仅按已确认内容给保守参考档并显示不确定数量；全部只有不确定识别时内容档和总分为 null，待回听确认。
+- RS Content 按上述档位评定，**不使用 RA 的逐错减词比例作为内容参考分**。流利度沿用本页 `ra-score-0.1` 的可观测特征和分档；语速、停顿阈值仍为项目自定。
+- RS 总参考分的项目换算为 `round(10 + 80 × (0.5 × Content档/3 + 0.5 × Fluency档/5))`。这不是 Pearson 最终考试分数公式；内容为零时仍显示项目换算参考值，不声称与官方零内容时的整题处理相同。
+- 发音保持 `not_assessed`，页面显示“本版本未评估”，历史记录存 `pronunciation: null`，不能显示为 0 或参与画像推算。

@@ -1,4 +1,4 @@
-import { scoreRA } from './scoring.js';
+import { scoreRA, scoreRS } from './scoring.js';
 import { alignWords } from './align.js';
 import { extractFeatures } from './features.js';
 import { buildEvidence } from './evidence.js';
@@ -6,8 +6,13 @@ import { RULES_VERSION } from './config.js';
 import { transcribeWithGroqWhisper } from './providers/groq-whisper.js';
 
 export const AUDIO_BUCKET = 'practice-audio';
+export function normalizeDiagnosisTaskType(taskType) {
+  const value = String(taskType || 'RA').trim().toUpperCase();
+  return value === 'RS' ? 'RS' : 'RA';
+}
 export function validateAnalysisInput(body, userId) {
   if (typeof body.attempt_id !== 'string' || !/^[A-Za-z0-9_-]{8,100}$/.test(body.attempt_id)) return [400, 'invalid_attempt_id'];
+  if (body.task_type !== undefined && !['RA', 'RS'].includes(String(body.task_type || '').trim().toUpperCase())) return [400, 'invalid_task_type'];
   if (['legacy_score', 'feedback'].includes(body.action)) return null;
   if (body.client_transcript !== undefined && (typeof body.client_transcript !== 'string' || body.client_transcript.length > 5000)) return [400, 'invalid_client_transcript'];
   if (typeof body.audio_path !== 'string' || !body.audio_path.startsWith(`ra/${userId}/`) || body.audio_path.length > 500
@@ -29,8 +34,8 @@ export function analysisResponse(row) {
   return { analysis_id: row.id, attempt_id: row.attempt_id, status: row.status, alignment: row.aligned,
     metrics: row.metrics, evidence: row.evidence, provider: row.provider, model: row.model,
     rules_version: row.rules_version, diagnosis_version: row.rules_version, timings_ms: row.timings_ms,
-    question: { id: row.question_id, content: row.reference_text },
-    audio: { bucket: AUDIO_BUCKET, path: row.audio_path }, transcript: row.transcript, error_code: row.error_code };
+    task_type: row.task_type || 'RA', question: { id: row.question_id, content: row.reference_text, task_type: row.task_type || 'RA' },
+    audio: { bucket: AUDIO_BUCKET, path: row.audio_path, task_type: row.task_type || 'RA' }, transcript: row.transcript, error_code: row.error_code };
 }
 
 export async function diagnoseRecording({ db, row, body, transcribe = transcribeWithGroqWhisper }) {
@@ -56,7 +61,11 @@ export async function diagnoseRecording({ db, row, body, transcribe = transcribe
   const features = extractFeatures({ alignment, referenceText: row.reference_text, silences: body.silences,
     speech_onset_ms: body.speech_onset_ms, speech_offset_ms: body.speech_offset_ms, duration_ms: body.duration_ms });
   const evidence = buildEvidence({ alignment, ...features });
-  if (recognized.words.length) features.metrics.score = scoreRA({ alignment, pauses: features.pauses, metrics: features.metrics });
+  if (recognized.words.length) {
+    features.metrics.score = normalizeDiagnosisTaskType(row.task_type) === 'RS'
+      ? scoreRS({ alignment, pauses: features.pauses, metrics: features.metrics })
+      : scoreRA({ alignment, pauses: features.pauses, metrics: features.metrics });
+  }
   timings.features_evidence = Math.round(performance.now() - step);
   timings.total = Math.round(performance.now() - started);
   return { status: recognized.words.length ? 'done' : 'unusable_audio', transcript: recognized.text,

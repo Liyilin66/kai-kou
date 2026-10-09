@@ -1085,7 +1085,7 @@ function buildRecentDateKeys(days) {
 }
 
 export function extractOverallScore(log) {
-  if (normalizeTaskType(log?.task_type) === "RA" && isRADiagnosis(toObject(log?.score_json))) return null;
+  if (["RA", "RS"].includes(normalizeTaskType(log?.task_type)) && isRADiagnosis(toObject(log?.score_json))) return null;
   const score = toObject(log?.score_json) || {};
   const candidates = [
     score?.overall,
@@ -1120,7 +1120,7 @@ export function extractOverallScore(log) {
 }
 
 function extractTrendOverallScore(log) {
-  if (normalizeTaskType(log?.task_type) === "RA" && isRADiagnosis(toObject(log?.score_json))) return null;
+  if (["RA", "RS"].includes(normalizeTaskType(log?.task_type)) && isRADiagnosis(toObject(log?.score_json))) return null;
   const score = toObject(log?.score_json) || {};
   const candidates = [
     score?.overall,
@@ -1143,7 +1143,7 @@ function extractTrendOverallScore(log) {
 }
 
 function resolveWeaknessScore(taskType, row) {
-  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(toObject(row?.score_json))) return null;
+  if (["RA", "RS"].includes(normalizeTaskType(taskType)) && isRADiagnosis(toObject(row?.score_json))) return null;
   const overall = resolveOverallScore(taskType, row?.score_json);
   if (overall !== null) return overall;
 
@@ -1213,7 +1213,7 @@ function resolveAccuracyPercent(row) {
 }
 
 function resolveOverallScore(taskType, scoreJson) {
-  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(toObject(scoreJson))) return null;
+  if (["RA", "RS"].includes(normalizeTaskType(taskType)) && isRADiagnosis(toObject(scoreJson))) return null;
   const score = toObject(scoreJson) || {};
   const candidates = [
     score?.overall,

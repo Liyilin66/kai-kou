@@ -1,14 +1,16 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { supabase } from "@/lib/supabase";
 import NavBar from "@/components/NavBar.vue";
 import RecordingWave from "@/components/RecordingWave.vue";
 import TimerBar from "@/components/TimerBar.vue";
 import { useRecorder } from "@/composables/useRecorder";
 import { useTTS } from "@/composables/useTTS";
 import { useTimer } from "@/composables/useTimer";
+import { createRADiagnosisSubmission } from "@/lib/ra-diagnosis";
 import { useAuthStore } from "@/stores/auth";
-import { getRandomQuestion } from "@/lib/questions";
+import { getQuestionById, getRandomQuestion } from "@/lib/questions";
 import { usePracticeStore } from "@/stores/practice";
 import { useUIStore } from "@/stores/ui";
 
@@ -18,12 +20,14 @@ const defaultQuestion = {
 };
 
 const router = useRouter();
+const route = useRoute();
 const practiceStore = usePracticeStore();
 const authStore = useAuthStore();
 const uiStore = useUIStore();
 const recorder = useRecorder();
 const timer = useTimer();
 const tts = useTTS();
+const diagnosisEnabled = import.meta.env.VITE_RS_DIAGNOSIS === "on";
 
 const phase = ref("playing");
 const showAnswer = ref(false);
@@ -40,6 +44,7 @@ const barHeights = [10, 18, 24, 30, 24, 16, 28, 20, 12];
 
 let isSubmitting = false;
 let isStartingRecording = false;
+let diagnosisSubmission = null;
 let recordingTicker = null;
 let unmounted = false;
 let playbackDelayTimer = null;
@@ -72,7 +77,10 @@ async function loadQuestion({ incrementIndex = false } = {}) {
   questionLoading.value = true;
 
   try {
-    const picked = await getRandomQuestion("RS");
+    const requestedId = typeof route.query.questionId === "string" ? route.query.questionId.trim() : "";
+    const picked = requestedId && !incrementIndex
+      ? await getQuestionById("RS", requestedId)
+      : await getRandomQuestion("RS");
     question.value = picked || { ...defaultQuestion };
     syncQuestionToStore();
 
@@ -212,6 +220,23 @@ async function handleSubmit() {
       return;
     }
 
+    if (diagnosisEnabled) {
+      const finalBlob = stopResult?.blob || recorder.audioBlob.value;
+      if (!finalBlob) throw new Error("录音保存失败，请重新录音。");
+      practiceStore.setTranscript(transcript);
+      practiceStore.setAudioBlob(finalBlob);
+      diagnosisSubmission ||= createRADiagnosisSubmission({ client: supabase, taskType: "RS" });
+      const result = await diagnosisSubmission({
+        blob: finalBlob,
+        questionId: question.value?.id || "unknown",
+        speechDiagnosis: stopResult?.speechDiagnosis,
+        clientTranscript: transcript
+      });
+      practiceStore.$patch({ result, phase: "done" });
+      if (!unmounted) router.push("/rs/result");
+      return;
+    }
+
     const recordFromPlayable = Number(stopResult?.playableDurationSec || 0);
     const recordFromDurationMs = Number(stopResult?.durationMs || 0);
     const recordSec = Number.isFinite(recordFromPlayable) && recordFromPlayable > 0
@@ -241,6 +266,12 @@ async function handleSubmit() {
     if (!unmounted && practiceStore.phase === "done" && scoreResult && !scoreResult.error) {
       router.push("/rs/result");
     }
+  } catch (error) {
+    if (!diagnosisEnabled) throw error;
+    uiStore.showToast(error?.code === "unusable_audio" ? "没有检测到复述声音，请检查麦克风后重录。" : `${error?.message || "复述诊断失败，请稍后重试。"}`, "warning");
+    if (error?.code === "unusable_audio") diagnosisSubmission = null;
+    phase.value = "idle";
+    hasFinalizedRecording = false;
   } finally {
     isSubmitting = false;
   }
@@ -256,6 +287,7 @@ async function skipQuestion() {
   await recorder.stopRecorderAndGetBlob({ reason: "skip" });
   tts.stop();
   hasFinalizedRecording = false;
+  diagnosisSubmission = null;
 
   await loadQuestion({ incrementIndex: true });
   startQuestionPlayback(250);
@@ -269,6 +301,7 @@ async function restartRecording() {
   await recorder.stopRecorderAndGetBlob({ reason: "restart" });
   phase.value = "idle";
   hasFinalizedRecording = false;
+  diagnosisSubmission = null;
   await startRecording();
 }
 
@@ -293,7 +326,7 @@ function shouldRetryWithToast(stopResult, transcript) {
     return true;
   }
 
-  if (!transcript || transcript.length < 3) {
+  if (!diagnosisEnabled && (!transcript || transcript.length < 3)) {
     uiStore.showToast("No speech detected. Please try again.", "warning");
     return true;
   }

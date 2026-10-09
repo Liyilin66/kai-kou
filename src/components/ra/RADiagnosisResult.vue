@@ -19,6 +19,10 @@ const feedbackMeta = ref(null);
 const comparison = ref(null);
 const feedbackController = new AbortController();
 const feedbackModel = computed(() => feedbackMeta.value?.provider === 'template' ? '模板建议' : [feedbackMeta.value?.provider, feedbackMeta.value?.model].filter(Boolean).join(' '));
+const taskType = computed(() => String(props.result.task_type || props.result.question?.task_type || 'RA').trim().toUpperCase() === 'RS' ? 'RS' : 'RA');
+const taskLabels = computed(() => taskType.value === 'RS'
+  ? { back: '‹ 返回 RS', route: '/rs', practiceRoute: '/rs', title: '复述诊断', eyebrow: 'REPEAT SENTENCE', ruleTitle: '评分规则 · rs-score-0.1' }
+  : { back: '‹ 返回 RA', route: '/ra', practiceRoute: '/ra/practice', title: '朗读诊断', eyebrow: 'READ ALOUD', ruleTitle: '评分规则 · ra-score-0.1' });
 const evidenceById = computed(() => new Map((props.result.evidence || []).map(item => [item.id, item])));
 async function loadFeedback() {
   try {
@@ -44,6 +48,29 @@ const words = computed(() => diagnosisWordItems(props.result.alignment, props.re
 const metrics = computed(() => props.result.metrics || {});
 const score = computed(() => metrics.value.score || null);
 const showScoringRules = ref(false);
+const contentCard = computed(() => {
+  if (taskType.value === 'RS') {
+    return {
+      heading: `内容档位 ${score.value?.content?.band ?? '待确认'} / 3`,
+      detail: `顺序匹配 ${score.value?.content?.matched ?? 0} / ${score.value?.content?.total ?? 0} 词` + (score.value?.content?.uncertain ? ` · ${score.value.content.uncertain} 词识别不确定，请回听确认；当前内容分仅按已确认部分` : '')
+    };
+  }
+  return {
+    heading: `正确 ${score.value?.content?.correct ?? 0} / ${score.value?.content?.total ?? 0} 词`,
+    detail: `${score.value?.content?.errors ?? 0} 处错误`
+  };
+});
+const rulesCopy = computed(() => taskType.value === 'RS'
+  ? {
+      official: 'Pearson Score Guide 第 16 页：RS 为部分得分，涉及 Listening 与 Speaking；Content 规则按正确顺序内容给 0–3 档。第 17 页另含 Pronunciation 与 Oral Fluency，第 46 页为 Oral Fluency 档位。',
+      content: 'RS 不照搬 RA 的逐错扣分。本项目按可信顺序匹配词数判定：全部参考词按顺序匹配且无句中多词为 3；至少一半为 2；不足一半但有原句内容为 1；无原句内容为 0；全部只有低置信度识别时内容与总分待确认。同音词按语音等价处理；低置信度不算已确认正确，不标为用户错误，填充词不计内容。',
+      formula: 'round(10 + 80 × (0.5 × Content档 / 3 + 0.5 × Fluency档 / 5))'
+    }
+  : {
+      official: 'Pearson Score Guide 第 15 页：内容每处 replacement、omission、insertion 计一个错误；第 46 页：流利度按 0–5 分档描述。我们使用这些公开评分项，不声称复刻 Pearson 专有评分。',
+      content: 'N 为归一化参考词数，内容比例=max(0,N−错误数)/N。同音词、低置信度、填充词不扣内容；同一原文位置替换与漏读只扣一次，多读含重复分别计错。',
+      formula: 'round(10 + 80 × (0.5 × 内容比例 + 0.5 × 流利度档位 / 5))'
+    });
 const fluencyEvidence = computed(() => (props.result.evidence || []).filter(item => ['hesitation','long_pause','repetition'].includes(item.type)));
 const cards = computed(() => [
   { label: '内容完整度', value: `${Math.round((metrics.value.completeness || 0) * 100)}%` },
@@ -95,18 +122,18 @@ function openScoringRules() { showScoringRules.value = true; track('ra_rules_ope
 function retrySameQuestion() {
   track('ra_retry_started');
   const questionId = `${props.result.question?.id || ''}`.trim();
-  router.push({ path: '/ra/practice', query: questionId ? { questionId } : {} });
+  router.push({ path: taskLabels.value.practiceRoute, query: questionId ? { questionId } : {} });
 }
 </script>
 
 <template>
   <main class="diagnosis-page" data-testid="ra-diagnosis-result">
-    <header><button type="button" @click="router.push('/ra')">‹ 返回 RA</button><span>朗读诊断</span></header>
-    <section class="intro"><p class="eyebrow">READ ALOUD</p><h1>听见问题，再练一次</h1><p>诊断依据录音识别与停顿。识别可能有误，请点击标注回听核验。</p></section>
+    <header><button type="button" @click="router.push(taskLabels.route)">{{ taskLabels.back }}</button><span>{{ taskLabels.title }}</span></header>
+    <section class="intro"><p class="eyebrow">{{ taskLabels.eyebrow }}</p><h1>听见问题，再练一次</h1><p>诊断依据录音识别与停顿。识别可能有误，请点击标注回听核验。</p></section>
     <section v-if="score" class="panel score-panel" aria-label="参考评分">
-      <div class="score-heading"><div><span class="eyebrow">READ ALOUD</span><div><strong class="total-score" data-testid="ra-reference-total">{{ score.total }}</strong><span> / 90</span></div></div><button type="button" @click="openScoringRules">评分规则</button></div>
+      <div class="score-heading"><div><span class="eyebrow">{{ taskLabels.eyebrow }}</span><div><strong class="total-score" data-testid="ra-reference-total">{{ score.total ?? '—' }}</strong><span> / 90</span></div></div><button type="button" @click="openScoringRules">评分规则</button></div>
       <div class="score-grid">
-        <article data-testid="ra-score-card-content"><h2>内容</h2><strong>正确 {{ score.content.correct }} / {{ score.content.total }} 词</strong><p>{{ score.content.errors }} 处错误</p></article>
+        <article data-testid="ra-score-card-content"><h2>内容</h2><strong>{{ contentCard.heading }}</strong><p>{{ contentCard.detail }}</p></article>
         <article data-testid="ra-score-card-fluency"><h2>流利度</h2><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
           <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div>
         </article>
@@ -114,12 +141,12 @@ function retrySameQuestion() {
       </div>
     </section>
     <div v-if="showScoringRules" class="rules-overlay" @click.self="showScoringRules = false">
-      <section class="rules-dialog" role="dialog" aria-modal="true" aria-labelledby="score-rules-title"><button class="rules-close" type="button" aria-label="关闭评分规则" @click="showScoringRules = false">关闭</button><h2 id="score-rules-title">评分规则 · ra-score-0.1</h2>
-        <h3>官方公开规则</h3><p>Pearson Score Guide 第 15 页：内容每处 replacement、omission、insertion 计一个错误；第 46 页：流利度按 0–5 分档描述。我们使用这些公开评分项，不声称复刻 Pearson 专有评分。</p>
-        <h3>项目判定与阈值</h3><p>N 为归一化参考词数，内容比例=max(0,N−错误数)/N。同音词、低置信度、填充词不扣内容；同一原文位置替换与漏读只扣一次，多读含重复分别计错。</p>
+      <section class="rules-dialog" role="dialog" aria-modal="true" aria-labelledby="score-rules-title"><button class="rules-close" type="button" aria-label="关闭评分规则" @click="showScoringRules = false">关闭</button><h2 id="score-rules-title">{{ taskLabels.ruleTitle }}</h2>
+        <h3>官方公开规则</h3><p>{{ rulesCopy.official }}</p>
+        <h3>项目判定与阈值</h3><p>{{ rulesCopy.content }}</p>
         <p>D=犹豫次数＋识别重复次数，L=长停顿次数，W=词/分，R=最长无≥0.5秒停顿片段的词数。犹豫沿用句中≥0.5秒，长停顿沿用≥2秒，均为项目自定。</p>
         <ol start="0"><li>Disfluent：L≥2且R&lt;3，或W&lt;40。</li><li>Limited：否则L≥2，或D≥6。</li><li>Intermediate：否则L=1，或D为4–5。</li><li>Good：否则D为2–3。</li><li>Advanced：否则D=1，或D=0且W&lt;90。</li><li>Highly proficient：否则D=0、L=0、W≥90。</li></ol>
-        <h3>总分换算与未评估项</h3><p class="score-formula">round(10 + 80 × (0.5 × 内容比例 + 0.5 × 流利度档位 / 5))</p><p>这是项目自定 10–90 换算，不包含发音，不等于 Pearson 官方单题分。官方未公开单题合成公式及两项权重。本版本不为发音提供数字；假开头无法检测，重复依赖识别且可能漏检。</p>
+        <h3>总分换算与未评估项</h3><p class="score-formula">{{ rulesCopy.formula }}</p><p>这是项目自定 10–90 换算，不包含发音，不等于 Pearson 官方单题分。官方未公开单题合成公式及两项权重。本版本不为发音提供数字；假开头无法检测，重复依赖识别且可能漏检。</p>
         <a href="https://www.pearsonpte.com/content/dam/ELL/pte/pearsonpte/resources/PTE-Academic-Test-Taker-Score-Guide.pdf" target="_blank" rel="noopener noreferrer">查看 Pearson 官方 Score Guide</a>
       </section>
     </div>
@@ -161,13 +188,13 @@ function retrySameQuestion() {
         </ol>
       </template>
     </section>
-    <section class="panel"><h2>原文与标注</h2><p class="legend">漏读 / 可能读错或识别不清 · 重复 / 多读 · 犹豫 / 长停顿</p>
+    <section class="panel"><details :open="taskType !== 'RS'"><summary><h2>原文与标注</h2></summary><p class="legend">漏读 / 可能读错或识别不清 · 重复 / 多读 · 犹豫 / 长停顿</p>
       <div class="annotated-text">
         <template v-for="word in words" :key="word.index">
           <button v-if="word.annotations.length" type="button" :class="['word', word.type]" :title="word.annotations.map(item => labels[item.type]).join('、')" @click="playEvidence(word.annotations[0])">{{ word.text }}</button>
           <span v-else :class="['word', word.type]" :title="word.uncertain ? '同音词或识别不确定，不计为用户错误' : ''">{{ word.text }}</span>{{ ' ' }}
         </template>
-      </div>
+      </div></details>
       <p v-if="words.some(word => word.uncertain)" class="note">灰色词语为同音词或识别不确定，不计为用户错误。</p>
       <audio v-if="audioUrl" ref="player" :src="audioUrl" controls preload="metadata" @error="playbackNotice = '录音加载失败，请重试。'" />
       <p v-if="playbackNotice" role="status" class="note">{{ playbackNotice }} <button type="button" @click="loadAudio">重新加载</button></p>

@@ -3,7 +3,8 @@ import { normalizeTokens } from "../../backend/speech/align.js";
 
 // One submission object belongs to one finalized recording. Retrying analysis
 // reuses both the upload and attempt ID; recording again creates a new object.
-export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createId = () => crypto.randomUUID() }) {
+export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createId = () => crypto.randomUUID(), taskType = 'RA' }) {
+  const normalizedTaskType = String(taskType || 'RA').trim().toUpperCase() === 'RS' ? 'RS' : 'RA';
   let attemptId = createId();
   let audioPath = '';
   return async function submit({ blob, questionId, speechDiagnosis, clientTranscript = '' }) {
@@ -26,7 +27,7 @@ export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createI
     try {
       response = await fetchImpl('/api/ra/analyze', {
         method: 'POST', headers, signal: controller.signal,
-        body: JSON.stringify({ attempt_id: attemptId, question_id: questionId, audio_path: audioPath, client_transcript: clientTranscript,
+        body: JSON.stringify({ attempt_id: attemptId, task_type: normalizedTaskType, question_id: questionId, audio_path: audioPath, client_transcript: clientTranscript,
           silences: speechDiagnosis.silences, speech_onset_ms: speechDiagnosis.speech_onset_ms,
           speech_offset_ms: speechDiagnosis.speech_offset_ms, duration_ms: speechDiagnosis.duration_ms })
       });
@@ -42,8 +43,8 @@ export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createI
     // Server reads the saved transcript and reference, and writes the shadow
     // score itself. No client-provided score is trusted or shown to the learner.
     if (!result.metrics?.score) void fetchImpl('/api/ra/analyze', { method: 'POST', headers, keepalive: true,
-      body: JSON.stringify({ action: 'legacy_score', attempt_id: attemptId }) }).catch(() => {});
-    return { ...result, diagnosis_version: result.rules_version, kind: 'ra_diagnosis' };
+      body: JSON.stringify({ action: 'legacy_score', task_type: normalizedTaskType, attempt_id: attemptId }) }).catch(() => {});
+    return { ...result, diagnosis_version: result.rules_version, kind: 'ra_diagnosis', task_type: normalizedTaskType };
   };
 }
 
@@ -103,7 +104,7 @@ export async function loadRADiagnosisFeedback({ client, result, fetchImpl = fetc
       const response = await fetchImpl('/api/ra/analyze', {
         method: 'POST', signal: controller.signal,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
-        body: JSON.stringify({ action: 'feedback', attempt_id: result.attempt_id })
+        body: JSON.stringify({ action: 'feedback', task_type: result.task_type || 'RA', attempt_id: result.attempt_id })
       });
       const body = await response.json();
       if (response.ok && body.feedback_status === 'done' && typeof body.feedback?.summary === 'string' && Array.isArray(body.feedback?.suggestions)) return body;

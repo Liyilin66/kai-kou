@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import { createRADiagnosisSubmission, evidencePlaybackSeconds, diagnosisWordItems, loadRADiagnosisFeedback } from '../../src/lib/ra-diagnosis.js';
 
@@ -24,7 +25,7 @@ test('retry preserves attempt ID and upload; shadow does not delay diagnosis or 
   assert.equal(events[0][1], 'ra/user/attempt.wav');
   const requests = events.filter(e => e[0] === 'request').map(e => e[1]);
   assert.equal(requests[0].attempt_id, requests[1].attempt_id);
-  assert.deepEqual(requests[2], { action: 'legacy_score', attempt_id: 'attempt' });
+  assert.deepEqual(requests[2], { action: 'legacy_score', task_type: 'RA', attempt_id: 'attempt' });
 });
 test('upload failure prevents analysis', async () => {
   const client = clientStub([]);
@@ -82,7 +83,7 @@ test('feedback sends only saved attempt ID with authentication and preserves mod
     calls.push({ url, headers: init.headers, body: JSON.parse(init.body) });
     return { ok: true, status: 200, json: async () => ({ feedback_status: 'done', feedback: { summary: '回听核验', suggestions: [] }, feedback_meta: { provider: 'groq', model: 'model' } }) };
   } });
-  assert.deepEqual(calls, [{ url: '/api/ra/analyze', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer token' }, body: { action: 'feedback', attempt_id: 'attempt' } }]);
+  assert.deepEqual(calls, [{ url: '/api/ra/analyze', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer token' }, body: { action: 'feedback', task_type: 'RA', attempt_id: 'attempt' } }]);
   assert.equal(output.feedback.summary, '回听核验');
   assert.equal(output.feedback_meta.model, 'model');
 });
@@ -131,4 +132,8 @@ test('versioned deterministic reference score does not invoke legacy model scori
  const events=[];const submit=createRADiagnosisSubmission({client:clientStub(events),createId:()=> 'attempt-score',fetchImpl:async(url,opts)=>{const body=JSON.parse(opts.body);events.push(['request',body]);return new Response(JSON.stringify({status:'done',metrics:{score:{score_version:'ra-score-0.1',total:80}}}));}});
  await submit({blob:new Blob(['audio'],{type:'audio/webm'}),questionId:'RA_001',speechDiagnosis});
  assert.equal(events.filter(e=>e[0]==='request').length,1);
+});
+test('feedback sends the stored diagnosis task type instead of defaulting RS to RA', () => {
+ const source = readFileSync(new URL('../../src/lib/ra-diagnosis.js', import.meta.url), 'utf8');
+ assert.match(source, /action: 'feedback', task_type: result.task_type \|\| 'RA'/);
 });

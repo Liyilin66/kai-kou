@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { getAccessStatus } from '../../backend/auth/access-status.js';
-import { analysisResponse, diagnoseRecording, validateAnalysisInput } from '../../backend/speech/analyze-service.js';
+import { analysisResponse, diagnoseRecording, normalizeDiagnosisTaskType, validateAnalysisInput } from '../../backend/speech/analyze-service.js';
 import scoreHandler from '../score.js';
 import { generatePublishedFeedback } from '../../backend/speech/feedback.js';
 
@@ -28,6 +28,8 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
       const lookup = () => db.from('speech_analyses').select('*').eq('user_id', user.id).eq('attempt_id', body.attempt_id).maybeSingle();
       const existing = await lookup();
       if (existing.error) throw new Error('analysis_read_failed');
+      const requestedTaskType = normalizeDiagnosisTaskType(body.task_type);
+      if (existing.data && normalizeDiagnosisTaskType(existing.data.task_type) !== requestedTaskType) return res.status(409).json({ error: 'analysis_task_type_mismatch' });
       if (body.action === 'feedback') {
         if (!existing.data) return res.status(404).json({ error: 'analysis_not_found' });
         row = existing.data;
@@ -70,7 +72,7 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
         // Only browser recognition reproduces the old scoring input. Never replace
         // missing browser text with the new provider's more accurate transcript.
         if (typeof row.client_transcript === 'string' && row.client_transcript.trim()) {
-          try { await legacyHandler({ method: 'POST', headers: { authorization: bearer }, body: { taskType: 'RA', transcript: row.client_transcript, questionContent: row.reference_text } }, capture); } catch { status = 500; /* Shadow failure must not alter diagnosis. */ }
+          try { await legacyHandler({ method: 'POST', headers: { authorization: bearer }, body: { taskType: row.task_type || 'RA', transcript: row.client_transcript, questionContent: row.reference_text } }, capture); } catch { status = 500; /* Shadow failure must not alter diagnosis. */ }
         }
         const successful = status === 200 && payload && !payload.error && Number.isFinite(payload.overall) && payload.provider_used && payload.provider_used !== 'none';
         const saved = await db.from('speech_analyses').update({ legacy_score: successful ? payload : null, legacy_status: successful ? 'done' : 'failed' }).eq('id', row.id).eq('user_id', user.id);
@@ -78,11 +80,15 @@ export function createAnalyzeHandler({ createDb, diagnose = diagnoseRecording, l
         return res.status(200).json({ legacy_status: successful ? 'done' : 'failed' });
       }
       if (body.action) return res.status(400).json({ error: 'invalid_action' });
-      if (existing.data) return res.status(existing.data.status === 'processing' ? 202 : 200).json(analysisResponse(existing.data));
-      const { data: question, error: questionError } = await db.from('questions').select('id, content').eq('id', body.question_id).eq('task_type', 'RA').eq('is_active', true).maybeSingle();
+      const taskType = normalizeDiagnosisTaskType(body.task_type);
+      if (existing.data) {
+        if (normalizeDiagnosisTaskType(existing.data.task_type) !== taskType) return res.status(409).json({ error: 'analysis_task_type_mismatch' });
+        return res.status(existing.data.status === 'processing' ? 202 : 200).json(analysisResponse(existing.data));
+      }
+      const { data: question, error: questionError } = await db.from('questions').select('id, content, task_type').eq('id', body.question_id).eq('task_type', taskType).eq('is_active', true).maybeSingle();
       if (questionError) throw new Error('question_read_failed');
       if (!question?.content) return res.status(404).json({ error: 'question_not_found' });
-      const claim = await db.from('speech_analyses').insert({ user_id: user.id, attempt_id: body.attempt_id, task_type: 'RA',
+      const claim = await db.from('speech_analyses').insert({ user_id: user.id, attempt_id: body.attempt_id, task_type: taskType,
         question_id: String(question.id), reference_text: question.content, audio_path: body.audio_path,
         status: 'processing', client_silences: body.silences, client_transcript: body.client_transcript ?? '' }).select('*').single();
       if (claim.error?.code === '23505') {

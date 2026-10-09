@@ -89,3 +89,19 @@ test('versioned RA reference scores appear in history, home and agent while pron
  assert.equal(invoke('backend/agent/build-agent-context.js',`buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([reference])}), []).recent_average_score_90_scale`),78);
  const buckets=invoke('src/lib/profile-portrait.js',`(() => { const buckets=createMetricBuckets();applyRowSignalsToBuckets(${JSON.stringify(reference)},buckets);return buckets;})()`);assert.equal(buckets.pronunciation.signalCount,0);assert.ok(buckets.content.signalCount>0);assert.ok(buckets.fluency.signalCount>0);
 });
+
+const rsReference = { ...reference, task_type: 'RS', question_id: 'RS_001', score_json: { ...reference.score_json, score_version: 'rs-score-0.1' } };
+test('RS reference scores appear in home, desktop and coach without guessed pronunciation', () => {
+  assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([rsReference])}).averageScore`), 78);
+  assert.equal(invoke('src/lib/home-desktop-dashboard.js', `extractOverallScore(${JSON.stringify(rsReference)})`), 78);
+  assert.equal(invoke('backend/agent/build-agent-context.js', `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([rsReference])}), []).recent_average_score_90_scale`), 78);
+  const buckets = invoke('src/lib/profile-portrait.js', `(() => { const buckets = createMetricBuckets(); applyRowSignalsToBuckets(${JSON.stringify(rsReference)}, buckets); return buckets; })()`);
+  assert.equal(buckets.pronunciation.signalCount, 0);
+  assert.ok(buckets.content.signalCount > 0); assert.ok(buckets.fluency.signalCount > 0);
+});
+test('unscored RS diagnoses are activity, never a weak zero or stale legacy score', () => {
+  const row = { ...diagnosis, task_type: 'RS', score_json: { ...diagnosis.score_json, overall: 90 } };
+  assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([row])}).averageScore`), null);
+  assert.equal(invoke('src/lib/home-desktop-dashboard.js', `extractOverallScore(${JSON.stringify(row)})`), null);
+  assert.equal(invoke('backend/agent/build-agent-context.js', `buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([row])}), []).recent_average_score_90_scale`), null);
+});

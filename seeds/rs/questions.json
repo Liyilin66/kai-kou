@@ -1,0 +1,362 @@
+[
+  {
+    "id": "RS_001",
+    "difficulty": 1,
+    "content": "The seminar begins after the library tour this afternoon.",
+    "voice": "en-US-JennyNeural"
+  },
+  {
+    "id": "RS_002",
+    "difficulty": 1,
+    "content": "Students should submit the lab notes before Friday morning.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_003",
+    "difficulty": 1,
+    "content": "The tutor explained the graph during the review session.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_004",
+    "difficulty": 1,
+    "content": "Our research group meets in the science building every Monday.",
+    "voice": "en-US-GuyNeural"
+  },
+  {
+    "id": "RS_005",
+    "difficulty": 1,
+    "content": "The campus bookstore sells used textbooks at lower prices.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_006",
+    "difficulty": 1,
+    "content": "Please check the course website for updated lecture slides.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_007",
+    "difficulty": 1,
+    "content": "The professor asked everyone to bring a printed worksheet.",
+    "voice": "en-US-AriaNeural"
+  },
+  {
+    "id": "RS_008",
+    "difficulty": 1,
+    "content": "The chemistry lab closes early during the winter break.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_009",
+    "difficulty": 1,
+    "content": "Several students joined the online tutorial from home today.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_010",
+    "difficulty": 1,
+    "content": "The final exam covers chapters four through eight.",
+    "voice": "en-US-DavisNeural"
+  },
+  {
+    "id": "RS_011",
+    "difficulty": 1,
+    "content": "The lecturer posted a short quiz after the class discussion.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_012",
+    "difficulty": 1,
+    "content": "The museum visit supports our unit on local history.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_013",
+    "difficulty": 1,
+    "content": "You can borrow the recorder from the media desk.",
+    "voice": "en-US-JennyNeural"
+  },
+  {
+    "id": "RS_014",
+    "difficulty": 1,
+    "content": "The reading list includes three articles about climate policy.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_015",
+    "difficulty": 1,
+    "content": "The academic advisor will answer questions after the workshop.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_016",
+    "difficulty": 1,
+    "content": "Our group presentation is scheduled for next Wednesday afternoon.",
+    "voice": "en-US-GuyNeural"
+  },
+  {
+    "id": "RS_017",
+    "difficulty": 1,
+    "content": "The library database provides access to recent journal articles.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_018",
+    "difficulty": 1,
+    "content": "The biology tutor marked the practice test during class.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_019",
+    "difficulty": 1,
+    "content": "Students can reserve a quiet study room online.",
+    "voice": "en-US-AriaNeural"
+  },
+  {
+    "id": "RS_020",
+    "difficulty": 1,
+    "content": "The lecture recording will be available by tomorrow evening.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_021",
+    "difficulty": 2,
+    "content": "The research assistant compared survey responses from two different campus libraries this semester.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_022",
+    "difficulty": 2,
+    "content": "Students must explain the method clearly before presenting their final research results.",
+    "voice": "en-US-DavisNeural"
+  },
+  {
+    "id": "RS_023",
+    "difficulty": 2,
+    "content": "The guest speaker discussed how renewable energy markets affect employment in regional communities.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_024",
+    "difficulty": 2,
+    "content": "Each participant completed a detailed questionnaire before the formal interview session began.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_025",
+    "difficulty": 2,
+    "content": "The coordinator extended the deadline because several uploaded files were corrupted overnight.",
+    "voice": "en-US-JennyNeural"
+  },
+  {
+    "id": "RS_026",
+    "difficulty": 2,
+    "content": "Our economics lecture focused on demand changes after recent national policy reform.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_027",
+    "difficulty": 2,
+    "content": "The data table shows a steady increase in attendance across the weekly seminars.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_028",
+    "difficulty": 2,
+    "content": "Students reviewed the ethics approval form carefully before collecting any confidential interview data.",
+    "voice": "en-US-GuyNeural"
+  },
+  {
+    "id": "RS_029",
+    "difficulty": 2,
+    "content": "The architecture studio displayed several detailed models near the main entrance to campus.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_030",
+    "difficulty": 2,
+    "content": "The laboratory report should describe the materials and basic safety procedure clearly.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_031",
+    "difficulty": 2,
+    "content": "The professor emphasized critical reading rather than memorizing isolated facts for the examination.",
+    "voice": "en-US-AriaNeural"
+  },
+  {
+    "id": "RS_032",
+    "difficulty": 2,
+    "content": "Many international students attend language workshops during their first semester at the university.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_033",
+    "difficulty": 2,
+    "content": "The field trip was postponed because heavy rain affected several rural roads.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_034",
+    "difficulty": 2,
+    "content": "The psychology experiment measured attention while participants solved visual puzzles on computer screens.",
+    "voice": "en-US-DavisNeural"
+  },
+  {
+    "id": "RS_035",
+    "difficulty": 2,
+    "content": "The tutorial leader asked students to defend their chosen academic sources carefully.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_036",
+    "difficulty": 2,
+    "content": "The assigned reading compares urban transport systems across three countries with different climates.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_037",
+    "difficulty": 2,
+    "content": "The statistics class practiced interpreting confidence intervals using examples from recent public surveys.",
+    "voice": "en-US-JennyNeural"
+  },
+  {
+    "id": "RS_038",
+    "difficulty": 2,
+    "content": "The department will publish scholarship decisions online at the end of the semester.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_039",
+    "difficulty": 2,
+    "content": "The study found that regular feedback improved student motivation during weekly tutorials.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_040",
+    "difficulty": 2,
+    "content": "The engineering team tested the prototype under different temperatures in a controlled laboratory.",
+    "voice": "en-US-GuyNeural"
+  },
+  {
+    "id": "RS_041",
+    "difficulty": 3,
+    "content": "The lecturer argued that historical evidence should be evaluated within its wider social and political context.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_042",
+    "difficulty": 3,
+    "content": "Researchers combined satellite images with local interviews to measure environmental change across several farming communities over time.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_043",
+    "difficulty": 3,
+    "content": "The assignment requires a balanced discussion of potential benefits, financial costs, and ethical concerns in practice.",
+    "voice": "en-US-AriaNeural"
+  },
+  {
+    "id": "RS_044",
+    "difficulty": 3,
+    "content": "Several departments collaborated to design a safer and more inclusive policy for evening campus events next semester.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_045",
+    "difficulty": 3,
+    "content": "The experiment was repeated because the initial measurements showed unusual variation between the two sample groups.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_046",
+    "difficulty": 3,
+    "content": "Students compared qualitative interviews with numerical results from the same community health project in their final report.",
+    "voice": "en-US-DavisNeural"
+  },
+  {
+    "id": "RS_047",
+    "difficulty": 3,
+    "content": "The workshop demonstrated how clear visual design can improve scientific communication for non-specialist audiences in public forums.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_048",
+    "difficulty": 3,
+    "content": "The committee recommended additional training before the new software system is released across campus next year.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_049",
+    "difficulty": 3,
+    "content": "The article questions whether economic growth always leads to better public health outcomes for disadvantaged communities.",
+    "voice": "en-US-JennyNeural"
+  },
+  {
+    "id": "RS_050",
+    "difficulty": 3,
+    "content": "Participants were asked to record their observations immediately after each practical learning activity in the workbook.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_051",
+    "difficulty": 3,
+    "content": "The lecture compared traditional farming practices with emerging climate adaptation strategies in several densely populated coastal regions.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_052",
+    "difficulty": 3,
+    "content": "The research proposal must identify key limitations before describing the expected contribution to knowledge in detail.",
+    "voice": "en-US-GuyNeural"
+  },
+  {
+    "id": "RS_053",
+    "difficulty": 3,
+    "content": "A reliable conclusion depends on careful sampling, transparent methods, and accurate reporting of results across studies.",
+    "voice": "en-GB-SoniaNeural"
+  },
+  {
+    "id": "RS_054",
+    "difficulty": 3,
+    "content": "The historian examined how migration shaped language use in small coastal towns over several decades of change.",
+    "voice": "en-AU-WilliamNeural"
+  },
+  {
+    "id": "RS_055",
+    "difficulty": 3,
+    "content": "The clinical trial monitored possible side effects across several age groups and regional locations during follow-up.",
+    "voice": "en-US-AriaNeural"
+  },
+  {
+    "id": "RS_056",
+    "difficulty": 3,
+    "content": "Students debated whether automated systems can make fair decisions in complex public services without human review.",
+    "voice": "en-GB-LibbyNeural"
+  },
+  {
+    "id": "RS_057",
+    "difficulty": 3,
+    "content": "The design brief asks teams to justify every material choice with evidence from testing and user feedback.",
+    "voice": "en-AU-NatashaNeural"
+  },
+  {
+    "id": "RS_058",
+    "difficulty": 3,
+    "content": "The policy review considered financial pressures and community needs alongside the environmental impact of proposed infrastructure projects.",
+    "voice": "en-US-DavisNeural"
+  },
+  {
+    "id": "RS_059",
+    "difficulty": 3,
+    "content": "The supervisor suggested revising the introduction after the literature review section was complete and properly cited.",
+    "voice": "en-GB-RyanNeural"
+  },
+  {
+    "id": "RS_060",
+    "difficulty": 3,
+    "content": "The study demonstrates that small classroom changes can influence student participation patterns over time in seminars.",
+    "voice": "en-AU-WilliamNeural"
+  }
+]

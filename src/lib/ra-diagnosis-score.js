@@ -3,8 +3,12 @@ export function hasRAReferenceScore(score) {
   return score?.score_version === 'ra-score-0.1' && hasNumericScore(score?.scores?.overall);
 }
 
+export function hasSpeakingReferenceScore(score) {
+  return hasRAReferenceScore(score) || (score?.score_version === 'rs-score-0.1' && hasNumericScore(score?.scores?.overall));
+}
+
 export function isRADiagnosis(score) {
-  return Boolean(score && (score.analysis_id || score.diagnosis_version) && !hasRAReferenceScore(score));
+  return Boolean(score && (score.analysis_id || score.diagnosis_version) && !hasSpeakingReferenceScore(score));
 }
 
 export function diagnosisLabel(score) {

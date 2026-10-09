@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { usePracticeStore } from "@/stores/practice";
 import NavBar from "@/components/NavBar.vue";
 import OrangeButton from "@/components/OrangeButton.vue";
+import RADiagnosisResult from "@/components/ra/RADiagnosisResult.vue";
 
 const router = useRouter();
 const store = usePracticeStore();
@@ -16,6 +17,7 @@ const result = computed(() =>
     keywords: []
   }
 );
+const diagnosisResult = computed(() => store.result?.kind === "ra_diagnosis" ? store.result : null);
 
 const keywords = computed(() => {
   if (store.result?.keywords?.length > 0) {
@@ -60,7 +62,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
+  <RADiagnosisResult v-if="diagnosisResult" :result="diagnosisResult" />
+  <div v-else class="min-h-screen bg-bg">
     <NavBar title="Repeat Sentence Result" back-to="/rs" />
 
     <main class="mx-auto max-w-2xl px-4 py-6">

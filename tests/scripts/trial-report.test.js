@@ -78,3 +78,13 @@ test('date must exist and participant emails are deduplicated', () => {
   assert.throws(() => parseReportArgs(['--since', '2026-02-30', '--emails', 'a@x.com']));
   assert.deepEqual(parseReportArgs(['--since', '2026-10-09', '--emails', 'A@x.com,a@x.com']).emails, ['a@x.com']);
 });
+test('RA trial report excludes reused RS event names while retaining old RA events', () => {
+  const report = buildTrialReport({ since: '2026-10-09T00:00:00Z', participants: [{ user_id: 'u' }], events: [
+    { user_id: 'u', event: 'ra_result_viewed', analysis_id: 'old-ra', created_at: '2026-10-09T02:00:00Z' },
+    { user_id: 'u', event: 'ra_result_viewed', analysis_id: 'new-rs', task_type: 'RS', created_at: '2026-10-10T02:00:00Z' },
+    { user_id: 'u', event: 'ra_evidence_played', analysis_id: 'new-rs', props: { task_type: 'RS' }, created_at: '2026-10-10T02:01:00Z' }
+  ] });
+  assert.equal(report.participants[0].result_views, 1);
+  assert.equal(report.participants[0].evidence_replay_result_page_fraction, 0);
+  assert.equal(report.participants[0].returned_after_first_day, false);
+});

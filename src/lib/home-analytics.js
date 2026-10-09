@@ -355,7 +355,7 @@ function resolveDurationSec(scoreJson) {
 
 function resolveOverallScore(taskType, scoreJson) {
   const score = toObject(scoreJson) || {};
-  if (normalizeTaskType(taskType) === "RA" && isRADiagnosis(score)) return null;
+  if (["RA", "RS"].includes(normalizeTaskType(taskType)) && isRADiagnosis(score)) return null;
   const candidates = [
     score?.overall,
     score?.score_overall,

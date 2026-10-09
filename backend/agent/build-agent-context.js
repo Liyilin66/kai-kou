@@ -576,7 +576,7 @@ function resolveTrendDirection(delta) {
 function resolveComparableScore(taskType, scoreJson) {
   const normalizedTaskType = normalizeTaskType(taskType);
   const score = toObject(scoreJson);
-  if (normalizedTaskType === "RA" && isRADiagnosis(score)) return null;
+  if (["RA", "RS"].includes(normalizedTaskType) && isRADiagnosis(score)) return null;
 
   if (normalizedTaskType === "WFD") {
     const accuracy = normalizePercent(score?.score)

@@ -89,7 +89,7 @@ export function buildTrialReport({ since, participants, practices = [], events =
     }
     const userPracticesAll = practices.filter(row => row.user_id === participant.user_id).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     const userPracticesSince = userPracticesAll.filter(row => new Date(row.created_at).getTime() >= sinceTime);
-    const userEvents = events.filter(row => row.user_id === participant.user_id && new Date(row.created_at).getTime() >= sinceTime);
+    const userEvents = events.filter(row => (!row.task_type || row.task_type === 'RA') && (!row.props?.task_type || row.props.task_type === 'RA') && row.user_id === participant.user_id && new Date(row.created_at).getTime() >= sinceTime);
     const dates = activityDates(userPracticesSince, userEvents);
     return {
       participant: label,
@@ -162,7 +162,7 @@ async function loadRows(client, users, since) {
     .select('id,user_id,task_type,question_id,score_total:score_json->metrics->score->total,legacy_total:score_json->scores->overall,created_at')
     .in('user_id', ids).eq('task_type', 'RA').order('created_at', { ascending: true }).range(start, end));
   const events = await readAll((start, end) => client.from('practice_events')
-    .select('id,user_id,event,analysis_id,question_id,created_at')
+    .select('id,user_id,event,analysis_id,question_id,task_type:props->>task_type,created_at')
     .in('user_id', ids).gte('created_at', since).order('created_at', { ascending: true }).range(start, end));
   return { practices, events };
 }

@@ -16,7 +16,12 @@ function fixture(options = {}) {
         single() { return this.run(); }, maybeSingle() { return this.run(); }, then(resolve, reject) { return this.run().then(resolve, reject); },
         async run() {
           if (table === 'profiles') return { data: { is_premium: !state.expired } };
-          if (table === 'questions') return { data: state.noQuestion ? null : { id: 'RA_001', content: 'The server reference.' } };
+          if (table === 'questions') {
+            if (state.noQuestion) return { data: null };
+            const taskType = this.filters.task_type || 'RA';
+            if (state.rejectTaskType && taskType === state.rejectTaskType) return { data: null };
+            return { data: { id: this.filters.id || 'RA_001', content: taskType === 'RS' ? 'Repeat the server reference.' : 'The server reference.', task_type: taskType } };
+          }
           if (this.op === 'insert') {
             if (state.row) return { error: { code: '23505' } };
             state.row = { id: 'analysis-id', ...this.value }; return { data: { ...state.row } };
@@ -71,7 +76,8 @@ function fixture(options = {}) {
   };
   const legacyHandler = async (req, res) => {
     state.legacyCalls++;
-    assert.equal(req.body.questionContent, state.row.reference_text);
+      assert.equal(req.body.taskType, state.row.task_type);
+      assert.equal(req.body.questionContent, state.row.reference_text);
     assert.equal(req.body.transcript, state.row.client_transcript);
     assert.notEqual(req.body.transcript, state.row.transcript);
     if (state.legacyFails) res.status(502).json({ error: 'provider_failed' });
@@ -114,6 +120,24 @@ test('diagnosis uses server reference, persists reference score and versions', a
   assert.ok(result.data.timings_ms.transcribe >= 0);
   assert.equal(state.row.client_transcript, body.client_transcript);
   assert.equal(state.row.transcript, 'The server reference.');
+});
+test('RS diagnosis reads an RS question, stores task type and returns RS score version', async () => {
+  const { invoke, state } = fixture();
+  const result = await invoke({ ...body, task_type: 'RS', question_id: 'RS_001' });
+  assert.equal(result.code, 200);
+  assert.equal(state.row.task_type, 'RS');
+  assert.equal(result.data.question.id, 'RS_001');
+  assert.equal(result.data.question.content, 'Repeat the server reference.');
+  assert.equal(result.data.metrics.score.score_version, 'rs-score-0.1');
+  assert.equal(state.logs[0].score_json.score_version, 'rs-score-0.1');
+});
+test('task type defaults to RA and mismatched question type is rejected before transcription', async () => {
+  const { invoke, state } = fixture({ rejectTaskType: 'RA' });
+  const result = await invoke({ ...body, question_id: 'RS_001' });
+  assert.equal(result.code, 404);
+  assert.equal(result.data.error, 'question_not_found');
+  assert.equal(state.calls, 0);
+  assert.equal(state.row, null);
 });
 test('browser transcript accepts empty and missing text, preserves up to 5000 characters', async () => {
   for (const client_transcript of ['', undefined, 'x'.repeat(5000)]) {
@@ -288,4 +312,15 @@ test('unexpected feedback failure is terminal without damaging diagnosis or char
   assert.equal(state.row.status, 'done'); assert.equal(state.logs.length, 1);
   assert.equal((await invoke(feedbackRequest)).data.feedback_status, 'failed');
   assert.equal(state.feedbackCalls, 1);
+});
+test('existing RS attempt cannot be polled or requested for feedback as RA', async () => {
+  const { invoke, state } = fixture({ row: { id: 'analysis-id', user_id: 'user', attempt_id: body.attempt_id, task_type: 'RS', status: 'done' } });
+  for (const requestBody of [body, { action: 'feedback', attempt_id: body.attempt_id }]) {
+    const res = await invoke(requestBody);
+    assert.equal(res.code, 409); assert.equal(res.data.error, 'analysis_task_type_mismatch');
+  }
+  assert.equal(state.calls, 0); assert.equal(state.feedbackCalls, 0);
+});
+test('invalid task type is rejected for feedback actions too', () => {
+  assert.deepEqual(validateAnalysisInput({ attempt_id: body.attempt_id, action: 'feedback', task_type: 'DI' }, 'user'), [400, 'invalid_task_type']);
 });

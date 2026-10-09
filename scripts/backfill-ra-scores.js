@@ -7,7 +7,7 @@ export function scoreStoredDiagnosis(row){
  return scoreRA({alignment:row.aligned,pauses:features.pauses,metrics:row.metrics});
 }
 export async function backfillRAScores(client,{apply=false}={}){
- const rows=[];for(let from=0;;from+=500){const r=await client.from('speech_analyses').select('id,user_id,status,question_id,reference_text,aligned,metrics,client_silences').eq('status','done').order('id').range(from,from+499);if(r.error)throw r.error;rows.push(...r.data);if(r.data.length<500)break;}
+ const rows=[];for(let from=0;;from+=500){const r=await client.from('speech_analyses').select('id,user_id,status,question_id,reference_text,aligned,metrics,client_silences').eq('status','done').eq('task_type','RA').order('id').range(from,from+499);if(r.error)throw r.error;rows.push(...r.data);if(r.data.length<500)break;}
  const output=[];
  for(const row of rows){const score=scoreStoredDiagnosis(row);const current=row.metrics?.score;
   const needsUpdate=!isDeepStrictEqual(current,score);
