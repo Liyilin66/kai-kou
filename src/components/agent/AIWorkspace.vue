@@ -93,10 +93,10 @@
         <div class="promo-card">
           <div class="promo-icon">📦</div>
           <div>
-            <div class="promo-title">PTE 备考资料包</div>
-            <div class="promo-sub">真题 · 高频词汇 · 模板</div>
+            <div class="promo-title">WE 模板库</div>
+            <div class="promo-sub">写作结构 · 模板参考</div>
           </div>
-          <button class="promo-btn">领取</button>
+          <button class="promo-btn" type="button" @click="router.push('/we/templates')">查看模板</button>
         </div>
       </div>
     </aside>
@@ -405,7 +405,11 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
 import { parseAgentContent } from "@/lib/agent-rich-content";
+
+const router = useRouter();
 
 const props = defineProps({
   navItems: { type: Array, default: () => [] },
@@ -559,9 +563,9 @@ const quickCmds = computed(() => (props.quickActions.length ? props.quickActions
   icon: quickIconMap[item.icon] || item.icon || "✦",
   text: item.prompt || item.text || item.label
 })));
-const followupQuestions = computed(() => props.recommendedQuestions.length
+const followupQuestions = computed(() => (props.recommendedQuestions.length
   ? props.recommendedQuestions.map((item) => normalizeText(item.text || item.prompt || item)).filter(Boolean)
-  : ["我今天最应该练哪个题型？", "DI 如何快速提高信息覆盖率？", "RTS 复述流畅度怎么练？", "WFD 总丢冠词和复数怎么办？"]);
+  : ["我今天最应该练哪个题型？", "DI 如何快速提高信息覆盖率？", "RTS 复述流畅度怎么练？", "WFD 总丢冠词和复数怎么办？"]).filter(question => !hasUnavailableTaskRecommendation({ advice: question })));
 const userName = computed(() => normalizeText(props.userDisplayName) || "同学");
 const userLetter = computed(() => normalizeText(props.userInitial) || userName.value.charAt(0).toUpperCase() || "Y");
 

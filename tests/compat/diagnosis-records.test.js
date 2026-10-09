@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 // Exercise actual pure normalization/aggregation code without browser-only Supabase imports.
 function loadModule(path) {
-  const helper = ['../../backend/scoring/pronunciation-not-assessed.js', '../../src/lib/ra-diagnosis-score.js']
+  const helper = ['../../backend/scoring/pronunciation-not-assessed.js', '../../src/lib/enabled-task-types.js', '../../src/lib/ra-diagnosis-score.js']
     .map(file => readFileSync(new URL(file, import.meta.url), 'utf8').replace(/^import .*?;\n/gm, '').replace(/export /g, '')).join('\n');
   const source = readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8')
     .replace(/^import .*?;\n/gm, '').replace(/export /g, '');

@@ -1287,9 +1287,9 @@ function sumBy(items, key) {
 
       <div class="profile-sidebar-footer">
         <div class="profile-promo">
-          <div class="profile-promo-title">PTE 备考资料包</div>
-          <div class="profile-promo-sub">真题 · 高频词汇 · 模板</div>
-          <button class="profile-promo-button" type="button" @click="goTo('/we/templates')">免费领取</button>
+          <div class="profile-promo-title">WE 模板库</div>
+          <div class="profile-promo-sub">写作结构 · 模板参考</div>
+          <button class="profile-promo-button" type="button" @click="goTo('/we/templates')">查看模板</button>
         </div>
       </div>
     </aside>

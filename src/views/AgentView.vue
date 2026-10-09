@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { getEnabledTaskTypes, hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
 import AIWorkspace from "@/components/agent/AIWorkspace.vue";
 import AITutorLoading from "@/components/agent/AITutorLoading.vue";
 import AgentIcon from "@/components/agent/AgentIcon.vue";
@@ -147,7 +148,9 @@ const quickActions = [
   {
     id: "explain-score",
     label: "解释低分",
-    prompt: "为什么这次 DI 分低？请结合我最近的记录，直接告诉我主要问题和改进方向。",
+    prompt: getEnabledTaskTypes().includes("DI")
+      ? "为什么这次 DI 分低？请结合我最近的记录，直接告诉我主要问题和改进方向。"
+      : "为什么这次练习分低？请结合我最近的记录，直接告诉我主要问题和改进方向。",
     icon: "question",
     helper: "找出扣分原因"
   },
@@ -218,7 +221,7 @@ const recommendedQuestions = [
     text: "WFD 总丢冠词和复数怎么办？",
     prompt: "WFD 总丢冠词和复数怎么办？请按听写、检查、复盘三个阶段说明。"
   }
-];
+].filter(item => !hasUnavailableTaskRecommendation({ advice: item.prompt }));
 
 const vipLockFeatures = [
   "恢复长期 AI 私教主聊天",
@@ -2874,10 +2877,10 @@ function normalizeText(value) {
         </button>
       </nav>
 
-      <section class="agent-resource-card" aria-label="PTE 备考资料包">
-        <p class="agent-resource-title">PTE 备考资料包</p>
-        <p class="agent-resource-copy">真题 · 高频词汇 · 模板</p>
-        <button class="agent-resource-button" type="button">免费领取</button>
+      <section class="agent-resource-card" aria-label="WE 模板库">
+        <p class="agent-resource-title">WE 模板库</p>
+        <p class="agent-resource-copy">写作结构 · 模板参考</p>
+        <button class="agent-resource-button" type="button" @click="openPath('/we/templates')">查看模板</button>
       </section>
     </aside>
 

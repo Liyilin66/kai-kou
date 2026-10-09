@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { usePracticeStore } from "@/stores/practice";
 import { isDIEnabled } from "@/lib/di-feature";
+import { getEnabledTaskTypes } from "@/lib/enabled-task-types";
 import { formatInteger, formatScore, loadHomeAnalyticsSnapshotForAuth } from "@/lib/home-analytics";
 import {
   buildDesktopDashboardState,
@@ -21,7 +22,7 @@ const { tasks } = storeToRefs(practiceStore);
 
 const searchQuery = ref("");
 const coachAction = ref("plan");
-const dashboard = ref(createEmptyDesktopDashboardState());
+const dashboard = ref(createEmptyDesktopDashboardState(null, { diEnabled: isDIEnabled() }));
 
 const TASK_VISUALS = {
   RA: { accent: "#7765F6", glow: "rgba(119, 101, 246, 0.14)", icon: "🎙", title: "RA", subtitle: "朗读句子\n流利表达", path: "/ra" },
@@ -32,11 +33,6 @@ const TASK_VISUALS = {
 };
 
 const QUICK_TASK_ORDER = ["RA", "WFD", "RTS", "DI", "WE"];
-const RECENT_PLACEHOLDERS = [
-  { id: "placeholder-ra", taskType: "RA", accent: "#7765F6", title: "RA 练习 - 20题", subtitle: "", scoreLabel: "72/90", timeLabel: "05-16 10:32", isPlaceholder: true },
-  { id: "placeholder-di", taskType: "DI", accent: "#7B6CFF", title: "DI 练习 - 数据图表题", subtitle: "", scoreLabel: "64/90", timeLabel: "05-16 09:41", isPlaceholder: true },
-  { id: "placeholder-wfd", taskType: "WFD", accent: "#1BC58E", title: "WFD 练习 - 20题", subtitle: "", scoreLabel: "70/90", timeLabel: "05-15 21:36", isPlaceholder: true }
-];
 
 const userDisplayName = computed(() => authStore.displayName || "同学");
 const userAvatarUrl = computed(() => `${authStore.avatarUrl || ""}`.trim());
@@ -46,6 +42,10 @@ const userInitial = computed(() => {
 });
 const diEnabled = computed(() => isDIEnabled());
 const homeAnalytics = computed(() => dashboard.value.homeAnalytics || {});
+const enabledTaskTypes = computed(() => getEnabledTaskTypes({
+  diEnabled: diEnabled.value,
+  types: QUICK_TASK_ORDER
+}));
 
 const greetingLabel = computed(() => {
   const hour = new Date().getHours();
@@ -67,14 +67,18 @@ const heroSupportText = computed(() => {
 });
 
 const sidebarItems = computed(() => [
-  { key: "home", label: "首页", icon: "⌂", path: "/home", active: true },
+  { key: "home", label: "首页", icon: "⌂", path: "/home" },
   { key: "practice", label: "练习中心", icon: "▤", sectionId: "desktop-quick" },
   { key: "coach", label: "AI 私教", icon: "✧", path: "/agent" },
   { key: "plan", label: "学习计划", icon: "□", sectionId: "desktop-goal" },
   { key: "report", label: "学习报告", icon: "▣", sectionId: "desktop-report" },
   { key: "question-bank", label: "题库", icon: "☷", sectionId: "desktop-library" },
   { key: "profile", label: "个人中心", icon: "○", path: "/profile" }
-]);
+].map((item) => ({
+  ...item,
+  active: item.key === activeSidebarKey.value
+})));
+const activeSidebarKey = ref("home");
 
 const heroStats = computed(() => [
   {
@@ -83,9 +87,7 @@ const heroStats = computed(() => [
     label: "平均得分",
     value: dashboard.value.loading ? "--" : formatScore(homeAnalytics.value.averageScore),
     suffix: homeAnalytics.value.averageScore !== null ? "/90" : "",
-    helper: homeAnalytics.value.scoredCount
-      ? `较上周 ↑ ${formatScore(Math.min(9.9, Math.max(1.2, homeAnalytics.value.scoredCount / 2)))}`
-      : "较上周 ↑ 5.2"
+    helper: homeAnalytics.value.scoreComparisonText || "暂无上周对比"
   },
   {
     key: "total-count",
@@ -95,7 +97,7 @@ const heroStats = computed(() => [
     suffix: "题",
     helper: homeAnalytics.value.totalCount
       ? `今日完成 ${formatInteger(homeAnalytics.value.todayCount)} 题`
-      : "较上周 ↑ 86"
+      : "今日完成 0 题"
   },
   {
     key: "streak",
@@ -105,15 +107,14 @@ const heroStats = computed(() => [
     suffix: homeAnalytics.value.currentStreak ? "天" : "",
     helper: homeAnalytics.value.currentStreak
       ? "继续保持今天的练习节奏"
-      : "最长 18 天"
+      : "今天开始建立节奏"
   }
 ]);
 
 const quickTasks = computed(() => {
   const taskMap = new Map(tasks.value.map((task) => [`${task.id || ""}`.trim().toUpperCase(), task]));
 
-  return QUICK_TASK_ORDER
-    .filter((taskType) => (taskType === "DI" ? diEnabled.value : true))
+  return enabledTaskTypes.value
     .map((taskType) => {
       const task = taskMap.get(taskType);
       const visuals = TASK_VISUALS[taskType] || TASK_VISUALS.RA;
@@ -146,6 +147,7 @@ const filteredQuickTasks = computed(() => {
     `${task.label} ${task.title}`.toLowerCase().includes(query)
   );
 });
+const enabledTaskSearchHint = computed(() => enabledTaskTypes.value.join("、"));
 
 const notificationCount = computed(() => {
   let count = 0;
@@ -171,7 +173,7 @@ const heatmapWeekLabels = computed(() => {
 
 const recentPracticeList = computed(() => {
   const realItems = Array.isArray(dashboard.value.recentPractices) ? dashboard.value.recentPractices : [];
-  return realItems.length ? realItems : RECENT_PLACEHOLDERS;
+  return realItems.filter((item) => enabledTaskTypes.value.includes(`${item.taskType || ""}`.trim().toUpperCase()));
 });
 
 const weeklyGoalPercent = computed(() => {
@@ -198,7 +200,7 @@ const trendChart = computed(() => buildTrendChart(dashboard.value.scoreTrend || 
 const trendComparisonLabel = computed(() => dashboard.value.trendMeta?.comparisonText || "暂无上周对比");
 
 async function loadDashboard() {
-  dashboard.value = createEmptyDesktopDashboardState(homeAnalytics.value);
+  dashboard.value = createEmptyDesktopDashboardState(homeAnalytics.value, { diEnabled: diEnabled.value });
 
   try {
     if (!authStore.loaded) {
@@ -236,7 +238,7 @@ async function loadDashboard() {
   } catch (error) {
     console.warn("Desktop dashboard load failed:", error);
     dashboard.value = {
-      ...createEmptyDesktopDashboardState(),
+      ...createEmptyDesktopDashboardState(null, { diEnabled: diEnabled.value }),
       loading: false
     };
   }
@@ -244,11 +246,13 @@ async function loadDashboard() {
 
 function handleSidebarClick(item) {
   if (item.path) {
+    activeSidebarKey.value = item.key;
     router.push(item.path);
     return;
   }
 
   if (item.sectionId) {
+    activeSidebarKey.value = item.key;
     scrollToSection(item.sectionId);
   }
 }
@@ -405,10 +409,10 @@ function formatDateChip(value) {
       </nav>
 
       <div class="desktop-sidebar__resource">
-        <p class="desktop-sidebar__resource-eyebrow">PTE 备考资料包</p>
-        <p class="desktop-sidebar__resource-title">真题 · 高频词汇 · 模板</p>
-        <button type="button" class="desktop-sidebar__resource-btn" @click="scrollToSection('desktop-goal')">
-          免费领取
+        <p class="desktop-sidebar__resource-eyebrow">WE 模板库</p>
+        <p class="desktop-sidebar__resource-title">写作模板 · 高频句型</p>
+        <button type="button" class="desktop-sidebar__resource-btn" @click="openTask('/we/templates')">
+          打开模板库
         </button>
         <span class="desktop-sidebar__gift" aria-hidden="true">▱</span>
       </div>
@@ -517,7 +521,7 @@ function formatDateChip(value) {
 
               <div v-if="!filteredQuickTasks.length" class="desktop-empty-search">
                 <p class="desktop-empty-search__title">没有找到匹配模块</p>
-                <p class="desktop-empty-search__copy">试试输入 `RA`、`WFD`、`RTS`、`DI` 或 `WE`。</p>
+                <p class="desktop-empty-search__copy">试试输入 {{ enabledTaskSearchHint }}。</p>
               </div>
             </div>
           </section>
@@ -721,7 +725,7 @@ function formatDateChip(value) {
             <button type="button" class="desktop-card-link" @click="scrollToSection('desktop-quick')">查看全部 →</button>
           </div>
 
-          <div class="desktop-recent-list">
+          <div v-if="recentPracticeList.length" class="desktop-recent-list">
             <div
               v-for="item in recentPracticeList"
               :key="item.id"
@@ -737,6 +741,7 @@ function formatDateChip(value) {
               <span class="desktop-recent-item__arrow">›</span>
             </div>
           </div>
+          <div v-else class="desktop-recent-empty">还没有练习记录，先做一道 RA。</div>
         </article>
       </section>
     </main>

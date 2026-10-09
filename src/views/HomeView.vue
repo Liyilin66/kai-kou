@@ -31,9 +31,9 @@
 
       <div class="home-agent-sidebar-footer">
         <div class="home-agent-promo">
-          <div class="home-agent-promo-title">PTE 备考资料包</div>
-          <div class="home-agent-promo-sub">真题 · 高频词汇 · 模板</div>
-          <button class="home-agent-promo-button" type="button" @click="goTo('/we/templates')">免费领取</button>
+          <div class="home-agent-promo-title">WE 模板库</div>
+          <div class="home-agent-promo-sub">写作结构 · 常用表达</div>
+          <button class="home-agent-promo-button" type="button" @click="goTo('/we/templates')">查看模板</button>
         </div>
       </div>
     </aside>
@@ -102,17 +102,18 @@
             </div>
             <div class="ai-banner">
               <span class="ai-banner-icon">💡</span>
-              <span>建议优先练习 RTS 和 DI，提升整体得分效率</span>
+              <span>{{ homeCoachBanner }}</span>
             </div>
-            <div class="ai-messages">
+            <div v-if="aiMessages.length" class="ai-messages">
               <div v-for="msg in aiMessages" :key="msg.id" class="ai-msg">
                 <div class="ai-msg-av">AI</div>
                 <div class="ai-msg-bubble">
                   <div class="ai-msg-text">{{ msg.text }}</div>
-                  <div class="ai-msg-time">{{ msg.time }}</div>
+                  <div v-if="msg.time" class="ai-msg-time">{{ msg.time }}</div>
                 </div>
               </div>
             </div>
+            <div v-else class="ai-empty">还没有足够练习记录，先做一道 RA，AI 私教会按真实数据给建议。</div>
             <div class="ai-actions">
               <div v-for="act in aiActions" :key="act.label" class="ai-act-btn" role="button" tabindex="0" @click="goTo(act.to)" @keydown.enter.prevent="goTo(act.to)" @keydown.space.prevent="goTo(act.to)">{{ act.label }}</div>
             </div>
@@ -122,7 +123,7 @@
         <!-- ── ROW 2：快捷入口 + AI建议 + 本周目标 ── -->
         <div class="row">
 
-          <div class="card sc-card">
+          <div id="quick" class="card sc-card">
             <div class="sec-title"><span class="sec-star">◈</span> 模块快捷入口</div>
             <div class="sc-grid">
               <div v-for="mod in modules" :key="mod.code"
@@ -170,7 +171,7 @@
             </div>
           </div>
 
-          <div class="card goal-card">
+          <div id="goal" class="card goal-card">
             <div class="goal-header">
               <div class="sec-title" style="margin-bottom:0"><span class="sec-star">◎</span> 本周目标进度</div>
               <span class="badge-green">{{ weeklyGoalStatusLabel }}</span>
@@ -210,7 +211,7 @@
         </div>
 
         <!-- ── ROW 3：热力图 + 趋势 + 弱项 + 最近练习 ── -->
-        <div class="row">
+        <div id="report" class="row">
 
           <div class="card hm-card">
             <div class="sec-title"><span class="sec-star">◈</span> 本周学习热力图</div>
@@ -377,11 +378,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { requestDailyAiSuggestion } from "@/lib/agent";
 import { isDIEnabled } from "@/lib/di-feature";
+import { HOME_TASK_TYPES, getEnabledTaskTypes, hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
 import { formatInteger, formatScore, loadHomeAnalyticsSnapshotForAuth } from "@/lib/home-analytics";
 import {
   buildDesktopDashboardState,
@@ -393,7 +395,13 @@ import {
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-const dashboard = ref(createEmptyDesktopDashboardState());
+const diEnabled = computed(() => isDIEnabled());
+const enabledHomeTaskTypes = computed(() => getEnabledTaskTypes({
+  types: HOME_TASK_TYPES,
+  diEnabled: diEnabled.value
+}));
+const enabledHomeTaskTypeSet = computed(() => new Set(enabledHomeTaskTypes.value));
+const dashboard = ref(createEmptyDesktopDashboardState(null, { diEnabled: diEnabled.value }));
 const dashboardLoadError = ref("");
 const TREND_MIN_SCORE = 10;
 const TREND_MAX_SCORE = 90;
@@ -405,7 +413,7 @@ const TREND_CHART = {
   bottom: 108
 };
 
-const DAILY_SUGGESTION_TASK_TYPES = ["RA", "WFD", "WE", "DI", "RTS"];
+const DAILY_SUGGESTION_TASK_TYPES = HOME_TASK_TYPES;
 const dailyTaskPathMap = {
   RA: "/ra",
   WFD: "/wfd",
@@ -474,7 +482,6 @@ const navItems = [
   { key: "agent", label: "AI 私教", icon: "spark", to: "/agent" },
   { key: "plan", label: "学习计划", icon: "square", to: "/home#goal" },
   { key: "report", label: "学习报告", icon: "report", to: "/home#report" },
-  { key: "library", label: "题库", icon: "box", to: "/home#quick" },
   { key: "profile", label: "个人中心", icon: "circle", to: "/profile" }
 ];
 
@@ -491,8 +498,16 @@ function goTo(path) {
 }
 
 function isNavActive(item) {
-  if (item.key === "home") return route.path === "/home" || route.path === "/";
+  if (item.key === "home") return (route.path === "/home" || route.path === "/") && !route.hash;
   return route.path === item.to || route.fullPath === item.to;
+}
+
+function scrollToHash(hash = route.hash) {
+  const id = `${hash || ""}`.replace(/^#/, "");
+  if (!id || typeof document === "undefined") return;
+  const element = document.getElementById(id);
+  if (!element) return;
+  element.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 const heroTask = computed(() => dashboard.value.heroTask || {});
@@ -581,11 +596,16 @@ const dailyAiMainTaskPath = computed(() => {
 });
 
 function createDailySuggestionState(payload = {}) {
+  const sourceSuggestion = payload.suggestion || createNewUserDailySuggestion();
+  const suggestion = shouldDiscardDisabledDailySuggestion(sourceSuggestion)
+    ? createFallbackDailySuggestion(payload.summary || dailyPracticeSummary.value || {})
+    : sourceSuggestion;
+
   return {
     date: payload.date || getTodayDateKey(),
     user_id: payload.user_id || "",
     practice_signature: payload.practice_signature || "",
-    suggestion: sanitizeDailySuggestion(payload.suggestion || createNewUserDailySuggestion()),
+    suggestion: sanitizeDailySuggestion(suggestion),
     generated_at: payload.generated_at || "",
     source: payload.source || "new_user",
     summary: payload.summary || null,
@@ -594,18 +614,25 @@ function createDailySuggestionState(payload = {}) {
   };
 }
 
+function shouldDiscardDisabledDailySuggestion(suggestion) {
+  return hasUnavailableTaskRecommendation(suggestion, { diEnabled: diEnabled.value });
+}
+
 function createNewUserDailySuggestion() {
+  const tasks = enabledHomeTaskTypes.value.includes("WFD")
+    ? [
+        { task_type: "RA", count: 2 },
+        { task_type: "WFD", count: 5 }
+      ]
+    : [{ task_type: enabledHomeTaskTypes.value[0] || "RA", count: 2 }];
+
   return {
     title: "今日 AI 建议",
     main_task_type: "RA",
     headline: "先完成一轮基础测温",
     reason: "你还没有足够练习记录，我需要先了解你的表现。",
-    advice: "建议先做 RA 2 道、DI 2 道、WFD 5 道。完成后我会根据真实数据给你下一步建议。",
-    tasks: [
-      { task_type: "RA", count: 2 },
-      { task_type: "DI", count: 2 },
-      { task_type: "WFD", count: 5 }
-    ],
+    advice: "建议先做一组基础练习。完成后我会根据真实数据给你下一步建议。",
+    tasks,
     cta_text: "开始练习"
   };
 }
@@ -628,14 +655,19 @@ function createFallbackDailySuggestion(summary = {}) {
     advice: taskMethods[mainTaskType] || taskMethods.RA,
     tasks: [
       { task_type: mainTaskType, count: mainTaskType === "WFD" ? 5 : 3 },
-      { task_type: mainTaskType === "RA" ? "DI" : "RA", count: 2 }
+      { task_type: pickSecondarySuggestionTask(mainTaskType), count: 2 }
     ],
     cta_text: `开始 ${mainTaskType} 训练`
   };
 }
 
+function pickSecondarySuggestionTask(mainTaskType) {
+  return enabledHomeTaskTypes.value.find((taskType) => taskType !== mainTaskType) || "RA";
+}
+
 function sanitizeDailySuggestion(suggestion) {
   const source = suggestion && typeof suggestion === "object" ? suggestion : {};
+  if (shouldDiscardDisabledDailySuggestion(source)) return createFallbackDailySuggestion();
   const mainTaskType = normalizeDailyTaskType(source.main_task_type) || "RA";
   return {
     title: "今日 AI 建议",
@@ -663,7 +695,7 @@ function sanitizeDailySuggestionTasks(tasks, mainTaskType = "RA") {
 
 function normalizeDailyTaskType(value) {
   const normalized = `${value || ""}`.trim().toUpperCase();
-  return DAILY_SUGGESTION_TASK_TYPES.includes(normalized) ? normalized : "";
+  return DAILY_SUGGESTION_TASK_TYPES.includes(normalized) && enabledHomeTaskTypeSet.value.has(normalized) ? normalized : "";
 }
 
 function buildDailyPracticeSummaryFromDashboard() {
@@ -673,7 +705,7 @@ function buildDailyPracticeSummaryFromDashboard() {
   const weeklyStudy = dashboard.value.weeklyStudy || {};
   const todayKey = resolveDashboardTodayKey(weeklyStudy) || getTodayDateKey();
   const todayTaskCounts = Object.fromEntries(
-    DAILY_SUGGESTION_TASK_TYPES.map((taskType) => {
+    enabledHomeTaskTypes.value.map((taskType) => {
       const count = Number(weeklyStudy.counters?.[taskType]?.[todayKey] || 0);
       return [taskType, Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0];
     })
@@ -744,7 +776,7 @@ function shouldRegenerateSuggestion(cache, summary, force = false) {
 
   const currentCounts = summary.today_task_counts || {};
   const cachedCounts = cachedSummary.today_task_counts || {};
-  return DAILY_SUGGESTION_TASK_TYPES.some((taskType) => Number(currentCounts[taskType] || 0) - Number(cachedCounts[taskType] || 0) >= 3);
+  return enabledHomeTaskTypes.value.some((taskType) => Number(currentCounts[taskType] || 0) - Number(cachedCounts[taskType] || 0) >= 3);
 }
 
 function isFallbackSuggestionRetryDue(cache) {
@@ -923,7 +955,7 @@ function limitText(value, fallback, maxLength) {
 }
 
 async function loadDashboard() {
-  dashboard.value = createEmptyDesktopDashboardState(homeAnalytics.value);
+  dashboard.value = createEmptyDesktopDashboardState(homeAnalytics.value, { diEnabled: diEnabled.value });
   dashboardLoadError.value = "";
 
   try {
@@ -953,7 +985,7 @@ async function loadDashboard() {
     }
 
     dashboard.value = buildDesktopDashboardState(analyticsSnapshot, practiceRows, {
-      diEnabled: isDIEnabled(),
+      diEnabled: diEnabled.value,
       trendRows
     });
     loadWeeklyGoals();
@@ -962,7 +994,7 @@ async function loadDashboard() {
     console.warn("Home dashboard load failed:", error);
     dashboardLoadError.value = "dashboard_failed";
     dashboard.value = {
-      ...createEmptyDesktopDashboardState(),
+      ...createEmptyDesktopDashboardState(null, { diEnabled: diEnabled.value }),
       loading: false
     };
     loadWeeklyGoals();
@@ -972,12 +1004,26 @@ async function loadDashboard() {
 
 onMounted(() => {
   loadDashboard();
+  nextTick(() => scrollToHash());
 });
 
-const aiMessages = ref([
-  { id: 1, text: "今天我们重点突破 RTS 和复述句子对应能力，这样能更快提升整体分数。", time: "10:32" },
-  { id: 2, text: "从最近练习来看，RTS 的稳定性偏弱，建议安排针对性训练，2 天内可见提升。", time: "10:33" }
-]);
+watch(
+  () => route.fullPath,
+  () => {
+    nextTick(() => scrollToHash());
+  }
+);
+
+const homeCoachBanner = computed(() => dashboard.value.coach?.banner || "完成几道练习后，AI 私教会按真实数据给出优先题型。");
+const aiMessages = computed(() =>
+  (Array.isArray(dashboard.value.coach?.summaries) ? dashboard.value.coach.summaries : [])
+    .map((item, index) => ({
+      id: `${index}-${item?.text || ""}`,
+      text: `${item?.text || ""}`.trim(),
+      time: `${item?.time || ""}`.trim()
+    }))
+    .filter((item) => item.text)
+);
 const aiActions = ref([
   { label: "📋 生成今日计划", to: "/agent" },
   { label: "📊 分析我的弱项", to: "/agent" },
@@ -993,7 +1039,7 @@ const moduleCardConfigs = [
 ];
 
 const modules = computed(() =>
-  moduleCardConfigs.map((module) => {
+  moduleCardConfigs.filter((module) => enabledHomeTaskTypeSet.value.has(module.code)).map((module) => {
     const metrics = moduleMetrics.value[module.code] || {};
     const hasScore = metrics.averageScore !== null && metrics.averageScore !== undefined;
     return {
@@ -1033,6 +1079,9 @@ const WEEKLY_GOAL_LABELS = {
   DI: "描述图表",
   WE: "写作议论"
 };
+const enabledWeeklyGoalCodes = computed(() =>
+  enabledHomeTaskTypes.value.filter((code) => Object.prototype.hasOwnProperty.call(WEEKLY_GOAL_TARGETS, code))
+);
 const currentWeekStartKey = computed(() => getWeekStartKey());
 const weeklyGoalStorageKey = computed(() => {
   const userId = `${authStore.user?.id || ""}`.trim();
@@ -1041,7 +1090,7 @@ const weeklyGoalStorageKey = computed(() => {
 const weeklyGoalTargets = ref(createDefaultWeeklyGoals());
 const weeklyTaskCounts = computed(() => dashboard.value.weeklyStudy?.taskCounts || {});
 const goalBreakdown = computed(() =>
-  Object.entries(weeklyGoalTargets.value).map(([code, target]) => {
+  Object.entries(weeklyGoalTargets.value).filter(([code]) => enabledWeeklyGoalCodes.value.includes(code)).map(([code, target]) => {
     const done = Math.max(0, Math.floor(Number(weeklyTaskCounts.value[code] || 0)));
     const total = Math.max(0, Math.floor(Number(target || 0)));
     return {
@@ -1068,7 +1117,7 @@ const weeklyGoalStatusLabel = computed(() => {
   return weekDone.value >= weekTotal.value ? "已达成" : "进行中";
 });
 const goalDraftRows = computed(() =>
-  Object.keys(WEEKLY_GOAL_TARGETS).map((code) => ({
+  enabledWeeklyGoalCodes.value.map((code) => ({
     code,
     name: WEEKLY_GOAL_LABELS[code] || code,
     value: Number(goalDraft.value[code] || 0)
@@ -1084,13 +1133,13 @@ const ringDash = computed(() => {
 });
 
 function createDefaultWeeklyGoals() {
-  return { ...WEEKLY_GOAL_TARGETS };
+  return Object.fromEntries(enabledWeeklyGoalCodes.value.map((code) => [code, WEEKLY_GOAL_TARGETS[code] || 0]));
 }
 
 function normalizeWeeklyGoals(goals) {
   const source = goals && typeof goals === "object" ? goals : {};
   return Object.fromEntries(
-    Object.keys(WEEKLY_GOAL_TARGETS).map((code) => [
+    enabledWeeklyGoalCodes.value.map((code) => [
       code,
       Math.max(0, Math.min(99, Math.floor(Number(source[code] ?? WEEKLY_GOAL_TARGETS[code] ?? 0))))
     ])
@@ -1152,7 +1201,7 @@ function closeGoalModal() {
 }
 
 function updateGoalDraft(code, value) {
-  if (!Object.prototype.hasOwnProperty.call(WEEKLY_GOAL_TARGETS, code)) return;
+  if (!enabledWeeklyGoalCodes.value.includes(code)) return;
   goalDraft.value = {
     ...goalDraft.value,
     [code]: Math.max(0, Math.min(99, Math.floor(Number(value || 0))))
@@ -1160,7 +1209,7 @@ function updateGoalDraft(code, value) {
 }
 
 function resetGoalDraft() {
-  goalDraft.value = Object.fromEntries(Object.keys(WEEKLY_GOAL_TARGETS).map((code) => [code, 0]));
+  goalDraft.value = Object.fromEntries(enabledWeeklyGoalCodes.value.map((code) => [code, 0]));
 }
 
 function saveGoalDraft() {
@@ -1174,7 +1223,7 @@ const fallbackHeatDays = ["一", "二", "三", "四", "五", "六", "日"].map((
   dateLabel: "",
   isToday: label === "五"
 }));
-const fallbackHeatRows = Object.keys(WEEKLY_GOAL_TARGETS).map((code) => ({
+const fallbackHeatRows = computed(() => enabledWeeklyGoalCodes.value.map((code) => ({
   label: code,
   cells: Array.from({ length: 7 }, (_, index) => ({
     level: 0,
@@ -1182,7 +1231,7 @@ const fallbackHeatRows = Object.keys(WEEKLY_GOAL_TARGETS).map((code) => ({
     dateLabel: "",
     isToday: fallbackHeatDays[index]?.isToday || false
   }))
-}));
+})));
 const heatDays = computed(() => {
   const weekDays = dashboard.value.weeklyStudy?.weekDays;
   if (Array.isArray(weekDays) && weekDays.length) {
@@ -1210,7 +1259,7 @@ const heatRows = computed(() => {
       })
     }));
   }
-  return fallbackHeatRows;
+  return fallbackHeatRows.value;
 });
 const weeklyStudyFoot = computed(() => {
   const weeklyStudy = dashboard.value.weeklyStudy || {};

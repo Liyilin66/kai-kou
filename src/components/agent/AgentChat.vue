@@ -1,6 +1,9 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { getEnabledTaskTypes } from "@/lib/enabled-task-types";
 import { parseAgentContent } from "@/lib/agent-rich-content";
+
+const exampleTask = getEnabledTaskTypes().includes("DI") ? "DI" : "RA";
 
 const props = defineProps({
   messages: {
@@ -72,7 +75,7 @@ function renderBlocks(value) {
         </div>
         <p class="mt-4 text-lg font-semibold text-slate-900">先从一个真实问题开始</p>
         <p class="mt-2 text-sm leading-7 text-slate-500">
-          例如“你好”、“你是谁”、“DI 怎么提高？”、“我最近哪项最弱？”。如果上一轮已经给了建议，也可以直接回“好”或“继续”。
+          例如“你好”、“你是谁”、“{{ exampleTask }} 怎么提高？”、“我最近哪项最弱？”。如果上一轮已经给了建议，也可以直接回“好”或“继续”。
         </p>
       </div>
 
@@ -175,7 +178,7 @@ function renderBlocks(value) {
         <textarea
           v-model="draftModel"
           class="min-h-[72px] w-full resize-none border-0 bg-transparent px-2 text-sm leading-7 text-slate-800 outline-none placeholder:text-slate-400"
-          placeholder="直接问：DI 怎么提高？或者结合我的记录看今天练什么。"
+          :placeholder="`直接问：${exampleTask} 怎么提高？或者结合我的记录看今天练什么。`"
           :disabled="pending"
           @keydown="handleKeydown"
         ></textarea>

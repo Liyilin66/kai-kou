@@ -1,4 +1,5 @@
 import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "./ra-diagnosis-score.js";
+import { getEnabledTaskTypes } from "./enabled-task-types.js";
 import { supabase } from "@/lib/supabase";
 
 const DASHBOARD_PAGE_SIZE = 1000;
@@ -29,27 +30,19 @@ const TASK_META = {
   RL: { label: "RL", title: "复述讲座", accent: "#4D8DFF" }
 };
 
-export function createEmptyDesktopDashboardState(homeAnalytics) {
+export function createEmptyDesktopDashboardState(homeAnalytics, options = {}) {
+  const displayTasks = getEnabledTaskTypes({ types: DISPLAY_TASKS, diEnabled: options.diEnabled === true });
   return {
     loading: true,
     homeAnalytics: homeAnalytics || createHomeAnalyticsFallback(),
     heroTask: {
       title: "先完成今日热身",
       subtitle: "把今天最值得优先完成的任务收进一张卡里。",
-      checklist: buildPlaceholderChecklist()
+      checklist: buildPlaceholderChecklist(displayTasks)
     },
     coach: {
-      banner: "建议优先练习 RA 和 DI，提升整体得分效率",
-      summaries: [
-        {
-          text: "你好，今天我们重点先突破 RA 流利度和 DI 数据解读能力。",
-          time: "10:32"
-        },
-        {
-          text: "从最近练习来看，DI 和 WE 的正确率偏低，建议安排针对性训练。",
-          time: "10:33"
-        }
-      ]
+      banner: "完成几道练习后，AI 私教会按真实数据给出优先题型。",
+      summaries: []
     },
     weeklyGoal: {
       percent: 0,
@@ -63,8 +56,8 @@ export function createEmptyDesktopDashboardState(homeAnalytics) {
       detail: "建议合理安排时间，保持连续学习"
     },
     moduleMetrics: {},
-    heatmapMatrix: buildPlaceholderHeatmapMatrix(),
-    weeklyStudy: createEmptyWeeklyStudySummary(),
+    heatmapMatrix: buildPlaceholderHeatmapMatrix(displayTasks),
+    weeklyStudy: createEmptyWeeklyStudySummary(displayTasks),
     scoreTrend: buildPlaceholderTrend(),
     trendMeta: {
       hasData: false,
@@ -225,12 +218,15 @@ export function buildDashboardScoreTrendRowsFromRows(rows, today = new Date()) {
 export function buildDesktopDashboardState(homeAnalytics, rows, options = {}) {
   const snapshot = isObject(homeAnalytics) ? homeAnalytics : createHomeAnalyticsFallback();
   const safeRows = Array.isArray(rows) ? rows : [];
-  const displayTasks = DISPLAY_TASKS.filter((taskType) => (taskType === "DI" ? options.diEnabled !== false : true));
-  const weaknessTasks = WEAKNESS_TASKS.filter((taskType) => (taskType === "DI" ? options.diEnabled !== false : true));
+  const displayTasks = getEnabledTaskTypes({ types: DISPLAY_TASKS, diEnabled: options.diEnabled !== false });
+  const weaknessTasks = getEnabledTaskTypes({ types: WEAKNESS_TASKS, diEnabled: options.diEnabled !== false });
+  const displayTaskSet = new Set(displayTasks);
   const weeklyRows = Array.isArray(options.weeklyRows) ? options.weeklyRows : safeRows;
   const optionWeaknessRows = Array.isArray(options.weaknessRows) ? options.weaknessRows : [];
   const weaknessRows = optionWeaknessRows.length ? optionWeaknessRows : safeRows.slice(0, DASHBOARD_WEAKNESS_PAGE_SIZE);
-  const recentRows = Array.isArray(options.recentRows) ? options.recentRows : safeRows.slice(0, DASHBOARD_RECENT_PRACTICE_LIMIT);
+  const recentRows = (Array.isArray(options.recentRows) ? options.recentRows : safeRows)
+    .filter((row) => displayTaskSet.has(normalizeTaskType(row?.task_type)))
+    .slice(0, DASHBOARD_RECENT_PRACTICE_LIMIT);
   const trendRows = normalizeTrendRows(options.trendRows);
   const weeklyStudy = buildWeeklyStudySummary(weeklyRows, displayTasks);
 
@@ -578,17 +574,17 @@ function buildWeeklyStudySummary(rows, displayTasks, today = new Date()) {
   };
 }
 
-function createEmptyWeeklyStudySummary(today = new Date()) {
+function createEmptyWeeklyStudySummary(displayTasks = DISPLAY_TASKS, today = new Date()) {
   const weekDays = buildWeekDaysSnapshot(today);
   return {
     weekDays,
     counters: Object.fromEntries(
-      DISPLAY_TASKS.map((taskType) => [
+      displayTasks.map((taskType) => [
         taskType,
         Object.fromEntries(weekDays.map((day) => [day.key, 0]))
       ])
     ),
-    taskCounts: Object.fromEntries(DISPLAY_TASKS.map((taskType) => [taskType, 0])),
+    taskCounts: Object.fromEntries(displayTasks.map((taskType) => [taskType, 0])),
     totalCount: 0,
     estimatedWeekMinutes: 0,
     durationTrackedCount: 0,
@@ -695,24 +691,29 @@ function resolveEstimatedTaskDurationSec(taskType) {
 function buildCoach(homeAnalytics, weakPoints) {
   const firstWeak = weakPoints.find((item) => !item.isPlaceholder) || weakPoints[0];
   const averageScore = Number(homeAnalytics?.averageScore || 0);
-  const firstSummary = firstWeak && !firstWeak.isPlaceholder
-    ? `小K，今天我们重点突破 ${firstWeak.label} 和 ${firstWeak.title} 对应能力，这样能更快提升整体分数。`
-    : "小K，今天我们重点突破 RA 流利度和 DI 数据解读能力，这样能更快提升整体分数。";
-  const secondSummary = firstWeak && !firstWeak.isPlaceholder
-    ? `从最近练习来看，${firstWeak.label} 的稳定性偏弱，建议安排针对性训练，2 天内可见提升。`
-    : "从最近练习来看，DI 和 WE 的正确率偏低，建议安排针对性训练，2 天内可见提升哦。";
+  const summaries = [];
+
+  if (firstWeak && !firstWeak.isPlaceholder) {
+    summaries.push({
+      text: `小K，今天可以先补 ${firstWeak.label} ${firstWeak.title}，这块是当前真实记录里的最低项。`,
+      time: ""
+    });
+  }
+
+  if (averageScore > 0) {
+    summaries.push({
+      text: firstWeak && !firstWeak.isPlaceholder
+        ? `最近 ${firstWeak.label} 的表现更需要稳定，先做一组针对练习再看趋势。`
+        : "已有练习记录后，我会继续收紧弱项建议和趋势分析。",
+      time: ""
+    });
+  }
 
   return {
     banner: firstWeak && !firstWeak.isPlaceholder
-      ? `建议优先练习 ${firstWeak.label} 和 DI，提升整体得分效率`
-      : "建议优先练习 RA 和 DI，提升整体得分效率",
-    summaries: [
-      { text: firstSummary, time: "10:32" },
-      {
-        text: averageScore > 0 ? secondSummary : "先积累更多真实练习记录，我会把你的弱项建议和趋势分析继续收紧。",
-        time: "10:33"
-      }
-    ]
+      ? `建议优先练习 ${firstWeak.label}，先把当前最低项补稳。`
+      : "完成几道练习后，AI 私教会按真实数据给出优先题型。",
+    summaries
   };
 }
 
@@ -979,12 +980,8 @@ function buildRecentPractices(rows) {
   });
 }
 
-function buildPlaceholderChecklist() {
-  return [
-    createHeroChecklistItem({ taskType: "RA", label: "RA", todayCount: 0 }),
-    createHeroChecklistItem({ taskType: "DI", label: "DI", todayCount: 0 }),
-    createHeroChecklistItem({ taskType: "WFD", label: "WFD", todayCount: 0 })
-  ];
+function buildPlaceholderChecklist(displayTasks = getEnabledTaskTypes({ types: DISPLAY_TASKS, diEnabled: false })) {
+  return buildNewUserChecklist(displayTasks);
 }
 
 function buildPlaceholderTrend() {
@@ -996,9 +993,9 @@ function buildPlaceholderTrend() {
   }));
 }
 
-function buildPlaceholderHeatmapMatrix() {
+function buildPlaceholderHeatmapMatrix(displayTasks = getEnabledTaskTypes({ types: DISPLAY_TASKS, diEnabled: false })) {
   const weekDays = buildWeekDaysSnapshot();
-  return DISPLAY_TASKS.map((taskType) => ({
+  return displayTasks.map((taskType) => ({
     taskType,
     label: TASK_META[taskType]?.label || taskType,
     accent: TASK_META[taskType]?.accent || "#5B6FFF",

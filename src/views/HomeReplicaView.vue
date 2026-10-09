@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { usePracticeStore } from "@/stores/practice";
 import { isDIEnabled } from "@/lib/di-feature";
+import { getEnabledTaskTypes, hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
 import { requestDailyAiSuggestion } from "@/lib/agent";
 import { buildHomeAnalyticsSnapshotFromRows, formatInteger, formatScore } from "@/lib/home-analytics";
 import {
@@ -38,6 +39,14 @@ const router = useRouter();
 const authStore = useAuthStore();
 const practiceStore = usePracticeStore();
 const { tasks } = storeToRefs(practiceStore);
+const diEnabled = computed(() => isDIEnabled());
+const enabledTaskTypes = computed(() => getEnabledTaskTypes({
+  diEnabled: diEnabled.value,
+  types: ["RA", "WFD", "RTS", "DI", "WE"]
+}));
+const weeklyGoalTasks = computed(() =>
+  WEEKLY_GOAL_TASKS.filter((task) => enabledTaskTypes.value.includes(task.type))
+);
 const dashboard = ref(createEmptyDesktopDashboardState());
 const weeklyGoalState = ref(createWeeklyGoalState());
 const goalModalOpen = ref(false);
@@ -58,33 +67,12 @@ const fallbackNavItems = [
   { key: "profile", label: "个人中心", icon: "○" }
 ];
 
-const fallbackFocusTasks = [
-  { task_type: "RA", label: "完成 2 道 RA 练习", completed_count_today: 0, target_count: 2, progress: 0 },
-  { task_type: "DI", label: "完成 2 道 DI 练习", completed_count_today: 0, target_count: 2, progress: 0 },
-  { task_type: "WFD", label: "完成 5 道 WFD 练习", completed_count_today: 0, target_count: 5, progress: 0 }
-];
-
 const fallbackStatCards = [
   { label: "平均得分", value: "--", suffix: "", helper: "暂无上周对比", color: "#8a6845", icon: "✓" },
   { label: "练习总量", value: "0", suffix: "题", helper: "今日完成 0 题", color: "#6d8f72", icon: "✓" },
   { label: "连续学习", value: "0", suffix: "天", helper: "今天开始建立节奏", color: "#b07a4b", icon: "●" }
 ];
 
-const fallbackQuickModules = [
-  { title: "RA", subtitle: "朗读句子\n流利表达", color: "#8a6845", icon: "●" },
-  { title: "WFD", subtitle: "写作填空\n语法拼写", color: "#6d8f72", icon: "◆" },
-  { title: "RTS", subtitle: "复述句子\n逻辑连贯", color: "#b07a4b", icon: "▤" },
-  { title: "DI", subtitle: "描述图表\n数据分析", color: "#8f735b", icon: "◔" },
-  { title: "WE", subtitle: "写作议论文\n结构论证", color: "#9a7a54", icon: "▣" }
-];
-
-const fallbackHeatRows = [
-  { label: "RA", cells: [2, 3, 2, 1, 2, 3, 1] },
-  { label: "WFD", cells: [2, 4, 3, 2, 1, 2, 2] },
-  { label: "RTS", cells: [1, 3, 4, 2, 2, 1, 2] },
-  { label: "DI", cells: [3, 2, 3, 1, 2, 2, 1] },
-  { label: "WE", cells: [1, 2, 1, 2, 3, 2, 1] }
-];
 const fallbackHeatDays = [
   { label: "一", isToday: false },
   { label: "二", isToday: false },
@@ -131,6 +119,24 @@ const userInitial = computed(() => {
 });
 const showUserAvatar = computed(() => Boolean(userAvatarUrl.value) && !avatarLoadFailed.value);
 const homeAnalytics = computed(() => dashboard.value.homeAnalytics || {});
+const fallbackFocusTasks = computed(() =>
+  enabledTaskTypes.value.slice(0, 3).map((taskType) => {
+    const target = resolveDefaultTaskTarget(taskType);
+    return {
+      task_type: taskType,
+      label: `完成 ${target} 道 ${taskType} 练习`,
+      completed_count_today: 0,
+      target_count: target,
+      progress: 0
+    };
+  })
+);
+const fallbackHeatRows = computed(() =>
+  weeklyGoalTasks.value.map((task) => ({
+    label: task.type,
+    cells: Array.from({ length: 7 }, () => 0)
+  }))
+);
 const heroSubtitle = computed(() => dashboard.value.heroTask?.subtitle || "根据真实练习记录自动生成今日任务");
 const focusTitle = computed(() => dashboard.value.heroTask?.title || "今日重点");
 
@@ -151,7 +157,9 @@ watch(() => authStore.user?.id, () => {
 
 const focusTasks = computed(() => {
   const realTasks = dashboard.value.heroTask?.checklist;
-  const source = Array.isArray(realTasks) && realTasks.length ? realTasks : fallbackFocusTasks;
+  const source = Array.isArray(realTasks) && realTasks.length
+    ? realTasks.filter((item) => enabledTaskTypes.value.includes(`${item.task_type || ""}`.trim().toUpperCase()))
+    : fallbackFocusTasks.value;
   return source.map((item) => {
     const current = Number(item.completed_count_today ?? item.current ?? 0);
     const total = Number(item.target_count ?? item.total ?? 0);
@@ -199,8 +207,7 @@ const statCards = computed(() => {
 
 const quickModules = computed(() => {
   const taskMap = new Map(tasks.value.map((task) => [`${task.id || ""}`.trim().toUpperCase(), task]));
-  return ["RA", "WFD", "RTS", "DI", "WE"]
-    .filter((taskType) => (taskType === "DI" ? isDIEnabled() : true))
+  return enabledTaskTypes.value
     .map((taskType) => {
       const visual = taskVisuals[taskType];
       const task = taskMap.get(taskType);
@@ -211,16 +218,13 @@ const quickModules = computed(() => {
     });
 });
 
-const coachBanner = computed(() => dashboard.value.coach?.banner || "建议优先练习 RA 和 DI，提升整体得分效率");
+const coachBanner = computed(() => dashboard.value.coach?.banner || "建议先完成一次真实练习，我会按记录给你排序。");
 const coachSummaries = computed(() => {
   const summaries = dashboard.value.coach?.summaries;
-  const source = Array.isArray(summaries) && summaries.length
-    ? summaries
-    : [
-      { text: "小K，今天我们重点突破 RA 流利度和 DI 数据解读能力，这样能更快提升你的整体分数。", time: "10:32" },
-      { text: "从最近练习来看，DI 和 WE 的正确率偏低，建议安排针对性训练，2 天内可见提升哦。", time: "10:33" }
-    ];
-  return source.map((item) => (typeof item === "string" ? { text: item, time: "" } : item)).slice(0, 2);
+  return (Array.isArray(summaries) ? summaries : [])
+    .map((item) => (typeof item === "string" ? { text: item, time: "" } : item))
+    .filter((item) => `${item?.text || ""}`.trim())
+    .slice(0, 2);
 });
 
 const dailySuggestionCacheKey = computed(() => {
@@ -251,7 +255,7 @@ const dailyAiMainTaskPath = computed(() => {
 const weeklyCompletionCounts = computed(() => {
   const source = dashboard.value.weeklyStudy?.taskCounts || {};
   return Object.fromEntries(
-    WEEKLY_GOAL_TASKS.map((task) => [task.type, Math.max(0, Math.floor(Number(source[task.type] || 0)))])
+    weeklyGoalTasks.value.map((task) => [task.type, Math.max(0, Math.floor(Number(source[task.type] || 0)))])
   );
 });
 const weeklyGoalTargets = computed(() => normalizeWeeklyGoals(weeklyGoalState.value.goals));
@@ -282,7 +286,7 @@ const weeklyGoalRingStyle = computed(() => ({
   background: `conic-gradient(#8a6845 ${weeklyGoalPercent.value * 3.6}deg, #e4dbcc 0deg)`
 }));
 const weeklyGoalChips = computed(() =>
-  WEEKLY_GOAL_TASKS.map((task) => {
+  weeklyGoalTasks.value.map((task) => {
     const target = Number(weeklyGoalTargets.value[task.type] || 0);
     const completed = Number(weeklyCompletionCounts.value[task.type] || 0);
     return {
@@ -295,7 +299,7 @@ const weeklyGoalChips = computed(() =>
   })
 );
 const goalDraftRows = computed(() =>
-  WEEKLY_GOAL_TASKS.map((task) => ({
+  weeklyGoalTasks.value.map((task) => ({
     ...task,
     target: Number(goalDraft.value[task.type] || 0),
     completed: Number(weeklyCompletionCounts.value[task.type] || 0)
@@ -339,7 +343,7 @@ const heatRows = computed(() => {
       })
     }));
   }
-  return fallbackHeatRows.map((row) => ({
+  return fallbackHeatRows.value.map((row) => ({
     label: row.label,
     cells: row.cells.map((level, index) => ({
       level,
@@ -522,23 +526,27 @@ function createDailySuggestionState(payload = {}) {
 }
 
 function createNewUserDailySuggestion() {
+  const tasks = enabledTaskTypes.value.slice(0, 3).map((taskType) => ({
+    task_type: taskType,
+    count: resolveDefaultTaskTarget(taskType)
+  }));
+  const planText = tasks.map((task) => `${task.task_type} ${task.count} 道`).join("、");
+  const mainTaskType = tasks[0]?.task_type || "RA";
+
   return {
     title: "今日 AI 建议",
-    main_task_type: "RA",
+    main_task_type: mainTaskType,
     headline: "先完成一轮基础测温",
     reason: "你还没有足够练习记录，我需要先了解你的表现。",
-    advice: "建议先做 RA 2 道、DI 2 道、WFD 5 道。完成后我会根据真实数据给你下一步建议。",
-    tasks: [
-      { task_type: "RA", count: 2 },
-      { task_type: "DI", count: 2 },
-      { task_type: "WFD", count: 5 }
-    ],
+    advice: `建议先做 ${planText || "RA 2 道"}。完成后我会根据真实数据给你下一步建议。`,
+    tasks,
     cta_text: "开始练习"
   };
 }
 
 function createFallbackDailySuggestion(summary = {}) {
   const mainTaskType = normalizeDailyTaskType(summary.weakest_task_type || summary.latest_task_type) || "RA";
+  const backupTaskType = enabledTaskTypes.value.find((taskType) => taskType !== mainTaskType) || "RA";
   const taskMethods = {
     RA: "重点保持不断句，卡顿超过 3 秒就重读一遍。",
     WFD: "先听主干，再补冠词、复数和时态细节。",
@@ -555,7 +563,7 @@ function createFallbackDailySuggestion(summary = {}) {
     advice: taskMethods[mainTaskType] || taskMethods.RA,
     tasks: [
       { task_type: mainTaskType, count: mainTaskType === "WFD" ? 5 : 3 },
-      { task_type: mainTaskType === "RA" ? "DI" : "RA", count: 2 }
+      { task_type: backupTaskType, count: resolveDefaultTaskTarget(backupTaskType) }
     ],
     cta_text: `开始 ${mainTaskType} 训练`
   };
@@ -563,6 +571,7 @@ function createFallbackDailySuggestion(summary = {}) {
 
 function sanitizeDailySuggestion(suggestion) {
   const source = suggestion && typeof suggestion === "object" ? suggestion : {};
+  if (hasUnavailableTaskRecommendation(source, { diEnabled: diEnabled.value })) return createFallbackDailySuggestion();
   const mainTaskType = normalizeDailyTaskType(source.main_task_type) || "RA";
   return {
     title: "今日 AI 建议",
@@ -590,7 +599,13 @@ function sanitizeDailySuggestionTasks(tasks, mainTaskType = "RA") {
 
 function normalizeDailyTaskType(value) {
   const normalized = `${value || ""}`.trim().toUpperCase();
-  return ["RA", "WFD", "WE", "DI", "RTS"].includes(normalized) ? normalized : "";
+  return enabledTaskTypes.value.includes(normalized) ? normalized : "";
+}
+
+function resolveDefaultTaskTarget(taskType) {
+  if (taskType === "WFD") return 5;
+  if (taskType === "WE") return 1;
+  return 2;
 }
 
 function buildDailyPracticeSummaryFromDashboard() {
@@ -600,7 +615,7 @@ function buildDailyPracticeSummaryFromDashboard() {
   const weeklyStudy = dashboard.value.weeklyStudy || {};
   const todayKey = resolveDashboardTodayKey(weeklyStudy) || getTodayDateKey();
   const todayTaskCounts = Object.fromEntries(
-    WEEKLY_GOAL_TASKS.map((task) => {
+    weeklyGoalTasks.value.map((task) => {
       const count = Number(weeklyStudy.counters?.[task.type]?.[todayKey] || 0);
       return [task.type, Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0];
     })
@@ -670,7 +685,7 @@ function shouldRegenerateSuggestion(cache, summary, force = false) {
 
   const currentCounts = summary.today_task_counts || {};
   const cachedCounts = cachedSummary.today_task_counts || {};
-  return WEEKLY_GOAL_TASKS.some((task) => Number(currentCounts[task.type] || 0) - Number(cachedCounts[task.type] || 0) >= 3);
+  return weeklyGoalTasks.value.some((task) => Number(currentCounts[task.type] || 0) - Number(cachedCounts[task.type] || 0) >= 3);
 }
 
 function isFallbackSuggestionRetryDue(cache) {
@@ -870,7 +885,7 @@ function formatSignatureNumber(value) {
 }
 
 function createEmptyWeeklyGoals() {
-  return Object.fromEntries(WEEKLY_GOAL_TASKS.map((task) => [task.type, 0]));
+  return Object.fromEntries(weeklyGoalTasks.value.map((task) => [task.type, 0]));
 }
 
 function createWeeklyGoalState(goals = createEmptyWeeklyGoals()) {
@@ -884,7 +899,7 @@ function createWeeklyGoalState(goals = createEmptyWeeklyGoals()) {
 function normalizeWeeklyGoals(goals) {
   const source = goals && typeof goals === "object" ? goals : {};
   return Object.fromEntries(
-    WEEKLY_GOAL_TASKS.map((task) => [task.type, normalizeGoalNumber(source[task.type])])
+    weeklyGoalTasks.value.map((task) => [task.type, normalizeGoalNumber(source[task.type])])
   );
 }
 
@@ -896,14 +911,14 @@ function normalizeGoalNumber(value) {
 
 function sumGoalValues(goals) {
   const normalized = normalizeWeeklyGoals(goals);
-  return WEEKLY_GOAL_TASKS.reduce((total, task) => total + Number(normalized[task.type] || 0), 0);
+  return weeklyGoalTasks.value.reduce((total, task) => total + Number(normalized[task.type] || 0), 0);
 }
 
 function calculateEffectiveGoalCompleted(goals, completedCounts) {
   const normalizedGoals = normalizeWeeklyGoals(goals);
   const completed = completedCounts && typeof completedCounts === "object" ? completedCounts : {};
 
-  return WEEKLY_GOAL_TASKS.reduce((total, task) => {
+  return weeklyGoalTasks.value.reduce((total, task) => {
     const target = Number(normalizedGoals[task.type] || 0);
     const done = Math.max(0, Math.floor(Number(completed[task.type] || 0)));
     return total + Math.min(done, target);
@@ -1030,7 +1045,7 @@ async function loadDashboard(options = {}) {
   const { showLoading = true } = options;
   const currentLoad = (async () => {
     if (showLoading) {
-      dashboard.value = createEmptyDesktopDashboardState();
+      dashboard.value = createEmptyDesktopDashboardState(null, { diEnabled: diEnabled.value });
     }
     try {
       if (!authStore.loaded) {
@@ -1057,7 +1072,7 @@ async function loadDashboard(options = {}) {
       const trendRows = buildDashboardScoreTrendRowsFromRows(rows);
 
       dashboard.value = buildDesktopDashboardState(analyticsSnapshot, rows, {
-        diEnabled: isDIEnabled(),
+        diEnabled: diEnabled.value,
         weeklyRows,
         weaknessRows,
         recentRows,
@@ -1067,7 +1082,7 @@ async function loadDashboard(options = {}) {
     } catch (error) {
       console.warn("Replica dashboard load failed:", error);
       dashboard.value = {
-        ...createEmptyDesktopDashboardState(),
+        ...createEmptyDesktopDashboardState(null, { diEnabled: diEnabled.value }),
         loading: false
       };
       void refreshDailyAiSuggestion();
@@ -1169,9 +1184,9 @@ onBeforeUnmount(() => {
         </nav>
 
         <section class="replica-resource-card">
-          <p class="replica-resource-title">PTE 备考资料包</p>
-          <p class="replica-resource-copy">真题 · 高频词汇 · 模板</p>
-          <button class="replica-resource-button" type="button">免费领取</button>
+          <p class="replica-resource-title">WE 模板库</p>
+          <p class="replica-resource-copy">写作模板 · 高频句型</p>
+          <button class="replica-resource-button" type="button" @click="openPath('/we/templates')">打开模板库</button>
           <div class="replica-gift" aria-hidden="true">
             <span class="replica-gift-box"></span>
             <span class="replica-gift-lid"></span>
@@ -1270,7 +1285,7 @@ onBeforeUnmount(() => {
                 <strong>{{ coachBanner }}</strong>
               </div>
 
-              <div class="replica-chat-list">
+              <div v-if="coachSummaries.length" class="replica-chat-list">
                 <div v-for="summary in coachSummaries" :key="`${summary.text}-${summary.time}`" class="replica-chat-row">
                   <img src="/agent/assistant-avatar.png" alt="AI" />
                   <div class="replica-chat-bubble">
@@ -1279,6 +1294,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </div>
+              <div v-else class="replica-chat-empty">完成一次练习后，AI 私教会按真实记录给出建议。</div>
 
               <div class="replica-ai-actions">
                 <button type="button" @click="openPath('/ra')"><span>▣</span> 生成今日计划</button>

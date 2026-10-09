@@ -1,5 +1,7 @@
 <script setup>
 import { computed } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const DEFAULT_NAV_ITEMS = [
   { key: "home", label: "首页", to: "/home" },
@@ -213,9 +215,9 @@ function normalizeText(value) {
 
       <div class="ai-tutor-loading-sidebar-footer">
         <div class="ai-tutor-loading-promo">
-          <div class="ai-tutor-loading-promo-title">PTE 备考资料包</div>
-          <div class="ai-tutor-loading-promo-sub">真题 · 高频词汇 · 模板</div>
-          <button class="ai-tutor-loading-promo-button" type="button" tabindex="-1">免费领取</button>
+          <div class="ai-tutor-loading-promo-title">WE 模板库</div>
+          <div class="ai-tutor-loading-promo-sub">写作结构 · 模板参考</div>
+          <button class="ai-tutor-loading-promo-button" type="button" @click="router.push('/we/templates')">查看模板</button>
         </div>
       </div>
     </aside>
