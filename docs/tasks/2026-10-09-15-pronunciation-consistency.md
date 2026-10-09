@@ -23,3 +23,26 @@
 - 原有测试全部通过；CI 绿。
 - 预览环境 DI、RTS 各做一次，结果页显示正确（RL 题量少，用单元测试覆盖即可）。
 - 交付说明列出 `lyl` 上未合并的提交。
+
+## 实施记录（2026-10-09）
+
+- 新增 `backend/scoring/pronunciation-not-assessed.js`（前后端共用）：版本号 `di-legacy-np-0.1` / `rts-legacy-np-0.1` / `rl-legacy-np-0.1`；去掉发音后的权重 DI 0.6/0.4、RTS 0.2/0.8、RL 0.5/0.5（原权重等比例归一）；在评分出口统一把 `scores`、`display_scores`、`product`、`diagnostics.display_scores` 中的发音及 `raw_traits.pronunciation_raw`、`official_traits.pronunciation.score` 置空，并标记 `judged: false`。
+- 服务端：DI 总分改用 0.6/0.4，总分微调项去掉发音证据；RTS 总分改用 0.2/0.8；RL 在通用分支中重算内容与流利度平均，不再采用模型自报总分（RS 等其他题型不变）。客户端兜底结果（DI、RTS 降级 / 失败，RL 网络失败估分）同样置空并带版本号。
+- 结果页：DI、RTS、RL 显示“本版本未评估”和与 RA/RS 相同的原因。新记录 RTS 结果页直接显示服务端存储的总分；旧记录保持原显示。
+- 读取方：画像对带 np 版本的记录不推送发音信号（包括由总分推算的代理信号）；首页、私教对 null 发音不计 0。
+- 删除 `RTSPracticeView.vue` 中未被调用的旧评分函数（权重为过时的 0.5/0.25/0.25）。
+- 规则页新增“DI / RTS / RL 现行计分”一节；README“局限与下一步”补充说明并更正“只覆盖 RA”。
+
+### 已知遗留
+
+- 旧 RTS 记录的结果页仍按 0.5/0.25/0.25 在前端重算总分，与存储值（0.15/0.25/0.6）不一致；这是原有问题，按“旧记录读取不受影响”保留。
+- DI 的 `ensureSpeechScoreSeparation` 在发音与流利度相等时会把流利度拉开 1 档，模型的发音原始分仍可能间接影响流利度；属于“其余评分逻辑不改”，未调整。
+
+### 验证
+
+- 456 项测试通过（新增：共用模块；DI / RTS 只改发音原始分时总分与显示分完全不变；RL 重算总分；三个结果页文案；DI / RTS / RL 新记录在画像、首页、私教中的读取兼容；旧记录仍计入发音画像）。RA/RS 开关同时 on、同时 off 构建通过。
+- 预览 `https://kai-8m68d63bd-yli71641-9949s-projects.vercel.app`（Vercel CLI 从本地 lyl 部署）：
+  - DI_Q024：结果页总分 55、内容 45、发音“本版本未评估”、流利度 70（0.6×45 + 0.4×70 = 55）；数据库 `ai_review.score_version = di-legacy-np-0.1`，各处发音为 null，`official_traits.pronunciation` 为 `score: null, judged: false`。
+  - RTS_Q050：结果页总分 77、内容 90、发音“本版本未评估”、流利度 74（0.2×90 + 0.8×74 = 77.2）；数据库 `rts-legacy-np-0.1`，各处发音为 null。
+  - 测试方式：浏览器面板无法使用麦克风，录音用公开题目音频代替，浏览器识别文字由测试脚本提供；评分走预览环境真实接口和模型。两条测试记录及录音已删除。
+  - RL 按任务约定只做单元测试。
