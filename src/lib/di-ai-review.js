@@ -1,4 +1,5 @@
 import { getApiUrl } from "@/lib/api-url";
+import { withPronunciationNotAssessed } from "../../backend/scoring/pronunciation-not-assessed.js";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth";
 
@@ -1238,7 +1239,7 @@ function buildDIClientFallbackReview({
   const normalizedStatus = normalizeDIReviewStatus(status);
   const normalizedReasonCode = normalizeDIReasonCode(reasonCode);
   const feedbackZh = getDIFallbackReasonMessage(normalizedReasonCode);
-  return {
+  return withPronunciationNotAssessed({
     taskType: "DI",
     status: normalizedStatus,
     degraded: normalizedStatus === DI_SCORE_STATUS_DEGRADED,
@@ -1273,7 +1274,7 @@ function buildDIClientFallbackReview({
     request_id: normalizeTextValue(requestId),
     input_summary: toObjectValue(questionMeta) || null,
     audio_signals: toObjectValue(audioSignals) || null
-  };
+  }, "DI");
 }
 
 async function runDIReviewForLog(context) {

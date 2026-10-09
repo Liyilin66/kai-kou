@@ -22,6 +22,7 @@ import {
 } from "../backend/we/normalize-we-score.js";
 import { buildWEPrompt } from "../backend/we/we-prompt.js";
 import { getAccessStatus } from "../backend/auth/access-status.js";
+import { weightedOverallWithoutPronunciation, withPronunciationNotAssessed } from "../backend/scoring/pronunciation-not-assessed.js";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
@@ -912,7 +913,7 @@ function extractStringByKeys(text, keys) {
   return "";
 }
 
-function normalizeResult(payload, options = {}) {
+export function normalizeResult(payload, options = {}) {
   if (options?.taskType === "RA") {
     return finalizeRAScore(payload, options);
   }
@@ -964,6 +965,16 @@ function normalizeResult(payload, options = {}) {
         }))
         .filter((item) => item.word)
     : [];
+
+  if (options?.taskType === "RL") {
+    // The model's own "overall" averaged in a guessed pronunciation score; recompute without it.
+    return withPronunciationNotAssessed({
+      scores: { pronunciation: null, fluency, content },
+      keywords,
+      feedback,
+      overall: Math.round(weightedOverallWithoutPronunciation("RL", { content, fluency }))
+    }, "RL");
+  }
 
   return {
     scores: {

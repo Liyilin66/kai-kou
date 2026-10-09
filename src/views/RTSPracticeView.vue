@@ -55,11 +55,6 @@ const RTS_SCORE_API_TIMEOUT_MS = 15000;
 const RTS_SCORE_STATUS_SCORED = "scored";
 const RTS_SCORE_STATUS_RULE_GATED = "rule_gated";
 const RTS_SCORE_STATUS_DEGRADED = "ai_review_degraded";
-const RTS_DISPLAY_MIN_SCORE = 10;
-const RTS_DISPLAY_MAX_SCORE = 90;
-const RTS_CONTENT_RAW_MAX = 3;
-const RTS_PRONUNCIATION_RAW_MAX = 5;
-const RTS_FLUENCY_RAW_MAX = 5;
 const RTS_SCORE_REASON_MESSAGE_MAP = {
   appropriacy_zero_off_topic: "回应内容与场景不匹配。",
   appropriacy_zero_goal_not_met: "回应没有完成情境目标。",
@@ -3897,60 +3892,6 @@ function toObjectValue(value) {
 
 function normalizeTextValue(value) {
   return `${value || ""}`.trim();
-}
-
-function normalizeTraitScore(value, min, max) {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return min;
-  return Math.max(min, Math.min(max, Math.round(num)));
-}
-
-function mapRTSRawToDisplay(rawScore, rawMax) {
-  const boundedRaw = normalizeTraitScore(rawScore, 0, rawMax);
-  if (rawMax <= 0) return RTS_DISPLAY_MIN_SCORE;
-  return normalizeTraitScore(
-    Math.round(RTS_DISPLAY_MIN_SCORE + (boundedRaw / rawMax) * (RTS_DISPLAY_MAX_SCORE - RTS_DISPLAY_MIN_SCORE)),
-    RTS_DISPLAY_MIN_SCORE,
-    RTS_DISPLAY_MAX_SCORE
-  );
-}
-
-function composeRTSDisplayOverall(content, pronunciation, fluency) {
-  return normalizeTraitScore(
-    Math.round(
-      Number(content || 0) * 0.5
-      + Number(pronunciation || 0) * 0.25
-      + Number(fluency || 0) * 0.25
-    ),
-    RTS_DISPLAY_MIN_SCORE,
-    RTS_DISPLAY_MAX_SCORE
-  );
-}
-
-function buildRTSDisplayScoresFromRaw({
-  contentRaw = 0,
-  pronunciationRaw = 0,
-  fluencyRaw = 0,
-  gateTriggered = false
-} = {}) {
-  if (gateTriggered) {
-    return {
-      content: RTS_DISPLAY_MIN_SCORE,
-      pronunciation: RTS_DISPLAY_MIN_SCORE,
-      fluency: RTS_DISPLAY_MIN_SCORE,
-      overall: RTS_DISPLAY_MIN_SCORE
-    };
-  }
-
-  const content = mapRTSRawToDisplay(contentRaw, RTS_CONTENT_RAW_MAX);
-  const pronunciation = mapRTSRawToDisplay(pronunciationRaw, RTS_PRONUNCIATION_RAW_MAX);
-  const fluency = mapRTSRawToDisplay(fluencyRaw, RTS_FLUENCY_RAW_MAX);
-  return {
-    content,
-    pronunciation,
-    fluency,
-    overall: composeRTSDisplayOverall(content, pronunciation, fluency)
-  };
 }
 
 async function applyQuestion(nextQuestion, { syncRoute = true, autoPlay = true } = {}) {

@@ -1,3 +1,5 @@
+import { weightedOverallWithoutPronunciation, withPronunciationNotAssessed } from "../scoring/pronunciation-not-assessed.js";
+
 const DI_STATUS_SCORED = "scored";
 const DI_STATUS_AI_DEGRADED = "ai_review_degraded";
 const DI_STATUS_FAILED = "failed";
@@ -12,11 +14,6 @@ const FLUENCY_RAW_MAX = 5;
 
 const DISPLAY_MIN_SCORE = 10;
 const DISPLAY_MAX_SCORE = 90;
-const DI_DISPLAY_WEIGHTS = {
-  content: 0.45,
-  pronunciation: 0.25,
-  fluency: 0.3
-};
 const CONTENT_DISPLAY_BANDS = [
   [10, 10],
   [18, 28],
@@ -503,15 +500,12 @@ function buildDIReviewPayload({
   const weightedOverall = contentTrait.score <= 0
     ? DISPLAY_MIN_SCORE
     : (
-      content * DI_DISPLAY_WEIGHTS.content
-      + pronunciation * DI_DISPLAY_WEIGHTS.pronunciation
-      + fluency * DI_DISPLAY_WEIGHTS.fluency
+      weightedOverallWithoutPronunciation("DI", { content, fluency })
     );
   const overallAdjustment = contentTrait.score <= 0
     ? 0
     : computeOverallAdjustment({
       contentEvidence: effectiveContentEvidence,
-      pronunciationEvidence: pronunciationEvidence.score,
       fluencyEvidence: fluencyEvidence.score,
       responseValidity,
       groundingDiagnostics
@@ -540,7 +534,7 @@ function buildDIReviewPayload({
     ? reasonMessageZh || "请继续练习图表概括和结论表达。"
     : "请继续练习图表概括和结论表达。";
 
-  return {
+  return withPronunciationNotAssessed({
     taskType: "DI",
     status: normalizedStatus,
     degraded: normalizedStatus === DI_STATUS_AI_DEGRADED,
@@ -610,7 +604,7 @@ function buildDIReviewPayload({
     },
     raw_error_type: normalizeText(rawErrorType),
     error_stage: normalizeText(errorStage)
-  };
+  }, "DI");
 }
 
 function buildTraitScore(score, max, judged = true) {
@@ -1390,7 +1384,6 @@ function clampWithinBand(value, rawScore, bands) {
 
 function computeOverallAdjustment({
   contentEvidence = 0.5,
-  pronunciationEvidence = 0.5,
   fluencyEvidence = 0.5,
   responseValidity = null,
   groundingDiagnostics = null
@@ -1404,7 +1397,6 @@ function computeOverallAdjustment({
     : 0;
   const adjustment = Math.round(
     (clampUnit(contentEvidence) - 0.55) * 3
-    + (clampUnit(pronunciationEvidence) - 0.5) * 1
     + (clampUnit(fluencyEvidence) - 0.5) * 1
     + responseBoost
   );

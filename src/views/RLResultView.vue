@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { usePracticeStore } from "@/stores/practice";
 import NavBar from "@/components/NavBar.vue";
 import OrangeButton from "@/components/OrangeButton.vue";
+import { PRONUNCIATION_NOT_ASSESSED_LABEL, PRONUNCIATION_NOT_ASSESSED_REASON } from "@/lib/ra-diagnosis-score";
 
 const router = useRouter();
 const store = usePracticeStore();
@@ -11,7 +12,7 @@ const store = usePracticeStore();
 const result = computed(() =>
   store.result || {
     overall: 0,
-    scores: { pronunciation: 0, fluency: 0, content: 0 },
+    scores: { pronunciation: null, fluency: 0, content: 0 },
     feedback: "No feedback yet."
   }
 );
@@ -72,6 +73,14 @@ onMounted(() => {
 
       <section class="mb-6 space-y-3">
         <article v-for="item in scoreItems" :key="item.key" class="rounded-xl bg-white p-4 shadow-sm">
+          <template v-if="item.key === 'pronunciation' && result.scores.pronunciation == null">
+            <div class="flex items-center justify-between" data-testid="rl-pronunciation-not-assessed">
+              <span class="text-sm font-semibold text-navy">{{ item.label }}</span>
+              <span class="text-sm font-semibold text-muted">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</span>
+            </div>
+            <p class="mt-1 text-xs text-muted">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
+          </template>
+          <template v-else>
           <div class="mb-2 flex items-center justify-between">
             <span class="text-sm font-semibold text-navy">{{ item.label }}</span>
             <span class="text-lg font-bold" :class="scoreColor(result.scores[item.key])">
@@ -86,6 +95,7 @@ onMounted(() => {
             />
           </div>
           <p class="mt-1 text-xs text-muted">{{ item.tip }}</p>
+          </template>
         </article>
       </section>
 

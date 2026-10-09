@@ -1,4 +1,5 @@
-﻿const RTS_STATUS_SCORED = "scored";
+import { weightedOverallWithoutPronunciation, withPronunciationNotAssessed } from "../scoring/pronunciation-not-assessed.js";
+const RTS_STATUS_SCORED = "scored";
 const RTS_STATUS_RULE_GATED = "rule_gated";
 const RTS_STATUS_AI_DEGRADED = "ai_review_degraded";
 const RTS_GATE_POLICY = "product_relaxed_fluency_first";
@@ -20,11 +21,6 @@ const FLUENCY_RAW_MAX = 5;
 
 const DISPLAY_MIN_SCORE = 10;
 const DISPLAY_MAX_SCORE = 90;
-const RTS_DISPLAY_WEIGHTS = {
-  content: 0.15,
-  pronunciation: 0.25,
-  fluency: 0.6
-};
 const RTS_CONTENT_RELEVANCE_GATE_FLOOR = 45;
 const RTS_CONTENT_MEDIUM_COVERAGE_FLOOR = 65;
 const RTS_CONTENT_HIGH_COVERAGE_FLOOR = 70;
@@ -475,7 +471,7 @@ export function finalizeRTSScorePayload(
       || feedbackLines.join(" ")
   ) || feedbackLines.join(" ");
 
-  return {
+  return withPronunciationNotAssessed({
     taskType: "RTS",
     status,
     is_ai_review_degraded: false,
@@ -545,7 +541,7 @@ export function finalizeRTSScorePayload(
     provider_used: normalizeProvider(providerUsed),
     fallback_reason: normalizeFallbackReason(fallbackReason),
     gate_reason_messages_zh: reasonCodes.map((code) => RTS_REASON_CODE_ZH[code]).filter(Boolean)
-  };
+  }, "RTS");
 }
 
 export function buildRTSAiFallbackResult(
@@ -601,7 +597,7 @@ export function buildRTSAiFallbackResult(
   ];
   const feedback = "录音已保存，AI评阅暂时不可用，本次结果为降级估分。";
 
-  return {
+  return withPronunciationNotAssessed({
     taskType: "RTS",
     status: RTS_STATUS_AI_DEGRADED,
     is_ai_review_degraded: true,
@@ -678,7 +674,7 @@ export function buildRTSAiFallbackResult(
     error_stage: normalizeText(errorStage) || "provider_call",
     raw_error_type: normalizeText(rawErrorType),
     gate_reason_messages_zh: fallbackCodes.map((code) => RTS_REASON_CODE_ZH[code]).filter(Boolean)
-  };
+  }, "RTS");
 }
 
 function buildHeuristicTraits({ transcriptMetrics, audioSignals, contentSignals = null } = {}) {
@@ -843,7 +839,7 @@ function buildDisplayScores({
   });
   content = relevanceAdjusted.content;
 
-  let overall = composeDisplayOverall({ content, pronunciation, fluency });
+  let overall = composeDisplayOverall({ content, fluency });
   let fluencyPassFloorApplied = false;
   if (shouldApplyRTSFluencyPassFloor({ fluency, transcriptMetrics, audioSignals, contentSignals: resolvedSignals })) {
     const flooredOverall = Math.max(overall, RTS_OVERALL_FLUENCY_PASS_FLOOR);
@@ -954,13 +950,8 @@ function rawToDisplay(rawScore, maxRawScore) {
   );
 }
 
-function composeDisplayOverall({ content = 0, pronunciation = 0, fluency = 0 } = {}) {
-  const weighted = (
-    Number(content || 0) * RTS_DISPLAY_WEIGHTS.content
-    + Number(pronunciation || 0) * RTS_DISPLAY_WEIGHTS.pronunciation
-    + Number(fluency || 0) * RTS_DISPLAY_WEIGHTS.fluency
-  );
-  return Math.round(weighted);
+function composeDisplayOverall({ content = 0, fluency = 0 } = {}) {
+  return Math.round(weightedOverallWithoutPronunciation("RTS", { content, fluency }));
 }
 
 function shouldApplyRTSFluencyPassFloor({

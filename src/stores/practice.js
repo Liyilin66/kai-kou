@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 import { getApiUrl } from "@/lib/api-url";
 import { buildPracticeAnalytics } from "@/lib/practice-analytics";
 import { supabase } from "@/lib/supabase";
+import { PRONUNCIATION_NOT_ASSESSED_VERSIONS, weightedOverallWithoutPronunciation } from "../../backend/scoring/pronunciation-not-assessed.js";
 
 const RA_MIN_SCORE = 10;
 const RA_MAX_SCORE = 90;
@@ -757,6 +758,9 @@ function normalizeScoreData(data, taskType) {
   if (normalizedTaskType === "WE") {
     return normalizeWEScoreData(data);
   }
+  if (normalizedTaskType === "RL") {
+    return normalizeRLScoreData(data);
+  }
 
   const pronunciation =
     normalizedTaskType === "RA" ? clampRAScore(data?.scores?.pronunciation) : clampScore(data?.scores?.pronunciation);
@@ -790,6 +794,22 @@ function normalizeScoreData(data, taskType) {
   }
 
   return result;
+}
+
+// RL pronunciation is not assessed; the overall is the content/fluency average.
+function normalizeRLScoreData(data) {
+  const fluency = clampScore(data?.scores?.fluency);
+  const content = clampScore(data?.scores?.content);
+  const feedback = typeof data?.feedback === "string" && data.feedback.trim()
+    ? data.feedback.trim()
+    : "这次练习已完成，继续保持。";
+  return {
+    scores: { pronunciation: null, fluency, content },
+    keywords: normalizeKeywords(data?.keywords),
+    feedback,
+    overall: clampOverall(data?.overall, Math.round(weightedOverallWithoutPronunciation("RL", { content, fluency }))),
+    score_version: PRONUNCIATION_NOT_ASSESSED_VERSIONS.RL
+  };
 }
 
 function normalizeWEScoreData(data) {
@@ -954,6 +974,16 @@ function buildFallbackResult(taskType) {
     };
   }
 
+  if (normalizedTaskType === "RL") {
+    return {
+      ...fallback,
+      scores: { ...fallback.scores, pronunciation: null },
+      overall: Math.round(weightedOverallWithoutPronunciation("RL", fallback.scores)),
+      score_version: PRONUNCIATION_NOT_ASSESSED_VERSIONS.RL,
+      keywords: []
+    };
+  }
+
   return {
     ...fallback,
     keywords: []
@@ -1042,6 +1072,9 @@ function buildPracticeLogScoreJson({
     const overall = Number(result?.overall);
     if (Number.isFinite(overall) && overall > 0) {
       baseScores.overall = clampOverall(overall, Math.round(overall));
+    }
+    if (result?.score_version) {
+      baseScores.score_version = result.score_version;
     }
     if (analytics) {
       baseScores.analytics = buildPracticeAnalytics(analytics);

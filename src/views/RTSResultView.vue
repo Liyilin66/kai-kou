@@ -4,6 +4,8 @@ import { useRoute, useRouter } from "vue-router";
 import NavBar from "@/components/NavBar.vue";
 import OrangeButton from "@/components/OrangeButton.vue";
 import { supabase } from "@/lib/supabase";
+import { PRONUNCIATION_NOT_ASSESSED_LABEL, PRONUNCIATION_NOT_ASSESSED_REASON } from "@/lib/ra-diagnosis-score";
+import { isPronunciationNotAssessedVersion, weightedOverallWithoutPronunciation } from "../../backend/scoring/pronunciation-not-assessed.js";
 import { getRTSPlaybackUrl, RTS_TOPIC_META, useRTSData } from "@/composables/useRTSData";
 import {
   getRTSAiReviewJob,
@@ -343,10 +345,11 @@ function firstNumber(...values) {
 
 function resolveDisplayScores({ review, status } = {}) {
   const source = toObject(review) || {};
+  const pronunciationNotAssessed = isPronunciationNotAssessedVersion(source?.score_version);
   if (status === RTS_STATUS_PENDING || status === RTS_STATUS_RULE_GATED) {
     return {
       content: DISPLAY_MIN,
-      pronunciation: DISPLAY_MIN,
+      pronunciation: pronunciationNotAssessed || status === RTS_STATUS_PENDING ? null : DISPLAY_MIN,
       fluency: DISPLAY_MIN,
       overall: DISPLAY_MIN
     };
@@ -400,6 +403,22 @@ function resolveDisplayScores({ review, status } = {}) {
     DISPLAY_MAX
   );
 
+  if (pronunciationNotAssessed) {
+    // Show the stored overall: it already applies the pronunciation-free weights and floors.
+    const storedOverall = firstNumber(source?.overall, source?.product?.overall, source?.display_scores?.overall);
+    return {
+      content,
+      pronunciation: null,
+      fluency,
+      overall: clampScore(
+        Number.isFinite(storedOverall) ? storedOverall : Math.round(weightedOverallWithoutPronunciation("RTS", { content, fluency })),
+        DISPLAY_MIN,
+        DISPLAY_MAX
+      )
+    };
+  }
+
+  // Older records keep the display they always had.
   return {
     content,
     pronunciation,
@@ -455,8 +474,14 @@ function resolveDisplayScores({ review, status } = {}) {
           </article>
           <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
             <p class="text-xs text-[#8CA0C0]">Pronunciation</p>
-            <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.pronunciation }}</p>
-            <p class="text-xs text-[#8CA0C0]">/90</p>
+            <template v-if="displayScores.pronunciation == null">
+              <p class="mt-1 text-sm font-semibold text-[#1E293B]" data-testid="rts-pronunciation-not-assessed">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</p>
+              <p class="text-xs text-[#8CA0C0]">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
+            </template>
+            <template v-else>
+              <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.pronunciation }}</p>
+              <p class="text-xs text-[#8CA0C0]">/90</p>
+            </template>
           </article>
           <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
             <p class="text-xs text-[#8CA0C0]">Fluency</p>

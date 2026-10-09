@@ -5,6 +5,8 @@ import NavBar from "@/components/NavBar.vue";
 import OrangeButton from "@/components/OrangeButton.vue";
 import { getDIPlaybackUrl } from "@/lib/di-history";
 import { supabase } from "@/lib/supabase";
+import { PRONUNCIATION_NOT_ASSESSED_LABEL, PRONUNCIATION_NOT_ASSESSED_REASON } from "@/lib/ra-diagnosis-score";
+import { isPronunciationNotAssessedVersion } from "../../backend/scoring/pronunciation-not-assessed.js";
 import {
   DI_SCORE_STATUS_DEGRADED,
   DI_SCORE_STATUS_FAILED,
@@ -185,14 +187,17 @@ function resolveDisplayScores({ review = null, status = DI_SCORE_STATUS_PENDING 
     ?? 10
   );
   const content = clampDisplayScore(display?.content ?? scores?.content ?? 10);
-  const pronunciation = clampDisplayScore(display?.pronunciation ?? scores?.pronunciation ?? 10);
+  // Pending and pronunciation-free results show "not assessed"; older records keep their number.
+  const pronunciation = status === DI_SCORE_STATUS_PENDING || isPronunciationNotAssessedVersion(source?.score_version)
+    ? null
+    : clampDisplayScore(display?.pronunciation ?? scores?.pronunciation ?? 10);
   const fluency = clampDisplayScore(display?.fluency ?? scores?.fluency ?? 10);
 
   if (status === DI_SCORE_STATUS_PENDING) {
     return {
       overall: 10,
       content: 10,
-      pronunciation: 10,
+      pronunciation,
       fluency: 10
     };
   }
@@ -277,8 +282,14 @@ function clampDisplayScore(value) {
           </article>
           <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
             <p class="text-xs text-[#8CA0C0]">Pronunciation</p>
-            <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.pronunciation }}</p>
-            <p class="text-xs text-[#8CA0C0]">/90</p>
+            <template v-if="displayScores.pronunciation == null">
+              <p class="mt-1 text-sm font-semibold text-[#1E293B]" data-testid="di-pronunciation-not-assessed">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</p>
+              <p class="text-xs text-[#8CA0C0]">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
+            </template>
+            <template v-else>
+              <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.pronunciation }}</p>
+              <p class="text-xs text-[#8CA0C0]">/90</p>
+            </template>
           </article>
           <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
             <p class="text-xs text-[#8CA0C0]">Fluency</p>

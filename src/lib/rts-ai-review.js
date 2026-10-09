@@ -1,4 +1,5 @@
 ﻿import { getApiUrl } from "@/lib/api-url";
+import { weightedOverallWithoutPronunciation, withPronunciationNotAssessed } from "../../backend/scoring/pronunciation-not-assessed.js";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth";
 
@@ -494,7 +495,7 @@ export function createRTSClientDegradedReview({
     relevanceSignals,
     wordCount: transcriptWords.length
   });
-  return {
+  return withPronunciationNotAssessed({
     taskType: "RTS",
     status: RTS_SCORE_STATUS_DEGRADED,
     is_ai_review_degraded: true,
@@ -556,7 +557,7 @@ export function createRTSClientDegradedReview({
     gate_reason_messages_zh: reasonCodes
       .map((item) => RTS_SCORE_REASON_MESSAGE_MAP[item] || normalizedReasonMessage)
       .filter(Boolean)
-  };
+  }, "RTS");
 }
 
 export async function patchRTSPracticeLog({
@@ -903,9 +904,9 @@ function mapRTSRawToDisplay(rawScore, rawMax) {
   );
 }
 
-function composeRTSDisplayOverall(content, pronunciation, fluency) {
+function composeRTSDisplayOverall(content, fluency) {
   return clampScore(
-    Math.round(Number(content || 0) * 0.15 + Number(pronunciation || 0) * 0.25 + Number(fluency || 0) * 0.6),
+    Math.round(weightedOverallWithoutPronunciation("RTS", { content, fluency })),
     RTS_DISPLAY_MIN_SCORE,
     RTS_DISPLAY_MAX_SCORE
   );
@@ -932,7 +933,7 @@ function buildRTSDisplayScoresFromRaw({
   }).content;
   const pronunciation = mapRTSRawToDisplay(pronunciationRaw, RTS_PRONUNCIATION_RAW_MAX);
   const fluency = mapRTSRawToDisplay(fluencyRaw, RTS_FLUENCY_RAW_MAX);
-  const weightedOverall = composeRTSDisplayOverall(content, pronunciation, fluency);
+  const weightedOverall = composeRTSDisplayOverall(content, fluency);
   const fluencyGuardOverall = fluency >= RTS_FLUENCY_PASS_LINE && resolvedSignals.relevance_gate_passed
     ? Math.max(weightedOverall, RTS_OVERALL_FLUENCY_PASS_FLOOR)
     : weightedOverall;
