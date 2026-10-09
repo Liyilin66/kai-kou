@@ -4,10 +4,12 @@ import { useRouter } from 'vue-router';
 import { getRAPlaybackUrl } from '@/lib/ra-history';
 import { supabase } from '@/lib/supabase';
 import { diagnosisWordItems, evidencePlaybackSeconds, loadRADiagnosisFeedback } from '@/lib/ra-diagnosis';
+import { trackPracticeEvent } from '@/lib/practice-events';
 import { compareDiagnoses, loadPreviousRADiagnosis } from '@/lib/ra-compare';
 
 const props = defineProps({ result: { type: Object, required: true } });
 const router = useRouter();
+const track = (event, values) => trackPracticeEvent(supabase, props.result, event, values);
 const player = ref(null);
 const audioUrl = ref('');
 const playbackNotice = ref('');
@@ -31,6 +33,7 @@ async function loadComparison() {
   try {
     const previous = await loadPreviousRADiagnosis({ client: supabase, result: props.result });
     comparison.value = compareDiagnoses(previous, props.result);
+    if (comparison.value) track('ra_compare_viewed', { improved: comparison.value.improved.length, ongoing: comparison.value.ongoing.length, new: comparison.value.newIssues.length });
   } catch {
     comparison.value = null;
   }
@@ -59,8 +62,9 @@ async function loadAudio() {
   catch { audioUrl.value = ''; }
   if (!audioUrl.value) playbackNotice.value = '录音暂时无法播放，请稍后重试。';
 }
-onMounted(() => { void loadAudio(); void loadFeedback(); void loadComparison(); });
+onMounted(() => { track('ra_result_viewed', { total: score.value?.total }); void loadAudio(); void loadFeedback(); void loadComparison(); });
 async function playEvidence(item) {
+  track('ra_evidence_played', { evidence_type: item.type });
   const seconds = evidencePlaybackSeconds(item, props.result.alignment);
   if (seconds === null) { playbackNotice.value = '此处没有可靠的时间定位，请在录音中手动回听。'; return; }
   if (!audioUrl.value) await loadAudio();
@@ -87,7 +91,9 @@ async function playEvidence(item) {
 function comparisonClass(change) {
   return change?.trend === 'better' ? 'better' : change?.trend === 'worse' ? 'worse' : 'neutral';
 }
+function openScoringRules() { showScoringRules.value = true; track('ra_rules_opened'); }
 function retrySameQuestion() {
+  track('ra_retry_started');
   const questionId = `${props.result.question?.id || ''}`.trim();
   router.push({ path: '/ra/practice', query: questionId ? { questionId } : {} });
 }
@@ -98,7 +104,7 @@ function retrySameQuestion() {
     <header><button type="button" @click="router.push('/ra')">‹ 返回 RA</button><span>朗读诊断</span></header>
     <section class="intro"><p class="eyebrow">READ ALOUD</p><h1>听见问题，再练一次</h1><p>诊断依据录音识别与停顿。识别可能有误，请点击标注回听核验。</p></section>
     <section v-if="score" class="panel score-panel" aria-label="参考评分">
-      <div class="score-heading"><div><span class="eyebrow">READ ALOUD</span><div><strong class="total-score" data-testid="ra-reference-total">{{ score.total }}</strong><span> / 90</span></div></div><button type="button" @click="showScoringRules = true">评分规则</button></div>
+      <div class="score-heading"><div><span class="eyebrow">READ ALOUD</span><div><strong class="total-score" data-testid="ra-reference-total">{{ score.total }}</strong><span> / 90</span></div></div><button type="button" @click="openScoringRules">评分规则</button></div>
       <div class="score-grid">
         <article data-testid="ra-score-card-content"><h2>内容</h2><strong>正确 {{ score.content.correct }} / {{ score.content.total }} 词</strong><p>{{ score.content.errors }} 处错误</p></article>
         <article data-testid="ra-score-card-fluency"><h2>流利度</h2><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
