@@ -96,3 +96,26 @@ test('DI, RTS and RL result pages say pronunciation is not assessed instead of s
   assert.match(rl, /data-testid="rl-pronunciation-not-assessed"/);
   assert.match(source('src/stores/practice.js'), /function normalizeRLScoreData[\s\S]*pronunciation: null[\s\S]*score_version: PRONUNCIATION_NOT_ASSESSED_VERSIONS\.RL/);
 });
+
+test('DI fluency no longer depends on the unassessed pronunciation trait', () => {
+  const audioVariants = [
+    null,
+    { duration_sec: 38, non_silent_frame_ratio: 0.9, rms_amplitude: 0.3, peak_amplitude: 0.9, speech_rate_wps: 2.6 },
+    { duration_sec: 40, non_silent_frame_ratio: 0.45, rms_amplitude: 0.05, peak_amplitude: 0.2, speech_rate_wps: 1.1 },
+    // Quiet, slow, short audio: the old separation step shifted fluency whenever pronunciation equalled it.
+    { duration_sec: 12, non_silent_frame_ratio: 0.3, rms_amplitude: 0.02, peak_amplitude: 0.06, speech_rate_wps: 0.8 }
+  ];
+  for (const contentRaw of [1, 4]) for (const audioSignals of audioVariants) {
+    for (let fluencyRaw = 1; fluencyRaw <= 5; fluencyRaw++) {
+      const result = pronunciationRaw => finalizeDIScorePayload({ ...diPayload(pronunciationRaw),
+        official_traits: { content: { score: contentRaw }, pronunciation: { score: pronunciationRaw }, oral_fluency: { score: fluencyRaw } } },
+      { ...diContext, audioSignals });
+      const baseline = result(0);
+      for (let pronunciationRaw = 1; pronunciationRaw <= 5; pronunciationRaw++) {
+        const other = result(pronunciationRaw);
+        assert.equal(other.display_scores.fluency, baseline.display_scores.fluency, `fluency raw ${fluencyRaw}, pronunciation raw ${pronunciationRaw}`);
+        assert.equal(other.overall, baseline.overall);
+      }
+    }
+  }
+});

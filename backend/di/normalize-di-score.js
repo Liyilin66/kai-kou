@@ -455,17 +455,6 @@ function buildDIReviewPayload({
     groundingDiagnostics
   });
 
-  if (pronunciationTrait.judged && fluencyTrait.judged && contentTrait.score > 0) {
-    ({ pronunciation, fluency } = ensureSpeechScoreSeparation({
-      pronunciation,
-      fluency,
-      pronunciationRaw: pronunciationTrait.score,
-      fluencyRaw: fluencyTrait.score,
-      pronunciationEvidence: pronunciationEvidence.score,
-      fluencyEvidence: fluencyEvidence.score
-    }));
-  }
-
   if (contentTrait.score > 0) {
     if (pronunciationTrait.judged) {
       pronunciation = applyEffectiveResponseFloor({
@@ -1343,43 +1332,6 @@ function interpolateScoreBand(bands, rawScore, evidenceScore = 0.5) {
     bandMin,
     bandMax
   );
-}
-
-function ensureSpeechScoreSeparation({
-  pronunciation = DISPLAY_MIN_SCORE,
-  fluency = DISPLAY_MIN_SCORE,
-  pronunciationRaw = 0,
-  fluencyRaw = 0,
-  pronunciationEvidence = 0.5,
-  fluencyEvidence = 0.5
-} = {}) {
-  if (pronunciation !== fluency) {
-    return { pronunciation, fluency };
-  }
-
-  const delta = pronunciationEvidence - fluencyEvidence;
-  if (Math.abs(delta) < 0.08) {
-    return { pronunciation, fluency };
-  }
-
-  const shift = Math.min(2, Math.max(1, Math.round(Math.abs(delta) * 10)));
-  if (delta > 0) {
-    return {
-      pronunciation: clampWithinBand(pronunciation + shift, pronunciationRaw, PRONUNCIATION_DISPLAY_BANDS),
-      fluency: clampWithinBand(fluency - shift, fluencyRaw, FLUENCY_DISPLAY_BANDS)
-    };
-  }
-
-  return {
-    pronunciation: clampWithinBand(pronunciation - shift, pronunciationRaw, PRONUNCIATION_DISPLAY_BANDS),
-    fluency: clampWithinBand(fluency + shift, fluencyRaw, FLUENCY_DISPLAY_BANDS)
-  };
-}
-
-function clampWithinBand(value, rawScore, bands) {
-  const boundedRaw = clampScore(rawScore, 0, Math.max(0, bands.length - 1));
-  const [bandMin, bandMax] = bands[boundedRaw] || [DISPLAY_MIN_SCORE, DISPLAY_MAX_SCORE];
-  return clampScore(value, bandMin, bandMax);
 }
 
 function computeOverallAdjustment({
