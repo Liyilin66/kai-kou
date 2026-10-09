@@ -1,0 +1,3001 @@
+{
+  "answer_key_version": "di-key-0.1",
+  "items": [
+    {
+      "id": "DI_Q001",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows the percentage distribution of males and females across age groups from 0–4 to 85+.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "It is a horizontal population pyramid, with males shown on the left and females on the right."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "The highest shares occur in the 25–34 age group, at 16.2 per cent for males and 16.5 per cent for females.",
+          "value": "16.2 per cent; 16.5 per cent"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "In the 85+ group, males account for 0.7 per cent and females account for 1.1 per cent.",
+          "value": "0.7 per cent; 1.1 per cent"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "The percentages generally increase toward the younger and middle-aged groups, peak at 25–34, and then decline among older groups."
+        },
+        {
+          "id": "P6",
+          "kind": "comparison",
+          "text": "Females exceed males in most younger groups, while males exceed females from 35–44 through 65–74; the 75–84 values are equal.",
+          "value": "3.0 per cent; 3.0 per cent"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:38:24.640Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q002",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram compares an overshot water wheel and a breastshot water wheel.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Both wheels contain paddles around the rim, spokes, a central hub, water flow arrows, and a tail race."
+        },
+        {
+          "id": "P3",
+          "kind": "comparison",
+          "text": "In the overshot wheel, water enters from a flume above the top of the wheel."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "In the breastshot wheel, water enters at about the middle height on the left side of the wheel."
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "The rotation arrows show the overshot wheel turning clockwise and the breastshot wheel turning anticlockwise."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The two wheel types differ mainly in where water is supplied to the paddles."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:44:05.844Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q003",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line chart shows the total population of Thorably from 1870 to 2010.",
+          "required": true,
+          "value": "1870–2010"
+        },
+        {
+          "id": "P2",
+          "kind": "trend",
+          "text": "The population generally declined from 1870 to 1950, despite several small fluctuations."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "The population reached its highest point in the 1960s, at a level above 300."
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The lowest population level occurred in 1950, at roughly 125."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "After the sharp peak in the 1960s, the population fell substantially to around 150 by 2000 and remained near that level in 2010."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:43:31.209Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q004",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows the number of arrests per year for using illegal drugs from 1991 to 2005.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "trend",
+          "text": "Arrests increased sharply from 1991 to 1995, remained stable until 1997, and then fluctuated considerably."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "The highest number of arrests occurred in 2000, while the lowest occurred in 1991.",
+          "value": "70 arrests; 10 arrests"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The figure reached 60 arrests annually from 1995 through 1997.",
+          "value": "60 arrests"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "After peaking in 2000, arrests dropped sharply in 2001 before rising again in 2002.",
+          "value": "70 arrests; 15 arrests; 55 arrests"
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "By 2005, the number of arrests was higher than at the beginning but lower than the peak.",
+          "value": "40 arrests"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:42:32.271Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q005",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows consumer confidence, indexed to 2002 equals 100, from January 1990 to January 2008.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "A single fluctuating line tracks consumer confidence against an index scale ranging from 60 to 110."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Consumer confidence reaches its highest point around 2002, at approximately 105, and its lowest point in the early 1990s, below 70.",
+          "value": null
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "The index fluctuates substantially before 2002, remains near 95 to 100 for several years, and then falls sharply after 2007."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Confidence is generally higher during the period from 2002 to 2007 than during most of the 1990s."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Overall, consumer confidence is highly volatile, with a prolonged elevated period followed by a dramatic decline at the end."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:47:30.612Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q006",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows the number of laws in Brazil from 1953 to 1993.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The horizontal axis represents years, while the vertical axis measures the number of laws."
+        },
+        {
+          "id": "P3",
+          "kind": "trend",
+          "text": "The number of laws generally increased throughout the period, with faster growth after the 1970s."
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The highest value occurs in 1993, at more than 2,000 laws.",
+          "value": null
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The number remained relatively low in the 1950s and 1960s compared with the sharp rise during the late 1980s and early 1990s."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Overall, Brazil experienced a substantial long-term increase in the number of laws over these four decades."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:47:33.580Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q007",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line chart shows intraday movements in the S&P/ASX 200 index from 10:00 to 2:00.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The horizontal axis displays time, while the vertical axis marks index levels at 3468, 3484, and 3500."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "The index reaches its highest visible level just below the 3500 mark during the late morning.",
+          "value": "3500"
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Overall, the index rises sharply from around 10:00, peaks before midday, and then fluctuates lower through the early afternoon."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The index remains mostly above 3484 after its initial rise, despite several short-term declines."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "By the end of the displayed period, the index is below its late-morning peak but above its starting level."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:46:53.617Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q008",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows Ontario manufacturing employment and the Canadian dollar exchange rate from 1981 to 2013.",
+          "required": true,
+          "value": "1981 - 2013"
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The blue line represents Ontario manufacturing employment in thousands, while the red line represents the Canadian dollar value in US dollars."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Manufacturing employment reaches its highest level at just above 1,100 thousand around 2001–2002, then declines substantially.",
+          "value": null
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The Canadian dollar reaches its lowest level near 0.64 US dollars around 2002 and its highest level near 1.01 around 2011.",
+          "value": null
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "After about 2002, the Canadian dollar rises strongly while manufacturing employment generally falls, showing an opposite movement between the two series."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:47:36.618Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q009",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows US fruit and vegetable consumption trends in pounds per person per year from 1970 to 2010.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph compares two categories: vegetables and fruit."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Vegetable consumption reaches the highest level at about 425 pounds per person per year in the late 1990s."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Vegetable consumption generally rises from the 1970s to the late 1990s, then declines slightly toward 2010."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Vegetable consumption remains higher than fruit consumption throughout the period, with the gap generally widening after 1990."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:47:57.277Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q010",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows life expectancy at birth in years for males and females from 1881–1890 to 2011–2013.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph compares two series, males and females, across years on the horizontal axis."
+        },
+        {
+          "id": "P3",
+          "kind": "trend",
+          "text": "Life expectancy increased substantially for both sexes over the period, with a brief plateau around the 1960s and 1970s."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Females consistently had higher life expectancy than males throughout the period."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "The highest life expectancy appears for females at the end of the period, while the lowest appears for males at the beginning."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The chart indicates a persistent female advantage and an overall improvement in life expectancy for both sexes."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:48:21.794Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q011",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line chart compares population growth and growth in rating base from 2012 to 2022, by financial year ending 30 June.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart contains two series: population growth shown in blue and growth in rating base shown in light green."
+        },
+        {
+          "id": "P3",
+          "kind": "trend",
+          "text": "Population growth stays near 1.5% until 2016, then gradually declines to about 1.3% in 2022."
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "Growth in rating base reaches its highest point at just under 2.0% in 2018.",
+          "value": "just under 2.0%"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Rating-base growth rises above population growth around 2017 and remains higher through 2022."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "By 2022, rating-base growth is visibly stronger than population growth."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:48:02.987Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q012",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The stacked area chart shows electricity generation in China by type from 1994 to 2004, measured in billion kilowatthours.",
+          "required": true,
+          "value": "1994-2004"
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart compares conventional thermal generation in red with hydroelectric generation in blue."
+        },
+        {
+          "id": "P3",
+          "kind": "trend",
+          "text": "Total electricity generation rises steadily throughout the period, with faster growth after 2002."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Conventional thermal power remains much larger than hydroelectric power in every year shown."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "The highest total electricity generation occurs in 2004, when the stacked total is slightly above 2,000 billion kilowatthours.",
+          "value": "2,000"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:48:12.534Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q013",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows the percentage of university and college students doing educational activities by hour on weekdays.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph compares full-time students with part-time students from 12 am to 11 pm."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Full-time students reach their highest participation at about 36%, while part-time students peak at about 21%.",
+          "value": "36%; 21%"
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Both groups rise sharply during the morning, decline through the afternoon, and fall again after evening."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Full-time students consistently have higher percentages than part-time students for most hours."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Educational activity is generally greatest during late morning and lowest during the early morning and late evening."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:49:52.900Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q014",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The graph shows carbon dioxide concentration and temperature change over the last 400,000 years, with age measured in years before present.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The blue line represents CO2 measured in ppm, while the red line represents temperature change in degrees Celsius relative to the present."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "CO2 values fluctuate between approximately 180 and 300 ppm, while temperature change ranges from about -10 to 4 degrees Celsius.",
+          "value": "180–300 ppm; -10 to 4 °C"
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Both variables show repeated rises and falls, with several pronounced peaks followed by extended declines across the period."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The two lines generally move in similar directions, with major high points occurring around 300,000, 200,000, and 120,000 years before present."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The graph indicates a recurring relationship between higher carbon dioxide levels and higher temperatures over geological time."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:49:29.098Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q015",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph compares oil prices in dollars with the food price index from 2000 to 2009.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph contains a red oil-price line using the left axis and a green food-price-index line using the right axis."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Both series reach their highest levels around 2007, with oil near $130 and the food price index near 210."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Both measures generally rise over the period, despite fluctuations and a sharp decline around 2008."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "After the 2008 drop, the food price index recovers more strongly than oil prices by the end of 2009."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:49:51.337Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q016",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows projected population in Australia, measured in millions, from 2001 to 2101 at 30 June.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph compares three projections labelled Series A, Series B, and Series C."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The vertical scale ranges from 20 million to 70 million.",
+          "value": "20–70 million"
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "All three series increase over time, although Series A rises much more steeply than the other projections."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "By 2101, Series A is the highest projection, while Series C is the lowest."
+        },
+        {
+          "id": "P6",
+          "kind": "comparison",
+          "text": "The gap between Series A and Series C becomes considerably wider toward the end of the period."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:50:36.746Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q017",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows U.S. energy consumption by fuel from 1980 to 2030, measured in quadrillion units.",
+          "required": true,
+          "value": "1980–2030"
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "It compares petrol and oil, coal, natural gas, nuclear, solar/wind, and hydropower across historical data and projections."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Petrol and oil is the highest fuel source throughout, rising to just under 50 quadrillion units by 2030."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Coal increases from about 16 quadrillion units in 1980 to around 32 by 2030, overtaking natural gas after 2015."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Natural gas levels off at about 25 quadrillion units from 2015 onward, while nuclear and solar/wind remain much lower."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The chart indicates that fossil fuels remain far more important than nuclear, solar/wind, and hydropower through 2030."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:50:11.317Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q018",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The bar chart shows internet population by country, measured in millions of users.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The countries shown are China, the US, Japan, Germany, the UK, France, India, Russia, Brazil, South Korea, Canada, Italy, Spain, Mexico and the Netherlands."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "China has the highest internet population, at about 180 million users.",
+          "value": "180"
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "The US is second with about 165 million users, while Japan is a distant third at about 60 million.",
+          "value": "165; 60"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "After the two leading countries, internet populations decline sharply and then remain below 40 million for most countries."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Mexico and the Netherlands have the smallest internet populations, at roughly 12 million each.",
+          "value": "12"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:49:58.996Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q019",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows taxation by countries for payroll and superannuation in recent years.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The listed categories are Australia, Austria, other countries, Denmark, and a weighted average."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Australia and Austria have the highest displayed amounts, tied at 16.6%.",
+          "value": "16.6%"
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Although Austria is ranked second, its displayed amount is the same as Australia’s."
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "The horizontal bars generally decrease from the top countries through the middle countries to Denmark."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Denmark has the smallest bar among the named country entries, while the weighted average is shown separately in grey."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:50:09.164Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q020",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The bar chart compares unemployment rates by ethnic group and sex in the UK in 2001, measured as percentages.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "It shows nine ethnic groups, with separate horizontal bars for men and women in each group."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Bangladeshi women have the highest visible unemployment rate, at just under 25 percent."
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The percentage axis runs from 0 to 30, with gridlines at intervals of 5.",
+          "value": "0, 5, 10, 15, 20, 25, 30"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Women have higher unemployment than men in the Mixed, Pakistani and Bangladeshi groups, while men are higher in several other groups."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Unemployment rates vary substantially across ethnic groups, with Bangladeshi and Pakistani groups generally higher than White and Indian groups."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:51:09.462Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q021",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The chart compares unemployment rates and median weekly earnings in 2012 by educational attainment.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The education categories range from less than a high school diploma to doctoral and professional degrees."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Professional degree holders have the highest median weekly earnings, while people without a high school diploma have the lowest earnings and highest unemployment.",
+          "value": "$1,735; $471; 12.4%"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "Unemployment is lowest for professional degree holders at 2.1%, followed by doctoral degree holders at 2.5%.",
+          "value": "2.1%; 2.5%"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "Higher educational attainment generally corresponds to higher weekly earnings and lower unemployment rates."
+        },
+        {
+          "id": "P6",
+          "kind": "comparison",
+          "text": "All workers have an unemployment rate of 6.8% and median weekly earnings of $815.",
+          "value": "6.8%; $815"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:50:43.860Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q022",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The stacked bar chart shows drinking habits by age in the US, measured as percentages.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The age groups are 16-24, 25-34, 35-44, 45-54, 55-64 and 65-74, with categories for never, ex-, light and heavy drinkers."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "Each stacked bar reaches 100 on the percentage scale.",
+          "value": "100 Percentage"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "Never drinkers are highest among people aged 16-24, at about 62 percent, while ex-drinkers are highest among those aged 65-74, at about 42 percent.",
+          "value": null
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "The proportion of never drinkers generally declines with age, while the proportion of ex-drinkers rises sharply in the two oldest groups."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Older people, especially those aged 65-74, are much more likely to be ex-drinkers than younger people."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:51:12.316Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q023",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "pie",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The pie chart shows kinds of wheat exported from Australia in 2005, measured in tonnes.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart includes Durum Wheat, General Purpose Wheat, Australian Hard Wheat, and Organic Wheat."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "General Purpose Wheat was the largest export, while Organic Wheat was the smallest.",
+          "value": "25109 tonnes and 6309 tonnes"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The export quantities were 25109 tonnes of General Purpose Wheat and 15176 tonnes of Australian Hard Wheat.",
+          "value": "25109 tonnes; 15176 tonnes"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Durum Wheat exports exceeded Organic Wheat exports but were lower than Australian Hard Wheat exports.",
+          "value": "9509 tonnes; 6309 tonnes; 15176 tonnes"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:44:05.833Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q024",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "pie",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The pie chart shows the approximate composition of the air by percentage.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The air is divided into nitrogen, oxygen, and other gases."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Nitrogen is the largest component at 79%, while other gases are the smallest at 1%.",
+          "value": "79%; 1%"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "Oxygen accounts for 20% of the air.",
+          "value": "20%"
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The chart shows that air consists overwhelmingly of nitrogen, followed by oxygen, with only a small amount of other gases."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:44:13.173Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q025",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "pie",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The pie chart shows the causes of deforestation in the Brazilian Amazon from 2000 to 2005.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart includes cattle ranching, small-scale agriculture, large-scale agriculture, logging, and other causes."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Cattle ranching is the largest cause, accounting for 65-70% of deforestation.",
+          "value": "65-70%"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "Small-scale agriculture contributes 20-25%, while large-scale agriculture contributes 5-10%.",
+          "value": "20-25%; 5-10%"
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "Logging and other causes are the least significant categories, together accounting for 3-5%.",
+          "value": "2-3%; 1-2%"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:51:53.255Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q026",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "pie",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image compares the population percentages of European Union countries in 1998 and 2007.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The pie charts show Germany, France, the United Kingdom, Italy, Spain, Poland, and all other countries."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "All other countries formed the largest share in both years, rising from 29.4% in 1998 to 29.7% in 2007.",
+          "value": "29.4%, 29.7%"
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Germany had the largest share among the named countries, but its percentage fell from 17.1% to 16.6%.",
+          "value": "17.1%, 16.6%"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "France, the United Kingdom, Italy, and Spain increased slightly, while Germany and Poland decreased."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:51:54.109Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q027",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image compares the relative sizes of several planets, including Jupiter, Saturn, Uranus, Neptune, Earth, and Pluto.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Jupiter and Saturn are the two largest planets shown, followed by Uranus and Neptune."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Jupiter is the largest object shown, while Pluto is the smallest labeled object."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Earth is much smaller than the four outer giant planets but larger than Pluto."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The image shows a dramatic decrease in apparent planetary size from Jupiter and Saturn to Earth and Pluto."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:44:34.036Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q028",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image illustrates correct and incorrect hand and wrist positions when using a computer keyboard and mouse.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The upper section compares correct and incorrect finger and hand placement on a keyboard."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "The lower section compares correct and incorrect wrist and hand posture while operating a mouse."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Correct positions keep the hands and wrists aligned, whereas incorrect positions show bent or awkward angles."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The diagram emphasizes maintaining neutral hand and wrist alignment during computer use."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:44:32.766Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q029",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image is an Adults Healthy BMI Chart showing weight in kilos against height in metres.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart contains coloured BMI bands labelled Under Weight, Healthy Weight, Over Weight, Obese, and Extreme Obese."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The horizontal axis shows height labels from 1.36 to 2.00 metres.",
+          "value": "1.36–2.00 Metres"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The vertical axis shows visible weight labels from 50 to 110 kilos.",
+          "value": "50–110 kilos"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "All BMI category bands rise toward the right, indicating that higher heights correspond to higher weight ranges."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "A person’s BMI category depends on the combination of height and weight shown by the coloured bands."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:51:56.980Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q030",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram titled \"How Solar Yard Lights Work\" shows an exploded view of a solar yard light and its components.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "From top to bottom, the light is assembled from a glass cover, solar cells and photoresistor, a housing, electronic parts, and a lamp cover."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "The upper section contains the glass cover, solar cells, and a photoresistor."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "The middle section includes a battery, controller board, and LED beneath the main housing."
+        },
+        {
+          "id": "P5",
+          "kind": "element",
+          "text": "The lamp cover forms the lower outer section and surrounds the LED assembly."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The illustration shows that the solar yard light combines solar collection, battery power, electronic control, and an LED lamp."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:10.827Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q031",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows a food pyramid with food and drink groups arranged in five levels.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "From bottom to top, the pyramid shows water, bread and cereals with fruits and vegetables, dairy with meat and fish, and junk food."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "The bottom level contains water, while the next level is divided between bread and cereals and fruits and vegetables."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "The middle level is divided between milk, cheese and eggs and meat, poultry, sausage and fish."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "Junk food, sweets and sugar drinks are placed alone at the smallest top section."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The pyramid visually suggests that water and lower-level food groups form the broadest part of the diet."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:14.901Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q032",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows government expenditure on education across all sectors.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The pyramid divides education spending into Early Childhood, Schools, Vocational Educational Training, and Higher Education."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "Early Childhood expenditure is shown as $0.8–1.4 billion, while Schools receive $3–4 billion.",
+          "value": "$0.8–1.4billion; $3–4billion"
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Vocational Educational Training receives $2 billion, compared with $1.8 billion for Higher Education.",
+          "value": "$2billion; $1.8billion"
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "Schools have the highest displayed sector expenditure at $3–4 billion, while Early Childhood has the lowest range of $0.8–1.4 billion.",
+          "value": "$3–4billion; $0.8–1.4billion"
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The separate Education Investment Fund is labelled as $11 billion, much larger than the displayed sector amounts.",
+          "value": "$11 billion"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:00.792Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q033",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows a floor plan for a library, with five numbered areas and several facilities.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The upper section contains areas 1, 2, and 3, while areas 4 and 5 are positioned below them."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "An entrance is located along the lower edge of area 3, leading into a passageway."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "The lower-right section includes separate female and male toilets, an elevator, and a marked walkway."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Areas 1, 2, and 4 are visibly larger than the narrower central area 5."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The plan indicates that visitors enter from the upper rooms into a circulation area connected to the toilets and elevator."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:45:11.381Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q034",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows how a river meander is cut off to form an oxbow lake in stages A and B.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Stage A shows a winding river meander with a narrow neck between two nearby bends."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "In stage B, sand and silt block the ends of the former bend after the river forms a new, straighter channel."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "The abandoned loop of water is labelled as an oxbow lake in stage B."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The river flows through the meander in stage A, whereas stage B shows the main flow diverted through the new channel."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The diagram indicates that deposition of sand and silt separates the meander loop from the main river."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:13.912Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q035",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows the distribution of the world's water, including freshwater and its main components.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "comparison",
+          "text": "Saltwater makes up 97.5% of total global water, while freshwater accounts for only 2.5%.",
+          "value": "97.5%; 2.5%"
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "Total global water is 1,386,000,000 cubic km, and total freshwater is 35,029,000 cubic km.",
+          "value": "1,386,000,000 CUBIC KM; 35,029,000 CUBIC KM"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "Glaciers and permanent snow are the largest freshwater store at 68.7%, followed by groundwater at 30.06%.",
+          "value": "68.7%; 30.06%"
+        },
+        {
+          "id": "P5",
+          "kind": "element",
+          "text": "Ground ice and permafrost account for .86% of freshwater, while other sources represent 1.22%.",
+          "value": ".86%; 1.22%"
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Within the small other category, lakes are .26%, whereas rivers and plants or animals are only .006% and .003%.",
+          "value": ".26%; .006%; .003%"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:26.877Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q036",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram titled \"Lunar Cycle affect Fish Catch Rates\" shows fish positions during four lunar phases.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Each panel shows a yellow moon above blue water, divided into surface and bottom zones."
+        },
+        {
+          "id": "P3",
+          "kind": "comparison",
+          "text": "In the first panel, fish are concentrated near the bottom, while in the final panel they are concentrated near the surface."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Across the sequence, the fish distribution moves from deeper water to more scattered positions and then toward the surface."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "The full-moon panel shows the fewest visible fish and the widest spread through the water."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The image suggests that fish catch locations vary according to the lunar cycle."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:47.863Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q037",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image compares computers from the past with a modern desktop computer.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The older computer is a large, bulky cabinet with multiple panels, a small screen, and a built-in keyboard."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "The modern computer consists of a separate tower, a large flat-screen monitor, a keyboard, and a mouse."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "The older computer occupies much more space, while the modern system has separate, slimmer components."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The image shows that computer design has changed from large integrated cabinets to more streamlined desktop systems."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:45:32.871Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q038",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image compares the heights of Hemlock, Cedar, Spruce, and Douglas Fir trees in feet.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Four tree types are shown from left to right: Hemlock, Cedar, Spruce, and Douglas Fir."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The displayed heights are 130 feet for Hemlock, 200 feet for Cedar, 230 feet for Spruce, and 280 feet for Douglas Fir.",
+          "value": "130 Feet, 200 Feet, 230 Feet, 280 Feet"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "Douglas Fir is the tallest tree at 280 feet, while Hemlock is the shortest at 130 feet.",
+          "value": "280 Feet; 130 Feet"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "Tree height increases steadily from Hemlock through Cedar and Spruce to Douglas Fir."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Douglas Fir is 150 feet taller than Hemlock.",
+          "value": "150 Feet"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:28.866Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q039",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram compares the bone structures of a human arm, seal limb, bird wing, and bat wing.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The human arm labels the hand, wrist and fingers, radius, ulna, and humerus."
+        },
+        {
+          "id": "P3",
+          "kind": "comparison",
+          "text": "All four limbs show corresponding upper-arm, forearm, and digit bones in similar colour-coded positions."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "The seal limb has spread digits, while the bird wing has feathers and the bat wing has elongated finger bones supporting a membrane."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The image visibly shows a shared basic bone pattern adapted into different limb shapes."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:38.346Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q040",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows a cross-section of Earth’s internal layers and their approximate thicknesses in miles and kilometers.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The diagram identifies the inner core, outer core, mantle, and crust."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The inner core is labeled 800 miles (1,300 kilometers), while the outer core measures 1,400 miles (2,250 kilometers).",
+          "value": "800 miles (1,300 kilometers); 1,400 miles (2,250 kilometers)"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The mantle is approximately 1,800 miles (2,900 kilometers) thick, whereas the crust ranges from 5 to 25 miles (8 to 40 kilometers).",
+          "value": "1,800 miles (2,900 kilometers); 5 to 25 miles (8 to 40 kilometers)"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Among the labeled layers, the mantle is thickest and the crust is by far the thinnest."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:45:50.793Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q041",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows two homemade bird feeders made from plastic bottles and filled with seeds.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Each feeder is a hanging plastic bottle with a string at the top, seed inside, and wooden perches through the sides."
+        },
+        {
+          "id": "P3",
+          "kind": "comparison",
+          "text": "The left feeder has a blue bottle cap and coloured perch ends, while the right feeder has a clear cap and plain wooden perches."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "A bird is perched on the right-hand feeder, while the left-hand feeder is shown without a bird."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The two pictures demonstrate that recycled plastic bottles can be used as simple hanging bird feeders."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:34.248Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q042",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram titled \"Parts of a Tree\" labels the main parts of a tree.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The visible labels identify leaves, a twig, a branch, the trunk, roots, and the crown."
+        },
+        {
+          "id": "P3",
+          "kind": "comparison",
+          "text": "Leaves, twigs and branches are shown above ground, while roots are shown below the soil."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "The trunk forms the central vertical part, connecting the crown above to the roots below."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The diagram shows that the crown is the upper leafy section of the tree."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:41.220Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q043",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The map shows predicted global temperature increases from 2070-2100 compared with the 1960-1990 average.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The world map uses colors from pale yellow to dark red to represent different temperature increases."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The temperature-increase scale ranges from 0 to 8 degrees Celsius.",
+          "value": "0, 1, 2, 3, 4, 5, 6, 7, 8°C"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The highest increases appear over northern South America and parts of the Arctic and northern continents, shown in dark red.",
+          "value": null
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Land areas generally show greater warming than the oceans, which are mostly pale yellow or light orange."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The map indicates that warming is projected to be unevenly distributed across the globe."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:45:56.221Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q044",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows the germination of a bean plant.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "The process progresses from a bean seed to a sprouting seed, then a young seedling, and finally a leafy plant."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "Each developing stage is shown in soil, with roots growing downward beneath the ground."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "As germination proceeds, the roots become larger and more branched while the stem grows upward."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The final plant is much taller than the earlier stages and has several green leaves above the soil."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The diagram shows that a bean seed develops into a mature plant through successive growth stages."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:48.714Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q045",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image illustrates the water cycle across mountains, land, rivers and the sea.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "Water evaporates from the sea, is transported by clouds, and falls as precipitation over the mountains."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "Blue upward arrows labelled Evaporation rise from the sea toward the clouds."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "Precipitation is shown as raindrops falling from clouds over the mountainous area."
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "Surface run-off flows downhill through the land and returns toward the sea."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The diagram shows that water continually circulates between the ocean, atmosphere and land."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:46.230Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q046",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows the Tesco Extra Music Download process.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "A central Tesco Extra Music Download panel is surrounded by icons for search, purchase, download and play."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "The cycle proceeds from Search to Purchase, then Download, and finally Play."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "Search is represented by a magnifying glass, purchase by a shopping cart, download by a downward arrow, and play by headphones."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The diagram presents music downloading as a circular four-step service process."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:57.508Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q047",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows the fungus gnat lifecycle, which is about 28 days.",
+          "required": true,
+          "value": "28 Days"
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "The lifecycle progresses from eggs to larva, then pupa, and finally adult."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "Eggs develop for 4-6 days before the larval stage.",
+          "value": "4-6 Days"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The larval stage lasts 12-14 days, the longest duration shown.",
+          "value": "12-14 Days"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The pupal stage takes 3-6 days, while the adult stage lasts 7-10 days.",
+          "value": "3-6 Days; 7-10 Days"
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The larval stage occupies the largest part of the fungus gnat lifecycle."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:52:55.290Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q048",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows how industrial emissions are transformed in the atmosphere and return as acid deposition.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Industry, transportation, ore smelting, and power generation release nitrogen oxides and sulfur dioxide into the atmosphere."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "Atmospheric emissions undergo chemical transformation, producing nitric acid and sulfuric acid before condensation occurs."
+        },
+        {
+          "id": "P4",
+          "kind": "sequence",
+          "text": "The transformed pollutants return through dry fallout of particulates and gases or through precipitation."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "Precipitation can include acid rain, fog, snow, and mist, showing that pollutants are deposited in several forms."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:02.581Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q049",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph titled \"Years to Double Population\" shows the years required for population doubling by ending year.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The horizontal axis shows Ending Year, while the vertical axis shows Years to Double."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "The longest doubling period was 544 years, from 0.375 to 0.75 Billion, ending in 1715.",
+          "value": "544 years; 0.375 to 0.75 Billion"
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Population doubling times declined sharply from 544 years in 1715 to 39 years by 1999.",
+          "value": "544 years; 39 yrs."
+        },
+        {
+          "id": "P5",
+          "kind": "number",
+          "text": "Later doubling periods were 79 years ending in 1960, 47 years ending in 1974, and 39 years ending in 1999.",
+          "value": "79 years; 47 yrs.; 39 yrs."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "A red forecast-only label near 2025 suggests a possible doubling from 4 to 8 Billion.",
+          "value": "2025?; 4 - 8 Billion?"
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:09.686Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q050",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line graph shows monthly Dubai gold sales in 2002, measured in millions of Dirhams.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The graph presents gold sales for each month from January to December.",
+          "value": null
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Sales reached their highest point in March at 350 million Dirhams.",
+          "value": "350 million Dirhams"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The lowest sales figures occurred in July and September, at 120 million Dirhams.",
+          "value": "120 million Dirhams"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "Sales rose from January to March, then generally declined to July before fluctuating for the rest of the year."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "After the March peak, monthly gold sales ended the year below the January level."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:09.516Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q051",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows the Sun, Moon and Earth alignment that produces solar eclipses.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The Sun is on the left, the Moon is positioned between it and the Earth, and Earth is on the right."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "Shadow regions behind the Moon are labelled as the umbra and penumbra."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "A total eclipse occurs in the narrow umbra, while a partial eclipse occurs in the wider penumbra."
+        },
+        {
+          "id": "P5",
+          "kind": "element",
+          "text": "Dashed circular paths around Earth and the Moon are labelled Earth's orbit and Moon's orbit."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The image shows that eclipse type depends on where Earth lies within the Moon's shadow."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:10.955Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q052",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows how Dell operates a closed-loop plastics supply chain.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "The cycle begins with collecting and recycling materials, followed by sorting and shredding."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "The next stages are molding and manufacturing, then assembling and shipping products."
+        },
+        {
+          "id": "P4",
+          "kind": "sequence",
+          "text": "The final stage is purchase and use, which returns to collection and recycling in a circular loop."
+        },
+        {
+          "id": "P5",
+          "kind": "element",
+          "text": "Icons show a recycling truck, shredder, factory, computer, and customer across the five stages."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The circular arrow indicates that plastics are reused continuously through the supply chain."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:19.488Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q053",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The map shows honey production as a percentage of national production by state in Mexico.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Mexico is divided into Northern, Central, and Southern zones, with states shaded by production category."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The legend gives four honey-production ranges: 0–1%, 1–3%, 3–10%, and 10–16.38%.",
+          "value": "0 - 1%; 1 - 3%; 3 - 10%; 10 - 16.38%"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The highest category is 10–16.38%, represented by the darkest brown shading.",
+          "value": "10 - 16.38%"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Most northern states are in the lightest production categories, while darker categories are concentrated in central and southeastern areas."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:21.918Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q054",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "mixed",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image compares fish distribution near a rocky seabed during the day and at night.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The picture is divided into two panels labelled DAY on the left and NIGHT on the right."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "Four individual fish are visible in the daytime panel."
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "Nine fish are visible together in the nighttime panel."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "At night, the fish form a larger, denser group than during the day."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The image suggests that these fish are more grouped together at night and more dispersed during the day."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:29.035Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q055",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The map shows Australian population density in 2011, measured as people per sq km.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Australia is divided into five population-density colour categories, from pale yellow to dark red."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The lowest density category is less than 0.1 people per sq km.",
+          "value": "Less than 0.1"
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "The darkest red areas, representing 100.0 or more people per sq km, occur mainly along parts of the coast.",
+          "value": "100.0 or more"
+        },
+        {
+          "id": "P5",
+          "kind": "trend",
+          "text": "Population density is generally lowest across the central inland and higher around coastal areas."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The map indicates that Australia’s population was concentrated near the coast rather than in the interior."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:36.702Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q056",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows a circular process for handling fruits, illustrated with grapes.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "sequence",
+          "text": "Grapes are shown growing on vines at the top right of the cycle."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "The grapes are transported by a pickup truck and then move along a conveyor belt."
+        },
+        {
+          "id": "P4",
+          "kind": "sequence",
+          "text": "The processed grapes are placed into a box before being put into a shopping cart."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "Arrows connect all five pictures in a clockwise cycle from growing grapes to shopping for fruit."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:31.885Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q057",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The horizontal bar chart shows average weekly household spending on goods and services in 2015-16, measured in dollars.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The chart compares 15 spending categories, including housing, food, transport, recreation, health, education and tobacco products."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Current housing costs for selected dwellings have the highest average weekly household spending, reaching about $250.",
+          "value": null
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Food and non-alcoholic beverages and transport are the next two largest expenses, while recreation is also substantially high."
+        },
+        {
+          "id": "P5",
+          "kind": "extreme",
+          "text": "Tobacco products have the lowest average weekly household spending, at only around $10.",
+          "value": null
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Overall, weekly household spending is concentrated in housing, food and transport, with much smaller amounts spent on the lowest-ranked categories."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:33.407Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q058",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "process",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The diagram shows how rotation is converted into electricity for homes.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "A wind turbine with three rotating blades is connected to an electrical unit at its base."
+        },
+        {
+          "id": "P3",
+          "kind": "sequence",
+          "text": "The turbine rotation produces electricity, which passes through cables from the electrical unit."
+        },
+        {
+          "id": "P4",
+          "kind": "element",
+          "text": "Several power lines extend from the unit to multiple houses and a larger building."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "The image illustrates wind-generated electricity being distributed to nearby buildings."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:39.991Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q059",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "line",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The line chart shows population growth in thousands from 1978/1979 to 2008/2009.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "It compares total growth, natural increase, and net international migration."
+        },
+        {
+          "id": "P3",
+          "kind": "extreme",
+          "text": "Total growth reaches its highest point at just under 500 thousand around 1988/1989."
+        },
+        {
+          "id": "P4",
+          "kind": "trend",
+          "text": "Natural increase generally declines from about 200 thousand to around 110 thousand before rising slightly at the end."
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "Net international migration fluctuates strongly and is higher than natural increase by 2008/2009."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Total population growth falls after its late-1980s peak, then rises steadily to over 400 thousand by the final year."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:38.684Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q060",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "bar",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The stacked bar chart shows the percentage breakdown of electronic and electric waste categories.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Electronic waste includes monitors, televisions, computers and related equipment, and DVD, VCR, CD players, radios and Hi-Fi sets."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "Electric waste includes refrigerators and household appliances such as washing machines, dryers, air-conditioners and vacuum cleaners."
+        },
+        {
+          "id": "P4",
+          "kind": "extreme",
+          "text": "Washing machines and other household appliances are the largest category at 30%, while monitors and televisions are the smallest at 10% each.",
+          "value": "30%; 10%"
+        },
+        {
+          "id": "P5",
+          "kind": "number",
+          "text": "Computers and related equipment and entertainment players each account for 15%, while refrigerators account for 20%.",
+          "value": "15%; 20%"
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Electronic waste and electric waste each make up half of the total bar, or 50%."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:47.983Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q061",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The map shows Earth's polar, temperate and tropical climate zones by latitude.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "Pink polar zones lie beyond 60 degrees north and south, while yellow temperate zones occupy middle latitudes."
+        },
+        {
+          "id": "P3",
+          "kind": "element",
+          "text": "The green tropical zone forms a broad band around the Equator between the temperate zones."
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The map marks the Equator, 30 degrees north and south, and 60 degrees north and south.",
+          "value": "60°N, 30°N, Equator (0°), 30°S, 60°S"
+        },
+        {
+          "id": "P5",
+          "kind": "sequence",
+          "text": "From the North Pole to the South Pole, the zones occur in the order polar, temperate, tropical, temperate and polar."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "Climate zones are arranged in broad east-to-west bands that are generally symmetrical around the Equator."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:45:41.461Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q062",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The image shows a compact residential floor plan measuring 5.40 metres by 6.80 metres.",
+          "required": true,
+          "value": "5.40m; 6.80m"
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The plan includes a bedroom, living area, kitchen, bathroom, entrance, and a central hallway."
+        },
+        {
+          "id": "P3",
+          "kind": "number",
+          "text": "The horizontal dimension across the top is 5.40 metres.",
+          "value": "5.40m"
+        },
+        {
+          "id": "P4",
+          "kind": "number",
+          "text": "The vertical dimension along the right side is 6.80 metres.",
+          "value": "6.80m"
+        },
+        {
+          "id": "P5",
+          "kind": "comparison",
+          "text": "The dwelling is longer vertically than it is wide horizontally."
+        },
+        {
+          "id": "P6",
+          "kind": "conclusion",
+          "text": "The furniture arrangement shows a compact home organized around a central entrance and hallway."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:46:17.488Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    },
+    {
+      "id": "DI_Q063",
+      "answer_key_version": "di-key-0.1",
+      "image_type": "map",
+      "points": [
+        {
+          "id": "P1",
+          "kind": "topic",
+          "text": "The map shows the distribution of tropical and temperate rainforest in South America.",
+          "required": true
+        },
+        {
+          "id": "P2",
+          "kind": "element",
+          "text": "The legend identifies tropical rainforest in green and temperate rainforest in dark teal."
+        },
+        {
+          "id": "P3",
+          "kind": "trend",
+          "text": "Tropical rainforest covers a large continuous area across northern South America, especially around Brazil and neighbouring countries."
+        },
+        {
+          "id": "P4",
+          "kind": "comparison",
+          "text": "Temperate rainforest occupies a much smaller, narrow strip along the southern Pacific coast near Chile and Argentina."
+        },
+        {
+          "id": "P5",
+          "kind": "conclusion",
+          "text": "Tropical rainforest is far more widespread than temperate rainforest on the map."
+        }
+      ],
+      "generated_by": {
+        "provider": "openai-compatible",
+        "requested_model": "gpt-5.6-luna",
+        "model": "gpt-5.6-terra",
+        "at": "2026-10-09T09:53:49.695Z",
+        "attempts": 1
+      },
+      "review": {
+        "status": "unreviewed"
+      }
+    }
+  ]
+}

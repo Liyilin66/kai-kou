@@ -33,6 +33,9 @@
 
 # Private listening labeling kit and manifest backups
 /eval/speech/labeling/
+
+# DI content evaluation recordings, transcripts, reports and review page
+/eval/di/
 *.json.bak
 
 # Application ignore rules (merged during flattening)

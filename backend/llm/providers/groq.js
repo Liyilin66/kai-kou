@@ -6,7 +6,7 @@ const SAFE_ERROR_BODY_KEYS = new Set(["error", "message", "type", "code", "param
 
 let hasWarnedLegacyGroqKey = false;
 
-export async function callGroq({ prompt, apiKey, model, timeoutMs } = {}) {
+export async function callGroq({ prompt, apiKey, model, timeoutMs, temperature } = {}) {
   const resolvedApiKey = `${apiKey || getGroqApiKeyFromEnv() || ""}`.trim();
   const resolvedModel = `${model || process.env.LLM_GROQ_MODEL || DEFAULT_GROQ_MODEL}`.trim() || DEFAULT_GROQ_MODEL;
   const resolvedTimeoutMs = toPositiveInt(timeoutMs, process.env.LLM_FALLBACK_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
@@ -36,7 +36,8 @@ export async function callGroq({ prompt, apiKey, model, timeoutMs } = {}) {
         body: JSON.stringify({
           model: resolvedModel,
           messages: [{ role: "user", content: `${prompt || ""}` }],
-          response_format: { type: "json_object" }
+          response_format: { type: "json_object" },
+          ...(Number.isFinite(temperature) ? { temperature } : {})
         })
       },
       resolvedTimeoutMs
