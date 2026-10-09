@@ -120,3 +120,15 @@ total = round(10 + 80 × (0.5 × content_ratio + 0.5 × fluency_band / 5))
 回填已执行：dry-run 6条待修改；--apply 成功6条；随后dry-run待修改0条。默认dry-run，无模型请求。
 
 373项测试通过、on/off两种构建通过、git diff --check通过。预览端真实流程验收待自动部署后补充；本轮不合并main。
+
+## 预览实际验收（2026-10-09）
+
+代码提交 `2dd58ac` 已推送 lyl，Git 自动预览 Ready： https://kai-3nzxwt1n6-yli71641-9949s-projects.vercel.app 。[CI run 37885668482](https://github.com/Liyilin66/kai-kou/actions/runs/37885668482) 的 on/off 两项均 success。生产 main 未合并。
+
+以临时账号，在375×812浏览器完整进入 RA_024、启动录音、用现有真实录音的音频流模拟麦克风、结束并提交，实际上传音频与服务端识别成功。不是新的人类朗读，也没有跳过录音／提交步骤。结果：总分80；内容正确51/53词、2处错误；流利度4/5（Advanced）、D=1/L=0；发音明确“本版本未评估”，没有任何发音数字。规则弹窗有官方p.15/p.46依据、全部项目阈值、50/50公式与“不是官方单题分”说明。页面与弹窗scrollWidth均375，无横向溢出，流利度证据按钮可回听。
+
+真实数据库核查：诊断 metrics.score.total=80；对应 practice_logs 的 scores 为 overall80/content87/fluency74/pronunciation=null、score_version=ra-score-0.1；feedback_status=done；legacy_status=null，没有调用旧影子模型评分。预览首页“最近RA均分80.0”、RA列表的RA_024“我的：80”正常。6条原有回填记录也逐条核对与对应历史总分一致，发音均null。
+
+截图本机 `output/playwright/task11-reference-score-375.png`、`task11-scoring-rules-375.png`，不提交生成图片。临时验收账号与媒体清理，原真实用户历史回填保留。
+
+待Claude审查提交包括任务10/混合评测尚未合并的3385bd0、2de3a10，以及本任务2dd58ac和本次文档验证提交。只推送lyl，不合并main。
