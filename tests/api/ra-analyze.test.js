@@ -42,7 +42,22 @@ function fixture(options = {}) {
       assert.equal(name, 'complete_ra_analysis');
       if (state.rpcFails) return { error: { message: 'failure' } };
       Object.assign(state.row, args.p_result);
-      if (state.row.status === 'done') state.logs.push({ analysis_id: state.row.id, metrics: state.row.metrics });
+      if (state.row.status === 'done') state.logs.push({
+        analysis_id: state.row.id,
+        metrics: state.row.metrics,
+        score_json: {
+          status: 'diagnosed',
+          analysis_id: state.row.id,
+          diagnosis_version: state.row.rules_version,
+          score_version: state.row.metrics?.score?.score_version,
+          scores: state.row.metrics?.score ? {
+            overall: state.row.metrics.score.total,
+            content: Math.round(10 + 80 * state.row.metrics.score.content.ratio),
+            fluency: Math.round(10 + 80 * state.row.metrics.score.fluency.band / 5),
+            pronunciation: null
+          } : undefined
+        }
+      });
       return { data: { ...state.row } };
     }
   };
@@ -80,16 +95,22 @@ function fixture(options = {}) {
   return { state, invoke };
 }
 
-test('diagnosis uses server reference, persists scoreless log and versions', async () => {
+test('diagnosis uses server reference, persists reference score and versions', async () => {
   const { invoke, state } = fixture();
   const result = await invoke({ ...body, questionContent: 'Forged client text.' });
   assert.equal(result.code, 200);
   assert.equal(result.data.status, 'done');
   assert.equal(result.data.question.content, 'The server reference.');
   assert.equal(result.data.metrics.completeness, 1);
+  assert.equal(result.data.metrics.score.score_version, 'ra-score-0.1');
+  assert.equal(result.data.metrics.score.content.ratio, 1);
+  assert.equal(result.data.metrics.score.fluency.band, 5);
+  assert.equal(result.data.metrics.score.pronunciation.status, 'not_assessed');
+  assert.equal(result.data.metrics.score.total, 90);
   assert.equal(result.data.rules_version, 'ra-diag-0.1');
   assert.equal(state.logs.length, 1);
-  assert.equal(state.logs[0].overall, undefined);
+  assert.deepEqual(state.logs[0].score_json.scores, { overall: 90, content: 90, fluency: 90, pronunciation: null });
+  assert.equal(state.logs[0].score_json.score_version, 'ra-score-0.1');
   assert.ok(result.data.timings_ms.transcribe >= 0);
   assert.equal(state.row.client_transcript, body.client_transcript);
   assert.equal(state.row.transcript, 'The server reference.');

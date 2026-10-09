@@ -41,7 +41,7 @@ export function createRADiagnosisSubmission({ client, fetchImpl = fetch, createI
     if (!response.ok || result.status !== 'done') throw new Error(result.message || result.error?.message || result.error || '录音诊断失败，请稍后重试。');
     // Server reads the saved transcript and reference, and writes the shadow
     // score itself. No client-provided score is trusted or shown to the learner.
-    void fetchImpl('/api/ra/analyze', { method: 'POST', headers, keepalive: true,
+    if (!result.metrics?.score) void fetchImpl('/api/ra/analyze', { method: 'POST', headers, keepalive: true,
       body: JSON.stringify({ action: 'legacy_score', attempt_id: attemptId }) }).catch(() => {});
     return { ...result, diagnosis_version: result.rules_version, kind: 'ra_diagnosis' };
   };

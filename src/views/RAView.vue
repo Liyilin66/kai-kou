@@ -1674,7 +1674,7 @@ async function startRecordingNow() {
                     </div>
                     <p>{{ getHistoryQuestionText(record) || "暂无题目快照" }}</p>
                     <div v-if="!record.diagnosisLabel" class="score-mini">
-                      <span>P {{ Number(record.scores?.pronunciation || 0) }}</span>
+                      <span>P {{ record.scores?.pronunciation == null ? "未评估" : Number(record.scores.pronunciation) }}</span>
                       <span>F {{ Number(record.scores?.fluency || 0) }}</span>
                       <span>C {{ Number(record.scores?.content || 0) }}</span>
                     </div>

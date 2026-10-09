@@ -1,6 +1,10 @@
-// Diagnosis metrics are observations, never PTE scores. Keep this module browser/Node neutral.
+// Unversioned diagnosis observations remain unscored; only versioned reference scores are numeric.
+export function hasRAReferenceScore(score) {
+  return score?.score_version === 'ra-score-0.1' && hasNumericScore(score?.scores?.overall);
+}
+
 export function isRADiagnosis(score) {
-  return Boolean(score && (score.analysis_id || score.diagnosis_version));
+  return Boolean(score && (score.analysis_id || score.diagnosis_version) && !hasRAReferenceScore(score));
 }
 
 export function diagnosisLabel(score) {

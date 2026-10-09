@@ -82,3 +82,10 @@ test('home score presentation uses a placeholder for diagnosis-only averages', (
   assert.equal(invoke('src/lib/home-analytics.js', 'formatScore(null)'), '--');
   assert.equal(invoke('src/lib/home-desktop-dashboard.js', 'buildWeeklyGoal({ averageScore: null }).currentValue'), null);
 });
+const reference={...diagnosis,score_json:{...diagnosis.score_json,score_version:'ra-score-0.1',scores:{overall:78,content:82,fluency:74,pronunciation:null}}};
+test('versioned RA reference scores appear in history, home and agent while pronunciation stays absent',()=>{
+ const log=invoke('src/lib/ra-history.js',`normalizeRALog(${JSON.stringify(reference)})`);assert.equal(log.overall,78);assert.equal(log.scores.pronunciation,null);assert.equal(log.diagnosisLabel,'');assert.equal(log.analysisId,'analysis-1');
+ assert.equal(invoke('src/lib/home-analytics.js',`buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([reference])}).averageScore`),78);
+ assert.equal(invoke('backend/agent/build-agent-context.js',`buildPracticeSummary(normalizePracticeLogs(${JSON.stringify([reference])}), []).recent_average_score_90_scale`),78);
+ const buckets=invoke('src/lib/profile-portrait.js',`(() => { const buckets=createMetricBuckets();applyRowSignalsToBuckets(${JSON.stringify(reference)},buckets);return buckets;})()`);assert.equal(buckets.pronunciation.signalCount,0);assert.ok(buckets.content.signalCount>0);assert.ok(buckets.fluency.signalCount>0);
+});

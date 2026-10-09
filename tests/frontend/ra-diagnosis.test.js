@@ -127,3 +127,8 @@ test('without evidence or a saved attempt, feedback has no invented problems and
   assert.deepEqual(output.feedback.suggestions, []);
   assert.ok(output.feedback.summary.length);
 });
+test('versioned deterministic reference score does not invoke legacy model scoring',async()=>{
+ const events=[];const submit=createRADiagnosisSubmission({client:clientStub(events),createId:()=> 'attempt-score',fetchImpl:async(url,opts)=>{const body=JSON.parse(opts.body);events.push(['request',body]);return new Response(JSON.stringify({status:'done',metrics:{score:{score_version:'ra-score-0.1',total:80}}}));}});
+ await submit({blob:new Blob(['audio'],{type:'audio/webm'}),questionId:'RA_001',speechDiagnosis});
+ assert.equal(events.filter(e=>e[0]==='request').length,1);
+});

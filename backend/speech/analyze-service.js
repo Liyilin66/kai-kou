@@ -1,3 +1,4 @@
+import { scoreRA } from './scoring.js';
 import { alignWords } from './align.js';
 import { extractFeatures } from './features.js';
 import { buildEvidence } from './evidence.js';
@@ -55,6 +56,7 @@ export async function diagnoseRecording({ db, row, body, transcribe = transcribe
   const features = extractFeatures({ alignment, referenceText: row.reference_text, silences: body.silences,
     speech_onset_ms: body.speech_onset_ms, speech_offset_ms: body.speech_offset_ms, duration_ms: body.duration_ms });
   const evidence = buildEvidence({ alignment, ...features });
+  if (recognized.words.length) features.metrics.score = scoreRA({ alignment, pauses: features.pauses, metrics: features.metrics });
   timings.features_evidence = Math.round(performance.now() - step);
   timings.total = Math.round(performance.now() - started);
   return { status: recognized.words.length ? 'done' : 'unusable_audio', transcript: recognized.text,

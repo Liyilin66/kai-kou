@@ -129,3 +129,40 @@ Score Guide 第 15 页公开的 RA 评分配置是：
 - “完全复刻 Pearson / Versant 评分。”
 - “Azure 分数就是 PTE 发音分。”
 - “官方公开了 RA 对 Reading/Speaking 的精确权重。”
+
+## 项目规则 ra-score-0.1
+
+本版本按官方公开评分项提供内容和流利度参考分；下列数值公式、阈值和忽略规则均为**项目自定**，不是 Pearson 官方单题评分公式。
+
+### 内容
+
+官方依据：Score Guide p.15 每处 replacement、omission、insertion 计一个词级错误。项目以归一化对齐参考记号数为 N（数字、缩写和复合词沿用当前对齐），errors 为替换＋漏读＋插入，重复读出的多余词按插入计。项目判定：homophone、low_confidence 不扣错，填充词 um/uh 等不扣错，同一参考位置替换与漏读只计一次；独立插入分别计错。
+
+`correct = max(0, N − errors)`；`content_ratio = N > 0 ? correct/N : 0`。内容卡显示正确 x/N 词、k 处错误。该值依赖识别与对齐，不能自动覆盖发音错误。
+
+### 流利度
+
+官方依据：Score Guide p.46 的 0–5 档中文归纳见上表。项目阈值：D=现有句中犹豫次数（≥0.5秒）＋识别到的重复次数；L=现有长停顿次数（≥2秒）；W=现有语速（词/分钟）；R=相邻词无≥0.5秒音频停顿的最长连续片段词数。R 根据已有音频能量静音区间与词时间定位分段，包含自然停顿断点，**不根据 Whisper 词间间隙重新定义停顿**。
+
+按顺序取第一个满足条件的档位：
+
+| 档位 | 档名 | 项目判定 |
+|---|---|---|
+| 0 | Disfluent | L≥2 且 R<3；或 W<40 |
+| 1 | Limited | L≥2；或 D≥6 |
+| 2 | Intermediate | L=1；或 D 为4–5 |
+| 3 | Good | D 为2–3 |
+| 4 | Advanced | D=1；或 D=0 且 W<90 |
+| 5 | Highly proficient | D=0、L=0、W≥90 |
+
+同一条 long_pause 不再算作 hesitation，以现有诊断类别为准；重复来自转写，可能漏检，假开头无法检测。语速低于阈值时的分档仍是项目判定，不把它写成官方的 WPM 要求。卡片显示档位／5及官方档名，并可点击已有犹豫、重复、长停顿证据回听；缺乏回听定位的速度条件只显示数值，不制造证据。
+
+### 发音与总分
+
+发音显示“本版本未评估”：现有技术无法可靠测量发音，测不出来的项不给分。不显示数字、不算发音均值、不计总分。
+
+```
+total = round(10 + 80 × (0.5 × content_ratio + 0.5 × fluency_band / 5))
+```
+
+总分范围10–90。两项各50%的权重及10–90换算是项目自定，**不包含发音，不等于 Pearson 官方单题分**。历史存储：`scores.overall=total`、`scores.content=round(10+80×ratio)`、`scores.fluency=round(10+80×band/5)`、`scores.pronunciation=null`，同时保存 `score_version=ra-score-0.1` 与全部原始依据。旧无版本诊断记录仍不将旧影子模型数字当作本版本分数；回填只处理已有 done 诊断，不从音频重新调用模型。

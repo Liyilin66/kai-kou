@@ -134,10 +134,11 @@ export function normalizeRALog(row) {
       content
     },
     overall,
-    analysisId: diagnosis ? `${scoreJson.analysis_id || ""}` : "",
-    diagnosisVersion: diagnosis ? `${scoreJson.diagnosis_version || ""}` : "",
+    analysisId: scoreJson?.analysis_id ? `${scoreJson.analysis_id || ""}` : "",
+    diagnosisVersion: scoreJson?.diagnosis_version ? `${scoreJson.diagnosis_version || ""}` : "",
     diagnosisLabel: diagnosisLabel(scoreJson),
-    metrics: diagnosis ? toObject(scoreJson.metrics) : null,
+    metrics: scoreJson?.analysis_id ? toObject(scoreJson.metrics) : null,
+    scoreVersion: scoreJson?.score_version || null,
     audio,
     questionSnapshot: questionSnapshot
       ? {
