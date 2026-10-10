@@ -1667,7 +1667,8 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
   .row-top{grid-template-columns:minmax(0,2fr) minmax(0,1fr);}
   .row-top .hero-card{grid-column:1;grid-row:1;}
   .row-top .sc-card{grid-column:1;grid-row:2;}
-  .row-top .ai-card{grid-column:2;grid-row:1 / span 2;}
+  /* Size to its own content: with few messages the actions sit right under them instead of at the bottom of a stretched card. */
+  .row-top .ai-card{grid-column:2;grid-row:1 / span 2;align-self:start;}
   .row-report{grid-template-columns:repeat(12,minmax(0,1fr));}
   .row-report .hm-card,.row-report .trend-card{grid-column:span 6;}
   .row-report .weak-card,.row-report .goal-card,.row-report .recent-card{grid-column:span 4;}

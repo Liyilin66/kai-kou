@@ -21,6 +21,7 @@ import {
   loadProfileProgressSnapshotForAuth
 } from "@/lib/profile-progress";
 import { supabase } from "@/lib/supabase";
+import { rankFocusModules, visibleFavoriteTiles, withoutClosedTaskTypes } from "@/lib/profile-task-filters";
 
 const route = useRoute();
 const router = useRouter();
@@ -322,24 +323,15 @@ const identityConfig = computed(() => [
 ]);
 
 const focusModules = computed(() => {
-  const explicit = normalizeListValue(
+  const explicit = withoutClosedTaskTypes(normalizeListValue(
     profile.value?.focus_modules ||
     profile.value?.focusModules ||
     profile.value?.priority_modules ||
     authStore.user?.user_metadata?.focus_modules
-  );
+  ));
   if (explicit.length) return explicit.slice(0, 4).join(" / ");
 
-  const completedCounts = profileProgress.value?.completedCounts || {};
-  const ranked = ["RA", "DI", "WFD", "RTS", "WE", "RS"]
-    .map((taskType) => ({
-      taskType,
-      count: Number(completedCounts[taskType] || 0)
-    }))
-    .sort((left, right) => left.count - right.count)
-    .map((item) => item.taskType);
-
-  return ranked.slice(0, 3).join(" / ") || "RA / DI / WFD";
+  return rankFocusModules(profileProgress.value?.completedCounts || {}).join(" / ");
 });
 
 const dailyStudyTime = computed(() => {
@@ -374,17 +366,9 @@ const aiIntensity = computed(() =>
   ) || "标准"
 );
 
-const favorites = computed(() => {
-  const summary = favoritesSnapshot.value;
-  const counts = summary.countsByTask || {};
-
-  return favoriteTaskTypes.map((item) => ({
-    ...item,
-    count: Number(counts[item.type] || 0)
-  }));
-});
-
-const favoriteTotalCount = computed(() => Number(favoritesSnapshot.value.totalCount || 0));
+const visibleFavorites = computed(() => visibleFavoriteTiles(favoriteTaskTypes, favoritesSnapshot.value.countsByTask || {}));
+const favorites = computed(() => visibleFavorites.value.items);
+const favoriteTotalCount = computed(() => visibleFavorites.value.total);
 
 const favoriteSummaryText = computed(() => {
   if (favoritesSnapshot.value.loading) return "正在同步你的重点题目。";
