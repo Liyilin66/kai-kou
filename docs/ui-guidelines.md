@@ -159,7 +159,7 @@
 3. 三个核心数字
 4. 题型入口
 5. AI 私教建议
-6. **学习报告区**（保留现有锚点：`HomeView` 的 `#report`，`HomeDesktopDashboard` 的 `#desktop-report`）：本周学习热力图、得分趋势、我的弱项 Top 3、本周目标、最近练习
+6. **学习报告区**（保留现有锚点 `#report`）：本周学习热力图、得分趋势、我的弱项 Top 3、本周目标、最近练习
 
 各宽度的排法：
 - **电脑：** 左侧 232px 固定侧栏，主区最大宽度 1160、居中，12 列网格。今日任务和三个数字占左 8 列，AI 私教占右 4 列、跨两行；题型入口占满一行；学习报告区里，热力图和趋势各占 6 列，弱项、本周目标、最近练习各占 4 列。
@@ -168,7 +168,7 @@
 - **侧栏导航：** 每一项都滚动到首页对应区块：练习中心 → 题型入口，学习计划 → 本周目标，学习报告 → 学习报告区。锚点 id 保持不变。**不新建报告页。**
 - **题型入口：** 必须用 `getEnabledTaskTypes({ types: HOME_TASK_TYPES })` 过滤，名称取自 `HOME_TASK_TYPE_META`。DI 在生产环境关闭，不能出现。不要写死卡片数量，网格用 `repeat(auto-fit, minmax(160px, 1fr))`，电脑端最多一行 5 个。
 - **WFD 中文名：** 统一为"听写句子"，以 `src/stores/practice.js` 为准。同步修改 `HOME_TASK_TYPE_META.WFD.name`（现在是"写作填空"）。
-- **两份实现：** 首页现在有 `HomeView.vue` 和 `HomeDesktopDashboard.vue` 两份实现，两者都按本规范改，不合并、不删除。
+- **实现文件：** 只按规范改 `HomeView.vue`。`HomeDesktopDashboard.vue` 和 `HomeReplicaView.vue` 在应用里没有任何引用、不在线上使用，这两个文件不改样式，也不截图。
 
 ### 7.3 练习页（RA / RS / RTS / WFD / RL / WE 通用）
 
