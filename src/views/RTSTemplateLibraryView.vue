@@ -45,23 +45,23 @@ function formatSerial(value) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F0F4F8] [font-family:'DM_Sans',-apple-system,'PingFang_SC',sans-serif]">
-    <header class="bg-[#1B3A6B] text-white">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <button type="button" class="text-sm text-white/90 transition-opacity hover:opacity-90" @click="goBack">← 返回首页</button>
+  <div class="kk-page min-h-screen">
+    <header class="border-b border-kk-line bg-kk-surface text-kk-ink">
+      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-16 lg:px-10">
+        <button type="button" class="-ml-2 inline-flex min-h-[44px] items-center px-2 text-[15px] font-medium text-kk-ink hover:text-kk-action-text" @click="goBack">← 返回首页</button>
         <p class="text-base font-semibold">RTS 模板库</p>
-        <button type="button" class="text-xs text-white/80 transition-opacity hover:opacity-90" @click="goRTSHome">RTS 首页</button>
+        <button type="button" class="inline-flex min-h-[44px] items-center px-1 text-sm font-semibold text-kk-action-text" @click="goRTSHome">RTS 首页</button>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-6">
-      <section class="rounded-[14px] border border-[#E8EDF5] bg-white p-5">
+    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <section class="rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p class="text-base font-semibold text-[#1E293B]">按场景分类模板</p>
-            <p class="mt-1 text-sm text-[#8CA0C0]">共 {{ totalTemplates }} 条模板，全部来自 RTS 模板文档。</p>
+            <p class="text-[17px] font-semibold text-kk-ink">按场景分类模板</p>
+            <p class="mt-1 text-sm text-kk-ink-3">共 {{ totalTemplates }} 条模板，全部来自 RTS 模板文档。</p>
           </div>
-          <span class="rounded-full bg-[#EDF2FB] px-3 py-1 text-xs font-semibold text-[#1B3A6B]">
+          <span class="rounded-full bg-kk-surface-2 px-3 py-1 text-xs font-semibold text-kk-ink-2">
             当前分类：{{ activeCategoryMeta?.label || "-" }}（{{ activeCategoryMeta?.count || 0 }}）
           </span>
         </div>
@@ -71,10 +71,10 @@ function formatSerial(value) {
             v-for="item in categoryTabs"
             :key="item.key"
             type="button"
-            class="rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+            class="inline-flex min-h-[40px] items-center rounded-full border px-4 text-sm font-medium transition-colors"
             :class="item.key === activeCategory
-              ? 'border-[#1B3A6B] bg-[#1B3A6B] text-white'
-              : 'border-[#E8EDF5] bg-white text-[#1E293B] hover:bg-[#F8FAFD]'"
+              ? 'border-kk-ink bg-kk-ink text-kk-ink-inverse'
+              : 'border-kk-line bg-kk-surface text-kk-ink hover:bg-kk-surface-2'"
             @click="selectCategory(item.key)"
           >
             {{ item.label }} · {{ item.tag }} · {{ item.count }}
@@ -86,22 +86,22 @@ function formatSerial(value) {
         <article
           v-for="item in activeTemplates"
           :key="item.id"
-          class="rounded-[14px] border border-[#E8EDF5] bg-white p-4"
+          class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk sm:p-5"
         >
           <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full bg-[#FFF3EC] px-2.5 py-1 text-xs font-semibold text-[#E8845A]">#{{ formatSerial(item.serial) }}</span>
-            <span class="rounded-full bg-[#EDF2FB] px-2.5 py-1 text-xs text-[#1B3A6B]">{{ item.categoryLabel }}</span>
-            <span class="rounded-full bg-[#F8FAFD] px-2.5 py-1 text-xs text-[#8CA0C0]">{{ item.id }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs font-semibold text-kk-ink kk-num">#{{ formatSerial(item.serial) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ item.categoryLabel }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-3">{{ item.id }}</span>
           </div>
 
-          <p class="mt-3 text-sm font-semibold text-[#1E293B]">{{ item.title }}</p>
-          <p class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-[#F8FAFD] p-3 text-sm leading-relaxed text-[#1E293B]">
+          <p class="mt-3 text-[15px] font-semibold text-kk-ink">{{ item.title }}</p>
+          <p class="mt-2 rounded-2xl border border-kk-line bg-kk-surface-2 p-3 text-[15px] leading-relaxed text-kk-ink kk-text">
             {{ item.content }}
           </p>
-          <p class="mt-2 text-xs text-[#8CA0C0]">所属分类：{{ item.categoryLabel }}（{{ activeCategoryMeta?.tag || item.category }}）</p>
+          <p class="mt-2 text-xs text-kk-ink-3">所属分类：{{ item.categoryLabel }}（{{ activeCategoryMeta?.tag || item.category }}）</p>
         </article>
 
-        <div v-if="!activeTemplates.length" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+        <div v-if="!activeTemplates.length" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
           当前分类暂无模板内容。
         </div>
       </section>

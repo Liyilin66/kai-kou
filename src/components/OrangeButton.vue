@@ -28,6 +28,8 @@ const props = defineProps({
 const componentType = computed(() => (props.to ? RouterLink : "button"));
 
 const toneClass = computed(() => {
+  // "action" follows docs/ui-guidelines.md (primary button); other tones are the legacy look.
+  if (props.tone === "action") return "rounded-full bg-kk-action font-bold text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press disabled:opacity-45";
   if (props.tone === "soft") return "bg-[#EDBBA5] text-white hover:bg-[#e3ab92]";
   if (props.tone === "outline") return "border-2 border-[#D1D5DB] bg-white text-[#1A1A2E] hover:bg-[#F8FAFC]";
   return "bg-orange text-white hover:bg-[#D7744A]";

@@ -429,20 +429,20 @@ function resolveDisplayScores({ review, status } = {}) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F5F7FB]">
-    <NavBar title="RTS AI评分结果" back-to="/rts/practice" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="RTS AI评分结果" back-to="/rts/practice" variant="kk" />
 
-    <main class="mx-auto max-w-3xl px-4 py-5">
-      <section v-if="loading" class="rounded-2xl border border-[#E8EDF5] bg-white px-4 py-6 text-sm text-[#8CA0C0]">
+    <main class="mx-auto max-w-3xl px-4 py-5 sm:px-6 lg:py-8">
+      <section v-if="loading" class="rounded-[20px] border border-kk-line bg-kk-surface px-5 py-6 text-sm text-kk-ink-3 shadow-kk">
         结果加载中...
       </section>
 
-      <section v-else-if="loadError" class="rounded-2xl border border-[#F2D6D3] bg-[#FFF7F6] p-4">
-        <p class="text-sm font-semibold text-[#B42318]">结果读取失败</p>
-        <p class="mt-1 text-sm text-[#D92D20]">{{ loadError }}</p>
+      <section v-else-if="loadError" class="rounded-[20px] border border-kk-error-line bg-kk-error-bg p-5">
+        <p class="text-sm font-semibold text-kk-error">结果读取失败</p>
+        <p class="mt-1 text-sm text-kk-error">{{ loadError }}</p>
         <button
           type="button"
-          class="mt-4 rounded-[11px] border border-[#E8EDF5] bg-white px-4 py-2 text-sm text-[#1B3A6B]"
+          class="mt-4 inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-5 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2"
           @click="goBackPractice"
         >
           返回练习页
@@ -450,86 +450,86 @@ function resolveDisplayScores({ review, status } = {}) {
       </section>
 
       <template v-else>
-        <section class="rounded-2xl border border-[#E8EDF5] bg-white p-4">
-          <p class="text-xs text-[#8CA0C0]">状态：{{ statusLabel }}</p>
-          <p class="mt-1 text-sm text-[#52627A]">{{ statusMessage }}</p>
-          <ul v-if="detailMessages.length" class="mt-3 space-y-1 text-xs text-[#D92D20]">
+        <section class="rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="text-[13px] font-semibold text-kk-ink-2">状态：{{ statusLabel }}</p>
+          <p class="mt-1 text-[15px] text-kk-ink">{{ statusMessage }}</p>
+          <ul v-if="detailMessages.length" class="mt-3 space-y-1 text-xs text-kk-error">
             <li v-for="(item, idx) in detailMessages" :key="`detail-${idx}`">- {{ item }}</li>
           </ul>
-          <p class="mt-3 text-xs text-[#8CA0C0]">题目 / 场景摘要</p>
-          <p class="mt-1 text-sm leading-relaxed text-[#1E293B]">{{ sceneSummary }}</p>
-          <p class="mt-2 text-xs text-[#8CA0C0]">主题：{{ topicLabel }} · 语气：{{ toneLabel }}</p>
+          <p class="mt-4 text-xs font-semibold uppercase tracking-[0.08em] text-kk-ink-3">题目 / 场景摘要</p>
+          <p class="kk-text mt-1 text-[15px] leading-relaxed text-kk-ink">{{ sceneSummary }}</p>
+          <p class="mt-2 text-[13px] text-kk-ink-3">主题：{{ topicLabel }} · 语气：{{ toneLabel }}</p>
         </section>
 
         <section class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
-            <p class="text-xs text-[#8CA0C0]">Overall</p>
-            <p class="mt-1 text-2xl font-bold text-[#1B3A6B]">{{ displayScores.overall }}</p>
-            <p class="text-xs text-[#8CA0C0]">/90</p>
+          <article class="min-w-0 rounded-2xl border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="text-[13px] font-semibold text-kk-ink-2">Overall</p>
+            <p class="kk-num mt-1 text-[32px] font-extrabold leading-none text-kk-ink">{{ displayScores.overall }}</p>
+            <p class="text-xs text-kk-ink-3">/90</p>
           </article>
-          <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
-            <p class="text-xs text-[#8CA0C0]">Content</p>
-            <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.content }}</p>
-            <p class="text-xs text-[#8CA0C0]">/90</p>
+          <article class="min-w-0 rounded-2xl border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="text-[13px] font-semibold text-kk-ink-2">Content</p>
+            <p class="kk-num mt-1 text-2xl font-extrabold text-kk-ink">{{ displayScores.content }}</p>
+            <p class="text-xs text-kk-ink-3">/90</p>
           </article>
-          <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
-            <p class="text-xs text-[#8CA0C0]">Pronunciation</p>
+          <article class="min-w-0 rounded-2xl border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="text-[13px] font-semibold text-kk-ink-2">Pronunciation</p>
             <template v-if="displayScores.pronunciation == null">
-              <p class="mt-1 text-sm font-semibold text-[#1E293B]" data-testid="rts-pronunciation-not-assessed">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</p>
-              <p class="text-xs text-[#8CA0C0]">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
+              <p class="mt-1 text-sm font-semibold text-kk-ink" data-testid="rts-pronunciation-not-assessed">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</p>
+              <p class="text-xs text-kk-ink-3">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
             </template>
             <template v-else>
-              <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.pronunciation }}</p>
-              <p class="text-xs text-[#8CA0C0]">/90</p>
+              <p class="kk-num mt-1 text-2xl font-extrabold text-kk-ink">{{ displayScores.pronunciation }}</p>
+              <p class="text-xs text-kk-ink-3">/90</p>
             </template>
           </article>
-          <article class="rounded-xl border border-[#E8EDF5] bg-white p-3">
-            <p class="text-xs text-[#8CA0C0]">Fluency</p>
-            <p class="mt-1 text-xl font-semibold text-[#1E293B]">{{ displayScores.fluency }}</p>
-            <p class="text-xs text-[#8CA0C0]">/90</p>
+          <article class="min-w-0 rounded-2xl border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="text-[13px] font-semibold text-kk-ink-2">Fluency</p>
+            <p class="kk-num mt-1 text-2xl font-extrabold text-kk-ink">{{ displayScores.fluency }}</p>
+            <p class="text-xs text-kk-ink-3">/90</p>
           </article>
         </section>
 
-        <section class="mt-4 rounded-2xl border border-[#E8EDF5] bg-white p-4">
-          <p class="text-sm font-semibold text-[#1B3A6B]">用户录音</p>
+        <section class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="text-[17px] font-semibold text-kk-ink">用户录音</p>
           <audio v-if="playbackUrl" class="mt-3 w-full" controls :src="playbackUrl" />
-          <p v-else class="mt-2 text-xs text-[#8CA0C0]">当前录音暂不可回放，但练习记录已保留。</p>
+          <p v-else class="mt-2 text-xs text-kk-ink-3">当前录音暂不可回放，但练习记录已保留。</p>
         </section>
 
-        <section class="mt-4 rounded-2xl border border-[#E8EDF5] bg-white p-4">
-          <p class="text-sm font-semibold text-[#1B3A6B]">Transcript</p>
-          <p class="mt-2 text-sm leading-relaxed text-[#52627A]">
+        <section class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="text-[17px] font-semibold text-kk-ink">Transcript</p>
+          <p class="kk-text mt-2 text-[17px] leading-relaxed text-kk-ink">
             {{ transcript || "未识别到有效 transcript。" }}
           </p>
         </section>
 
-        <section class="mt-4 rounded-2xl border border-[#E8EDF5] bg-white p-4">
-          <p class="text-sm font-semibold text-[#1B3A6B]">中文反馈</p>
-          <ul v-if="feedbackList.length" class="mt-2 space-y-1 text-sm text-[#52627A]">
+        <section class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="text-[17px] font-semibold text-kk-ink">中文反馈</p>
+          <ul v-if="feedbackList.length" class="mt-2 space-y-2 text-[15px] leading-relaxed text-kk-ink-2">
             <li v-for="(item, idx) in feedbackList" :key="`feedback-${idx}`">- {{ item }}</li>
           </ul>
-          <p v-else class="mt-2 text-sm text-[#8CA0C0]">暂无反馈内容。</p>
+          <p v-else class="mt-2 text-sm text-kk-ink-3">暂无反馈内容。</p>
         </section>
 
-        <section class="mt-4 rounded-2xl border border-[#E8EDF5] bg-white p-4">
-          <p class="text-sm font-semibold text-[#1B3A6B]">更优回答建议</p>
-          <p class="mt-2 text-sm leading-relaxed text-[#52627A]">
+        <section class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="text-[17px] font-semibold text-kk-ink">更优回答建议</p>
+          <p class="kk-text mt-2 text-[17px] leading-relaxed text-kk-ink">
             {{ betterExpression || "Hey, tell the main problem first, then give one simple and clear suggestion." }}
           </p>
         </section>
 
         <section class="mt-5 space-y-3">
-          <OrangeButton full @click="goNextQuestion">下一题</OrangeButton>
+          <OrangeButton full tone="action" @click="goNextQuestion">下一题</OrangeButton>
           <button
             type="button"
-            class="w-full rounded-[11px] border border-[#E8EDF5] bg-white px-4 py-3 text-sm font-semibold text-[#1B3A6B]"
+            class="min-h-[48px] w-full rounded-full border border-kk-line bg-kk-surface px-4 py-3 text-[15px] font-semibold text-kk-ink hover:bg-kk-surface-2"
             @click="goBackPractice"
           >
             返回继续练习
           </button>
           <button
             type="button"
-            class="w-full rounded-[11px] border border-transparent bg-[#F3F6FB] px-4 py-3 text-sm text-[#52627A]"
+            class="min-h-[44px] w-full rounded-full px-4 py-3 text-sm font-semibold text-kk-action-text hover:bg-kk-surface-2"
             @click="goRTSHome"
           >
             返回 RTS 首页

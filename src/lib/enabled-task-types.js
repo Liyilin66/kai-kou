@@ -6,7 +6,7 @@ export const HOME_TASK_TYPE_ORDER = HOME_TASK_TYPES;
 
 export const HOME_TASK_TYPE_META = {
   RA: { label: "RA", name: "朗读句子", path: "/ra" },
-  WFD: { label: "WFD", name: "写作填空", path: "/wfd" },
+  WFD: { label: "WFD", name: "听写句子", path: "/wfd" },
   RTS: { label: "RTS", name: "情景回应", path: "/rts" },
   DI: { label: "DI", name: "描述图表", path: "/di" },
   WE: { label: "WE", name: "写作议论文", path: "/we" }

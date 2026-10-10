@@ -22,7 +22,7 @@ const ESTIMATED_TASK_DURATION_MINUTES = {
 
 const TASK_META = {
   RA: { label: "RA", title: "朗读句子", accent: "#5B6FFF" },
-  WFD: { label: "WFD", title: "写作填空", accent: "#20C997" },
+  WFD: { label: "WFD", title: "听写句子", accent: "#20C997" },
   RTS: { label: "RTS", title: "情景回应", accent: "#FF9B42" },
   DI: { label: "DI", title: "描述图表", accent: "#7B6CFF" },
   WE: { label: "WE", title: "写作议论文", accent: "#4D8DFF" },

@@ -132,21 +132,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F0F4F8] [font-family:'DM_Sans',-apple-system,'PingFang_SC',sans-serif]">
-    <header class="bg-[#1B3A6B] text-white">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <button type="button" class="text-sm text-white/90 transition-opacity hover:opacity-90" @click="goBack">← 返回首页</button>
+  <div class="kk-page min-h-screen">
+    <header class="border-b border-kk-line bg-kk-surface text-kk-ink">
+      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-16 lg:px-10">
+        <button type="button" class="-ml-2 inline-flex min-h-[44px] items-center px-2 text-[15px] font-medium text-kk-ink hover:text-kk-action-text" @click="goBack">← 返回首页</button>
         <p class="text-base font-semibold">RTS 收藏</p>
-        <button type="button" class="text-xs text-white/80 transition-opacity hover:opacity-90" @click="goRTSHome">RTS 首页</button>
+        <button type="button" class="inline-flex min-h-[44px] items-center px-1 text-sm font-semibold text-kk-action-text" @click="goRTSHome">RTS 首页</button>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-6">
-      <section v-if="loading" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <section v-if="loading" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
         收藏加载中...
       </section>
 
-      <section v-else-if="!favoriteQuestions.length" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+      <section v-else-if="!favoriteQuestions.length" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
         暂无 RTS 收藏题目。
       </section>
 
@@ -154,15 +154,15 @@ onMounted(() => {
         <article
           v-for="question in favoriteQuestions"
           :key="question.id"
-          class="cursor-pointer rounded-[14px] border border-[#E8EDF5] bg-white p-4 transition-colors hover:bg-[#F8FAFD]"
+          class="cursor-pointer rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk transition-colors hover:bg-kk-surface-2 sm:p-5"
           @click="openPractice(question.id)"
         >
           <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full bg-[#EDF2FB] px-2.5 py-1 text-xs font-semibold text-[#1B3A6B]">{{ question.id }}</span>
-            <span class="rounded-full bg-[#F5F7FB] px-2.5 py-1 text-xs text-[#1E293B]">{{ topicLabel(question.topic) }}</span>
-            <span class="rounded-full bg-[#FFF3EC] px-2.5 py-1 text-xs text-[#E8845A]">难度 {{ "★".repeat(Math.max(1, Math.min(3, Number(question.difficulty || 1)))) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs font-semibold text-kk-ink">{{ question.id }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink">{{ topicLabel(question.topic) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">难度 {{ "★".repeat(Math.max(1, Math.min(3, Number(question.difficulty || 1)))) }}</span>
           </div>
-          <p class="mt-3 line-clamp-2 text-sm leading-relaxed text-[#1E293B]">{{ question.content }}</p>
+          <p class="kk-text mt-3 line-clamp-2 text-[15px] leading-relaxed text-kk-ink">{{ question.content }}</p>
         </article>
       </section>
     </main>

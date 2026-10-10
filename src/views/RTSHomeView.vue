@@ -393,14 +393,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F0F4F8] [font-family:'DM_Sans',-apple-system,'PingFang_SC',sans-serif]">
-    <header class="bg-[#1B3A6B] text-white">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <button type="button" class="text-sm text-white/90 transition-opacity hover:opacity-90" @click="goHome">← 返回</button>
+  <div class="kk-page min-h-screen">
+    <header class="border-b border-kk-line bg-kk-surface text-kk-ink">
+      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-16 lg:px-10">
+        <button type="button" class="-ml-2 inline-flex min-h-[44px] items-center px-2 text-[15px] font-medium text-kk-ink hover:text-kk-action-text" @click="goHome">← 返回</button>
         <p class="text-base font-semibold">RTS 情景回应</p>
         <button
           type="button"
-          class="rounded-full border border-white/25 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-white/10"
+          class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line px-4 text-sm font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
           @click="goList"
         >
           题库
@@ -408,26 +408,26 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-5">
-      <section class="rounded-[14px] bg-[#1B3A6B] p-5 text-white">
-        <p class="text-xs uppercase tracking-[0.15em] text-white/75">Respond to a situation</p>
-        <h1 class="mt-2 text-3xl font-bold">听懂场景，开口回应</h1>
-        <p class="mt-3 text-sm leading-relaxed text-white/90">
+    <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      <section class="rounded-[20px] bg-kk-ink p-5 text-kk-ink-inverse sm:p-7">
+        <p class="text-xs font-semibold uppercase tracking-[0.08em] text-[rgba(251,247,241,0.75)]">Respond to a situation</p>
+        <h1 class="mt-2 text-[24px] font-bold leading-snug sm:text-[28px]">听懂场景，开口回应</h1>
+        <p class="mt-3 text-[15px] leading-relaxed text-[rgba(251,247,241,0.75)]">
           系统播放场景和文字，你需要代入角色给出得体口语回应，重点训练语气与场景匹配。
         </p>
 
-        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <article class="rounded-xl bg-white/10 px-4 py-3">
-            <p class="text-2xl font-bold">{{ stats.todayPracticed }}</p>
-            <p class="mt-1 text-xs text-white/80">今日已练</p>
+        <div class="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+          <article class="min-w-0 rounded-2xl bg-white/10 px-3 py-3 sm:px-4">
+            <p class="kk-num text-2xl font-extrabold sm:text-[28px]">{{ stats.todayPracticed }}</p>
+            <p class="mt-1 text-[13px] text-[rgba(251,247,241,0.75)]">今日已练</p>
           </article>
-          <article class="rounded-xl bg-white/10 px-4 py-3">
-            <p class="text-2xl font-bold">{{ stats.totalQuestions }}</p>
-            <p class="mt-1 text-xs text-white/80">题库总量</p>
+          <article class="min-w-0 rounded-2xl bg-white/10 px-3 py-3 sm:px-4">
+            <p class="kk-num text-2xl font-extrabold sm:text-[28px]">{{ stats.totalQuestions }}</p>
+            <p class="mt-1 text-[13px] text-[rgba(251,247,241,0.75)]">题库总量</p>
           </article>
-          <article class="rounded-xl bg-white/10 px-4 py-3">
-            <p class="text-2xl font-bold">{{ stats.averageRating || "0.0" }}</p>
-            <p class="mt-1 text-xs text-white/80">平均评分</p>
+          <article class="min-w-0 rounded-2xl bg-white/10 px-3 py-3 sm:px-4">
+            <p class="kk-num text-2xl font-extrabold sm:text-[28px]">{{ stats.averageRating || "0.0" }}</p>
+            <p class="mt-1 text-[13px] text-[rgba(251,247,241,0.75)]">平均评分</p>
           </article>
         </div>
       </section>
@@ -435,64 +435,63 @@ onBeforeUnmount(() => {
       <section class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           type="button"
-          class="rounded-[14px] bg-[#E8845A] p-5 text-left text-white transition-transform hover:-translate-y-0.5"
+          class="rounded-[20px] bg-kk-action p-5 text-left text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press"
           @click="startRandomPractice"
         >
-          <p class="text-sm font-semibold">随机练习</p>
-          <p class="mt-2 text-xs text-white/90">从题库随机抽题</p>
+          <p class="text-[17px] font-bold">随机练习</p>
+          <p class="mt-1 text-sm text-[rgba(255,255,255,0.9)]">从题库随机抽题</p>
         </button>
         <button
           type="button"
-          class="rounded-[14px] border border-[#E8EDF5] bg-white p-5 text-left text-[#1B3A6B] transition-colors hover:bg-[#F8FAFD]"
+          class="rounded-[20px] border border-kk-line bg-kk-surface p-5 text-left text-kk-ink shadow-kk transition-colors hover:bg-kk-surface-2"
           @click="goList"
         >
-          <p class="text-sm font-semibold">选题练习</p>
-          <p class="mt-2 text-xs text-[#8CA0C0]">按场景和难度筛选</p>
+          <p class="text-[17px] font-bold">选题练习</p>
+          <p class="mt-1 text-sm text-kk-ink-3">按场景和难度筛选</p>
         </button>
       </section>
 
       <section class="mt-5">
-        <p class="mb-2 text-sm font-semibold text-[#1B3A6B]">按场景分类练习</p>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p class="mb-3 text-[17px] font-semibold text-kk-ink">按场景分类练习</p>
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <button
             v-for="topic in topicCards"
             :key="topic.key"
             type="button"
-            class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-left transition-colors hover:bg-[#F8FAFD]"
+            class="min-w-0 rounded-2xl bg-kk-surface-2 p-4 text-left transition-colors hover:bg-kk-line"
             @click="goCategory(topic.key)"
           >
-            <p class="text-xl">{{ topic.emoji }}</p>
-            <p class="mt-1 text-base font-semibold text-[#1E293B]">{{ topic.label }}</p>
-            <p class="mt-1 text-xs text-[#8CA0C0]">{{ topic.count }} 题</p>
-            <span class="mt-2 inline-flex rounded-full px-2.5 py-1 text-xs" :class="topic.badgeClass">{{ topic.tag }}</span>
+            <p class="text-[15px] font-semibold text-kk-ink">{{ topic.label }}</p>
+            <p class="mt-1 text-[13px] text-kk-ink-3">{{ topic.count }} 题</p>
+            <span class="mt-3 inline-flex rounded-full bg-kk-surface px-2.5 py-1 text-xs font-medium text-kk-ink-2">{{ topic.tag }}</span>
           </button>
         </div>
       </section>
 
       <section class="mt-5">
-        <div class="mb-2 flex items-center justify-between">
-          <p class="text-sm font-semibold text-[#1B3A6B]">最近练习（当前题）</p>
-          <button type="button" class="text-xs text-[#8CA0C0] hover:text-[#1B3A6B]" @click="goList">查看全部题库</button>
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <p class="text-[17px] font-semibold text-kk-ink">最近练习（当前题）</p>
+          <button type="button" class="inline-flex min-h-[44px] items-center px-1 text-sm font-semibold text-kk-action-text" @click="goList">查看全部题库</button>
         </div>
 
-        <div v-if="loading" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+        <div v-if="loading" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
           正在读取练习记录...
         </div>
-        <div v-else-if="!currentPractice" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+        <div v-else-if="!currentPractice" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
           当前题目还没有练习记录，先完成一题再回来查看。
         </div>
 
         <div v-else class="space-y-2">
-          <article class="w-full rounded-[14px] border border-[#E8EDF5] bg-white px-4 py-3">
+          <article class="w-full rounded-[20px] border border-kk-line bg-kk-surface px-4 py-4 shadow-kk">
             <div class="flex items-center justify-between gap-3">
-              <p class="line-clamp-1 text-sm font-medium text-[#1E293B]">{{ currentPractice.summary }}</p>
-              <p class="text-sm text-[#1B3A6B]">[{{ renderStars(currentPractice.rating) }}]</p>
+              <p class="line-clamp-1 min-w-0 text-[15px] font-medium text-kk-ink">{{ currentPractice.summary }}</p>
+              <p class="kk-num shrink-0 text-sm font-semibold text-kk-ink">[{{ renderStars(currentPractice.rating) }}]</p>
             </div>
-            <p class="mt-1 text-xs text-[#8CA0C0]">
+            <p class="mt-1 text-[13px] text-kk-ink-3">
               {{ topicLabel(currentPractice.topic) }} · {{ formatDuration(currentPractice.durationSec) }}
             </p>
 
-            <div v-if="currentPractice.hasAudio" class="mt-2 space-y-2">
+            <div v-if="currentPractice.hasAudio" class="mt-3 space-y-2">
               <audio
                 v-if="currentPracticePlayback.url"
                 class="w-full"
@@ -502,7 +501,7 @@ onBeforeUnmount(() => {
               />
               <button
                 type="button"
-                class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+                class="inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
                 :disabled="currentPracticePlayback.loading"
                 @click="loadCurrentPracticePlayback()"
               >
@@ -514,12 +513,12 @@ onBeforeUnmount(() => {
                       : "加载并播放录音"
                 }}
               </button>
-              <p v-if="currentPracticePlayback.error" class="text-xs text-[#D92D20]">{{ currentPracticePlayback.error }}</p>
+              <p v-if="currentPracticePlayback.error" class="text-xs text-kk-error">{{ currentPracticePlayback.error }}</p>
             </div>
 
             <button
               type="button"
-              class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+              class="mt-2 inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
               @click="replayQuestion(currentPractice.questionId)"
             >
               进入题目重练
@@ -529,15 +528,15 @@ onBeforeUnmount(() => {
       </section>
 
       <section class="mt-5">
-        <div class="mb-2 flex items-center justify-between">
-          <p class="text-sm font-semibold text-[#1B3A6B]">历史录音（最近20条）</p>
-          <button type="button" class="text-xs text-[#8CA0C0] hover:text-[#1B3A6B]" @click="loadDashboard">刷新列表</button>
+        <div class="mb-2 flex items-center justify-between gap-3">
+          <p class="text-[17px] font-semibold text-kk-ink">历史录音（最近20条）</p>
+          <button type="button" class="inline-flex min-h-[44px] items-center px-1 text-sm font-semibold text-kk-action-text" @click="loadDashboard">刷新列表</button>
         </div>
 
-        <div v-if="loading" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+        <div v-if="loading" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
           正在加载历史录音...
         </div>
-        <div v-else-if="!visibleHistoryItems.length" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+        <div v-else-if="!visibleHistoryItems.length" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
           还没有可回放的历史录音。
         </div>
 
@@ -545,17 +544,17 @@ onBeforeUnmount(() => {
           <article
             v-for="item in visibleHistoryItems"
             :key="item.id"
-            class="rounded-[14px] border border-[#E8EDF5] bg-white px-4 py-3"
+            class="rounded-[20px] border border-kk-line bg-kk-surface px-4 py-4 shadow-kk"
           >
             <div class="flex items-center justify-between gap-3">
-              <p class="line-clamp-1 text-sm font-medium text-[#1E293B]">{{ item.summary }}</p>
-              <p class="text-sm text-[#1B3A6B]">[{{ renderStars(item.rating) }}]</p>
+              <p class="line-clamp-1 min-w-0 text-[15px] font-medium text-kk-ink">{{ item.summary }}</p>
+              <p class="kk-num shrink-0 text-sm font-semibold text-kk-ink">[{{ renderStars(item.rating) }}]</p>
             </div>
-            <p class="mt-1 text-xs text-[#8CA0C0]">
+            <p class="mt-1 text-[13px] text-kk-ink-3">
               {{ formatDateTime(item.createdAt) }} · {{ formatDuration(item.durationSec) }}
             </p>
 
-            <div v-if="isValidRTSRemoteHistoryRecord(item)" class="mt-2 space-y-2">
+            <div v-if="isValidRTSRemoteHistoryRecord(item)" class="mt-3 space-y-2">
               <audio
                 v-if="getHistoryPlaybackState(item.id).url"
                 class="w-full"
@@ -565,7 +564,7 @@ onBeforeUnmount(() => {
               />
               <button
                 type="button"
-                class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+                class="inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
                 :disabled="getHistoryPlaybackState(item.id).loading"
                 @click="loadHistoryPlayback(item)"
               >
@@ -577,14 +576,14 @@ onBeforeUnmount(() => {
                       : "加载并播放录音"
                 }}
               </button>
-              <p v-if="getHistoryPlaybackState(item.id).error" class="text-xs text-[#D92D20]">
+              <p v-if="getHistoryPlaybackState(item.id).error" class="text-xs text-kk-error">
                 {{ getHistoryPlaybackState(item.id).error }}
               </p>
             </div>
 
             <button
               type="button"
-              class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+              class="mt-2 inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
               @click="replayQuestion(item.questionId)"
             >
               进入题目重练

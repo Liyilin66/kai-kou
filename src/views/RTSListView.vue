@@ -170,36 +170,36 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F0F4F8] [font-family:'DM_Sans',-apple-system,'PingFang_SC',sans-serif]">
-    <header class="bg-[#1B3A6B] text-white">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <button type="button" class="text-sm text-white/90 hover:opacity-90" @click="goBack">← 返回</button>
+  <div class="kk-page min-h-screen">
+    <header class="border-b border-kk-line bg-kk-surface text-kk-ink">
+      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-16 lg:px-10">
+        <button type="button" class="-ml-2 inline-flex min-h-[44px] items-center px-2 text-[15px] font-medium text-kk-ink hover:text-kk-action-text" @click="goBack">← 返回</button>
         <p class="text-base font-semibold">RTS 题库列表</p>
-        <p class="text-xs text-white/75">共{{ filteredQuestions.length }}题</p>
+        <p class="kk-num text-sm text-kk-ink-3">共{{ filteredQuestions.length }}题</p>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-5">
-      <section class="mb-4 flex gap-2 overflow-x-auto pb-1">
+    <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      <section class="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
         <button
           v-for="item in filterOptions"
           :key="item.value"
           type="button"
-          class="shrink-0 rounded-[20px] border px-3 py-1.5 text-xs font-medium transition-colors"
+          class="inline-flex min-h-[40px] shrink-0 items-center rounded-full border px-4 text-sm font-medium transition-colors"
           :class="activeFilter === item.value
-            ? 'border-[#1B3A6B] bg-[#1B3A6B] text-white'
-            : 'border-[#E8EDF5] bg-white text-[#1E293B] hover:bg-[#F8FAFD]'"
+            ? 'border-kk-ink bg-kk-ink text-kk-ink-inverse'
+            : 'border-kk-line bg-kk-surface text-kk-ink hover:bg-kk-surface-2'"
           @click="() => { activeFilter = item.value; syncRouteWithFilter(item.value); }"
         >
           {{ item.label }}
         </button>
       </section>
 
-      <section v-if="loading" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+      <section v-if="loading" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
         题库加载中...
       </section>
 
-      <section v-else-if="!filteredQuestions.length" class="rounded-[14px] border border-[#E8EDF5] bg-white p-4 text-sm text-[#8CA0C0]">
+      <section v-else-if="!filteredQuestions.length" class="rounded-2xl border border-dashed border-kk-line p-4 text-sm text-kk-ink-3">
         当前筛选条件下暂无题目。
       </section>
 
@@ -207,31 +207,31 @@ onMounted(async () => {
         <article
           v-for="question in filteredQuestions"
           :key="question.id"
-          class="cursor-pointer rounded-[14px] border border-[#E8EDF5] bg-white p-4 transition-colors hover:bg-[#F8FAFD]"
+          class="cursor-pointer rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk transition-colors hover:bg-kk-surface-2 sm:p-5"
           @click="startPractice(question.id)"
         >
           <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full bg-[#EDF2FB] px-2.5 py-1 text-xs font-semibold text-[#1B3A6B]">题号 {{ questionNumber(question.id) }}</span>
-            <span class="rounded-full bg-[#F5F7FB] px-2.5 py-1 text-xs text-[#48617F]">{{ question.id }}</span>
-            <span class="rounded-full px-2.5 py-1 text-xs" :class="topicMeta(question.topic).badgeClass">{{ topicMeta(question.topic).label }}</span>
-            <span class="rounded-full bg-[#FFF3EC] px-2.5 py-1 text-xs text-[#E8845A]">{{ toneBadge(question) }}</span>
-            <span class="rounded-full bg-[#F5F7FB] px-2.5 py-1 text-xs text-[#1E293B]">难度 {{ difficultyStars(question) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs font-semibold text-kk-ink">题号 {{ questionNumber(question.id) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ question.id }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ topicMeta(question.topic).label }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ toneBadge(question) }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink">难度 {{ difficultyStars(question) }}</span>
           </div>
 
           <p
-            class="mt-3 text-sm leading-relaxed text-[#1E293B] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden"
+            class="kk-text mt-3 text-[15px] leading-relaxed text-kk-ink [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] overflow-hidden"
           >
             {{ question.content }}
           </p>
 
           <div class="mt-4 flex items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-2 text-xs text-[#8CA0C0]">
-              <span class="rounded-full bg-[#F8FAFD] px-2 py-1">难度点 {{ difficultyStars(question) }}</span>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-kk-ink-3">
+              <span class="rounded-full bg-kk-surface-2 px-2 py-1">难度点 {{ difficultyStars(question) }}</span>
               <span>已练 {{ practicedTimes(question.id) }} 次</span>
             </div>
             <button
               type="button"
-              class="rounded-[11px] bg-[#E8845A] px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+              class="inline-flex min-h-[44px] shrink-0 items-center rounded-full bg-kk-action px-5 text-sm font-bold text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press"
               @click.stop="startPractice(question.id)"
             >
               开始练习

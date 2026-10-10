@@ -398,45 +398,45 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F5F7FB]">
-    <NavBar title="RTS 分析中" back-to="/rts/practice" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="RTS 分析中" back-to="/rts/practice" variant="kk" />
 
     <main class="mx-auto flex min-h-[calc(100vh-72px)] max-w-md flex-col justify-center px-6 py-8">
-      <section class="rounded-[28px] border border-[#E8EDF5] bg-white px-6 py-10 text-center shadow-[0_18px_48px_rgba(27,58,107,0.08)]">
-        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#FFF2EB]">
+      <section class="rounded-[20px] border border-kk-line bg-kk-surface px-6 py-10 text-center shadow-kk">
+        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-kk-surface-2">
           <span class="rts-analyzing-spinner" />
         </div>
 
-        <h1 class="mt-7 text-[32px] font-semibold tracking-[-0.02em] text-[#1B3A6B]">
+        <h1 class="mt-7 text-[24px] font-bold leading-snug text-kk-ink sm:text-[28px]">
           正在分析你的 RTS 作答
         </h1>
-        <p class="mt-3 text-base text-[#7A8CA5]">
+        <p class="mt-3 text-base text-kk-ink-3">
           {{ analyzingHint }}
         </p>
-        <p class="mt-2 text-xs text-[#A0AEC0]">
+        <p class="kk-num mt-2 text-xs text-kk-ink-3">
           已等待 {{ elapsedSeconds }} 秒
         </p>
 
-        <div class="mt-8 rounded-2xl bg-[#F8FAFD] px-4 py-4 text-left">
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#8CA0C0]">
+        <div class="mt-8 rounded-2xl bg-kk-surface-2 px-4 py-4 text-left">
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-kk-ink-3">
             当前题目
           </p>
-          <p class="mt-2 text-sm leading-6 text-[#445468]">
+          <p class="mt-2 text-sm leading-6 text-kk-ink-2">
             {{ sceneSummary }}
           </p>
         </div>
 
-        <p v-if="errorMessage" class="mt-6 rounded-2xl border border-[#F2D6D3] bg-[#FFF7F6] px-4 py-3 text-left text-sm text-[#B42318]">
+        <p v-if="errorMessage" class="mt-6 rounded-2xl border border-kk-error-line bg-kk-error-bg px-4 py-3 text-left text-sm text-kk-error">
           {{ errorMessage }}
         </p>
 
         <div v-if="errorMessage" class="mt-6 space-y-3">
-          <OrangeButton full @click="restartChecking">
+          <OrangeButton full tone="action" @click="restartChecking">
             重新检查
           </OrangeButton>
           <button
             type="button"
-            class="w-full rounded-[12px] border border-[#E8EDF5] bg-white px-4 py-3 text-sm font-semibold text-[#1B3A6B]"
+            class="min-h-[48px] w-full rounded-full border border-kk-line bg-kk-surface px-4 py-3 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2"
             @click="goBackPractice"
           >
             返回练习页
@@ -452,8 +452,8 @@ onUnmounted(() => {
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  border: 4px solid rgba(232, 132, 90, 0.16);
-  border-top-color: #e8845a;
+  border: 4px solid rgba(30, 27, 24, 0.12);
+  border-top-color: var(--kk-ink);
   animation: rts-analyzing-spin 1s linear infinite;
 }
 

@@ -23,13 +23,21 @@ const props = defineProps({
   timer: {
     type: String,
     default: ""
+  },
+  // "kk" opts a page into docs/ui-guidelines.md; pages not yet migrated keep the navy bar.
+  variant: {
+    type: String,
+    default: "legacy"
   }
 });
+
+const isKK = computed(() => props.variant === "kk");
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const statusClass = computed(() => {
+  if (isKK.value) return authStore.isPremium ? "bg-kk-notice-bg text-kk-notice" : "bg-kk-surface-2 text-kk-ink-2";
   if (authStore.isPremium) return "bg-green-100 text-green-700";
   if (authStore.isInTrial) return "bg-orange/10 text-orange";
   return "bg-gray-100 text-gray-500";
@@ -81,15 +89,15 @@ async function handleLogout() {
     </div>
   </div>
 
-  <div v-else class="bg-navy py-3">
+  <div v-else :class="isKK ? 'border-b border-kk-line bg-kk-surface py-2 font-kk' : 'bg-navy py-3'">
     <div class="mx-auto flex h-full max-w-4xl items-center justify-between gap-3 px-4">
       <div class="flex min-w-0 items-center gap-3">
-        <button v-if="backTo" type="button" class="text-white" aria-label="返回上一页" @click="goBack">
+        <button v-if="backTo" type="button" :class="isKK ? '-ml-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-kk-ink hover:bg-kk-surface-2' : 'text-white'" aria-label="返回上一页" @click="goBack">
           <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4">
             <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
-        <span class="truncate text-base font-medium text-white">{{ title }}</span>
+        <span class="truncate text-base" :class="isKK ? 'font-semibold text-kk-ink' : 'font-medium text-white'">{{ title }}</span>
       </div>
 
       <div class="flex shrink-0 items-center gap-2">
@@ -98,10 +106,10 @@ async function handleLogout() {
         </div>
 
         <template v-if="authStore.isLoggedIn">
-          <span class="rounded-full px-2 py-1 text-[11px] font-medium" :class="statusClass">
+          <span class="rounded-full font-medium" :class="[statusClass, isKK ? 'px-3 py-1 text-xs font-semibold' : 'px-2 py-1 text-[11px]']">
             {{ authStore.statusText }}
           </span>
-          <button type="button" class="text-[11px] text-white/80 transition-colors hover:text-white" @click="handleLogout">退出</button>
+          <button type="button" :class="isKK ? 'min-h-[44px] px-2 text-sm text-kk-ink-2 hover:text-kk-ink' : 'text-[11px] text-white/80 transition-colors hover:text-white'" @click="handleLogout">退出</button>
         </template>
       </div>
     </div>

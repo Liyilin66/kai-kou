@@ -1,9 +1,46 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Kai-Kou design tokens: docs/ui-guidelines.md section 2. */
+:root {
+  --kk-bg: #FAF8F4;
+  --kk-surface: #FFFFFF;
+  --kk-surface-2: #F3EFE8;
+  --kk-line: #E8E1D6;
+  --kk-ink: #1E1B18;
+  --kk-ink-2: #5C554E;
+  --kk-ink-3: #6F675F;
+  --kk-ink-inverse: #FBF7F1;
+  --kk-dark-line: #4A433C;
+
+  --kk-action: #D3402A;
+  --kk-action-hover: #BC3622;
+  --kk-action-press: #A32E1C;
+  --kk-action-soft: #FBE9E4;
+  --kk-action-text: #B23421;
+  --kk-on-action: #FFFFFF;
+
+  --kk-success: #1D7148;
+  --kk-success-bg: #E2F2E9;
+  --kk-success-line: #A9D7BD;
+  --kk-error: #6B35A8;
+  --kk-error-bg: #EFE6FA;
+  --kk-error-line: #7B45BB;
+  --kk-notice: #875800;
+  --kk-notice-bg: #FCEFC9;
+  --kk-notice-line: #E2BE62;
+
+  --kk-font: "PingFang SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  --kk-font-num: "Manrope", "PingFang SC", sans-serif;
+  --kk-font-text: "Source Serif 4", Georgia, serif;
+  --kk-shadow: 0 1px 2px rgba(30, 27, 24, 0.05), 0 8px 24px rgba(30, 27, 24, 0.05);
+  --kk-shadow-pop: 0 12px 40px rgba(30, 27, 24, 0.16);
+}
 
 @layer base {
   html,
@@ -16,4 +53,20 @@
     @apply m-0 bg-bg font-sans text-text antialiased;
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Root class for pages already moved to the new visual language; others keep the legacy body styles. */
+.kk-page {
+  background: var(--kk-bg);
+  color: var(--kk-ink);
+  font-family: var(--kk-font);
+}
+
+.kk-num {
+  font-family: var(--kk-font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.kk-text {
+  font-family: var(--kk-font-text);
 }

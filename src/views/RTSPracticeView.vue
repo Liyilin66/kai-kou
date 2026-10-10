@@ -595,7 +595,7 @@ function highlightScenarioContent(text) {
   terms.forEach((term) => {
     const safe = escapeRegExp(escapeHtml(term));
     const regex = new RegExp(`\\b${safe}\\b`, "gi");
-    output = output.replace(regex, (matched) => `<span class=\"rounded bg-[#FFF4CC] px-1\">${matched}</span>`);
+    output = output.replace(regex, (matched) => `<span class=\"rounded bg-kk-notice-bg px-1\">${matched}</span>`);
   });
   return output;
 }
@@ -4328,27 +4328,27 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="min-h-screen bg-[#F0F4F8] [font-family:'DM_Sans',-apple-system,'PingFang_SC',sans-serif]">
-    <header class="bg-[#1B3A6B] text-white">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <button type="button" class="text-sm text-white/90 transition-opacity hover:opacity-90" @click="goHome">← 首页</button>
+  <div class="kk-page min-h-screen">
+    <header class="border-b border-kk-line bg-kk-surface text-kk-ink">
+      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-16 lg:px-10">
+        <button type="button" class="-ml-2 inline-flex min-h-[44px] items-center px-2 text-[15px] font-medium text-kk-ink hover:text-kk-action-text" @click="goHome">← 首页</button>
         <p class="text-base font-semibold">RTS 情景回应</p>
-        <p class="text-xs text-white/80">第{{ questionIndex }}题/共{{ totalQuestions }}</p>
+        <p class="kk-num shrink-0 text-sm text-kk-ink-3">第{{ questionIndex }}题/共{{ totalQuestions }}</p>
       </div>
-      <div class="mx-auto flex max-w-6xl items-center justify-between border-t border-white/15 px-4 py-2">
-        <div class="flex items-center gap-1">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 pb-3 pt-1 sm:px-6 lg:px-10">
+        <div class="flex min-w-0 flex-1 items-center gap-1">
           <span
             v-for="dot in progressDots"
             :key="dot.index"
-            class="h-1.5 w-4 rounded-full transition-colors"
-            :class="dot.active ? 'bg-[#E8845A]' : 'bg-white/25'"
+            class="h-1.5 w-4 min-w-[4px] shrink rounded-full transition-colors"
+            :class="dot.active ? 'bg-kk-action' : 'bg-kk-line'"
           />
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            class="rounded-full border px-2.5 py-1 text-xs transition-colors"
-            :class="isFavorite ? 'border-[#E8845A] bg-[#E8845A] text-white' : 'border-white/25 text-white hover:bg-white/10'"
+            class="inline-flex min-h-[36px] shrink-0 items-center rounded-full border px-3 text-sm font-semibold transition-colors"
+            :class="isFavorite ? 'border-kk-notice-line bg-kk-notice-bg text-kk-notice' : 'border-kk-line text-kk-ink hover:bg-kk-surface-2'"
             :disabled="favoriteBusy"
             @click="toggleFavorite"
           >
@@ -4356,7 +4356,7 @@ onUnmounted(() => {
           </button>
           <button
             type="button"
-            class="rounded-full border border-white/25 px-2.5 py-1 text-xs text-white transition-colors hover:bg-white/10"
+            class="inline-flex min-h-[36px] shrink-0 items-center rounded-full border border-kk-line px-3 text-sm font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
             @click="goList"
           >
             选题
@@ -4365,49 +4365,49 @@ onUnmounted(() => {
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 py-5">
-      <section v-if="loading" class="rounded-[14px] border border-[#E8EDF5] bg-white p-5 text-sm text-[#8CA0C0]">
+    <main class="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      <section v-if="loading" class="rounded-[20px] border border-kk-line bg-kk-surface p-5 text-sm text-kk-ink-3 shadow-kk">
         练习页加载中...
       </section>
 
       <template v-else-if="currentQuestion">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <section class="space-y-4 rounded-[14px] border border-[#E8EDF5] bg-white p-4">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
+          <section class="min-w-0 space-y-4 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk sm:p-5">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full bg-[#EDF2FB] px-2.5 py-1 text-xs font-semibold text-[#1B3A6B]">{{ currentQuestion.id }}</span>
-              <span class="rounded-full px-2.5 py-1 text-xs" :class="topicMeta.badgeClass">{{ topicMeta.label }}</span>
-              <span class="rounded-full bg-[#FFF3EC] px-2.5 py-1 text-xs text-[#E8845A]">{{ toneLabel }}</span>
+              <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs font-semibold text-kk-ink">{{ currentQuestion.id }}</span>
+              <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ topicMeta.label }}</span>
+              <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ toneLabel }}</span>
             </div>
 
-            <div class="rounded-[14px] border border-[#E8EDF5] bg-[#F8FAFD] p-3">
-              <p class="text-xs font-semibold text-[#8CA0C0]">情景描述</p>
-              <div class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-white p-3">
+            <div class="rounded-[20px] border border-kk-line bg-kk-surface-2 p-3">
+              <p class="text-xs font-semibold uppercase tracking-[0.08em] text-kk-ink-3">情景描述</p>
+              <div class="mt-2 rounded-2xl border border-kk-line bg-kk-surface p-3">
                 <div class="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    class="rounded-[11px] bg-[#1B3A6B] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                    class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2"
                     @click="playSceneAudio"
                   >
                     ▶ 播放
                   </button>
-                  <p class="text-xs text-[#8CA0C0]">{{ listeningLabel }}</p>
+                  <p class="text-xs text-kk-ink-3">{{ listeningLabel }}</p>
                 </div>
-                <div class="mt-2 h-2 overflow-hidden rounded-full bg-[#E8EDF5]">
-                  <div class="h-full bg-[#1B3A6B] transition-all" :style="{ width: `${listeningProgress}%` }" />
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-kk-surface-2">
+                  <div class="h-full bg-kk-ink transition-all" :style="{ width: `${listeningProgress}%` }" />
                 </div>
-                <p v-if="autoPlayHint" class="mt-2 text-xs text-[#1B3A6B]">
+                <p v-if="autoPlayHint" class="mt-2 text-[13px] text-kk-ink-2">
                   {{ autoPlayHint }}
                 </p>
-                <p v-if="sceneAudioError" class="mt-2 text-xs text-[#E8845A]">
+                <p v-if="sceneAudioError" class="mt-2 text-[13px] font-medium text-kk-error">
                   {{ sceneAudioError }}
                 </p>
               </div>
 
-              <p class="mt-3 text-sm leading-relaxed text-[#1E293B]" v-html="highlightedScenarioHtml" />
+              <p class="kk-text mt-3 text-[17px] leading-relaxed text-kk-ink" v-html="highlightedScenarioHtml" />
 
-              <div class="mt-3 rounded-[11px] border-l-4 border-[#E8845A] bg-[#FFF8F4] px-3 py-2">
-                <p class="text-xs text-[#8CA0C0]">你的角色</p>
-                <p class="mt-1 text-sm text-[#1E293B]">{{ currentQuestion.key_points?.role || "请根据场景代入角色回应。" }}</p>
+              <div class="mt-3 rounded-2xl border border-kk-line bg-kk-surface px-3 py-2">
+                <p class="text-xs font-semibold text-kk-ink-3">你的角色</p>
+                <p class="mt-1 text-sm text-kk-ink">{{ currentQuestion.key_points?.role || "请根据场景代入角色回应。" }}</p>
               </div>
             </div>
 
@@ -4415,44 +4415,44 @@ onUnmounted(() => {
               <article
                 v-for="stage in stageList"
                 :key="stage.key"
-                class="rounded-[11px] border px-2 py-2 text-center text-xs"
+                class="rounded-full border px-1 py-2 text-center text-xs sm:text-[13px]"
                 :class="stage.isActive
-                  ? 'border-[#1B3A6B] bg-[#EDF2FB] text-[#1B3A6B]'
+                  ? 'border-kk-action bg-kk-action-soft font-semibold text-kk-action-text'
                   : stage.isDone
-                    ? 'border-[#E8845A] bg-[#FFF3EC] text-[#E8845A]'
-                    : 'border-[#E8EDF5] bg-white text-[#8CA0C0]'"
+                    ? 'border-kk-ink bg-kk-ink text-kk-ink-inverse'
+                    : 'border-kk-line bg-kk-surface text-kk-ink-3'"
               >
                 {{ stage.label }}
               </article>
             </div>
 
-            <div class="rounded-[11px] border border-[#E8EDF5] bg-white p-3">
-              <div class="mb-2 flex items-center justify-between">
-                <p class="text-xs text-[#8CA0C0]">{{ timerInfo.label }}</p>
+            <div class="rounded-2xl border border-kk-line bg-kk-surface p-3">
+              <div class="mb-2 flex items-center justify-between gap-2">
+                <p class="text-xs text-kk-ink-3">{{ timerInfo.label }}</p>
                 <div class="flex items-center gap-2">
                   <button
                     v-if="sceneAudioSkipVisible"
                     type="button"
-                    class="rounded-full border border-[#E8EDF5] bg-[#F8FAFD] px-2.5 py-1 text-[11px] font-semibold text-[#1B3A6B] transition-colors hover:bg-white"
+                    class="inline-flex min-h-[32px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-xs font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                     @click="skipSceneAudio"
                   >
                     跳过音频
                   </button>
-                  <p class="text-xs font-semibold text-[#1B3A6B]">{{ timerInfo.remaining }}s</p>
+                  <p class="kk-num text-lg font-extrabold text-kk-action-text">{{ timerInfo.remaining }}s</p>
                 </div>
               </div>
-              <div class="h-2 overflow-hidden rounded-full bg-[#E8EDF5]">
-                <div class="h-full bg-[#E8845A] transition-all" :style="{ width: `${timerInfo.progress}%` }" />
+              <div class="h-2 overflow-hidden rounded-full bg-kk-surface-2">
+                <div class="h-full bg-kk-action transition-all" :style="{ width: `${timerInfo.progress}%` }" />
               </div>
             </div>
 
-            <div class="rounded-[11px] border border-[#E8EDF5] bg-[#F8FAFD] p-3">
-              <div v-if="sceneAudioInlineCalloutVisible" class="mb-3 rounded-[11px] border-2 border-[#E8845A] bg-[#FFF3EC] p-3">
-                <p class="text-sm font-semibold text-[#7A4312]">{{ sceneAudioInlineCalloutTitle }}</p>
-                <p class="mt-1 text-xs leading-relaxed text-[#8C5A32]">{{ sceneAudioInlineCalloutMessage }}</p>
+            <div class="rounded-2xl border border-kk-line bg-kk-surface-2 p-3">
+              <div v-if="sceneAudioInlineCalloutVisible" class="mb-3 rounded-2xl border border-kk-notice-line bg-kk-notice-bg p-3">
+                <p class="text-sm font-semibold text-kk-notice">{{ sceneAudioInlineCalloutTitle }}</p>
+                <p class="mt-1 text-xs leading-relaxed text-kk-notice">{{ sceneAudioInlineCalloutMessage }}</p>
                 <button
                   type="button"
-                  class="mt-3 w-full rounded-[11px] bg-[#E8845A] px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  class="mt-3 w-full min-h-[52px] rounded-full bg-kk-action px-4 py-3 text-[15px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press"
                   @click="playSceneAudio({ reason: 'manual_resume' })"
                 >
                   点击播放场景音频
@@ -4463,7 +4463,7 @@ onUnmounted(() => {
                 <div class="space-y-2">
                   <button
                     type="button"
-                    class="w-full rounded-[11px] bg-[#52C41A] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                    class="w-full min-h-[52px] rounded-full bg-kk-action px-4 py-3 text-[15px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press"
                     @click="playSceneAudio"
                   >
                     {{ listeningActionLabel }}
@@ -4471,7 +4471,7 @@ onUnmounted(() => {
                   <button
                     v-if="sceneAudioPauseToggleVisible"
                     type="button"
-                    class="w-full rounded-[11px] border border-[#1B3A6B] bg-white px-4 py-3 text-sm font-semibold text-[#1B3A6B] hover:bg-[#F8FAFD]"
+                    class="w-full min-h-[48px] rounded-full border border-kk-line bg-kk-surface px-4 py-3 text-[15px] font-semibold text-kk-ink hover:bg-kk-surface-2"
                     @click="toggleSceneAudioPause"
                   >
                     {{ sceneAudioPauseToggleLabel }}
@@ -4481,12 +4481,12 @@ onUnmounted(() => {
 
               <template v-else-if="currentPhase === PHASE.PREPARING">
                 <div class="space-y-2">
-                  <p class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]">
+                  <p class="rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2">
                     准备阶段会在 {{ prepareRemaining }} 秒后自动进入录音。
                   </p>
                   <button
                     type="button"
-                    class="w-full rounded-[11px] bg-[#1B3A6B] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                    class="w-full min-h-[52px] rounded-full bg-kk-action px-4 py-3 text-[15px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press"
                     @click="startRecordingPhase"
                   >
                     开始回应
@@ -4497,33 +4497,33 @@ onUnmounted(() => {
               <template v-else-if="currentPhase === PHASE.RECORDING">
                 <button
                   type="button"
-                  class="w-full rounded-[11px] bg-[#1B3A6B] px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  class="w-full min-h-[52px] rounded-full bg-kk-action px-4 py-3 text-[15px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press disabled:cursor-not-allowed disabled:opacity-45"
                   :disabled="!canStopRecording"
                   @click="stopRecordingPhase('manual')"
                 >
                   {{ recordingStopButtonLabel }}
                 </button>
-                <div class="mt-2 rounded-[11px] bg-white px-3 py-2">
+                <div class="mt-2 rounded-2xl bg-kk-surface px-3 py-2">
                   <RecordingWave :is-recording="Boolean(recorder.isRecording.value)" />
                 </div>
-                <p v-if="recordingStatusHint" class="mt-2 text-xs text-[#8CA0C0]">
+                <p v-if="recordingStatusHint" class="mt-2 text-[13px] text-kk-ink-2">
                   {{ recordingStatusHint }}
                 </p>
               </template>
               <template v-else>
                 <div class="space-y-3">
-                  <section v-if="recorderDebugPanelVisible" class="rounded-[11px] border-2 border-[#E8845A] bg-[#FFF3EC] p-3 text-xs text-[#5B3A1D]">
-                    <p class="text-sm font-semibold text-[#7A4312]">录音诊断（最近一次 stop）</p>
-                    <p class="mt-1 text-[11px] leading-relaxed text-[#8C5A32]">
+                  <section v-if="recorderDebugPanelVisible" class="rounded-2xl border border-kk-notice-line bg-kk-notice-bg p-3 text-xs text-kk-notice">
+                    <p class="text-sm font-semibold text-kk-notice">录音诊断（最近一次 stop）</p>
+                    <p class="mt-1 text-[11px] leading-relaxed text-kk-notice">
                       <template v-if="isRecorderDebugEnabled()">已开启调试显示；未开启时，录音失败或 RTS 二次 probe 警告也会自动显示在这里。</template>
                       <template v-else>本次录音存在失败或兼容性警告，已强制显示关键诊断信息。</template>
                     </p>
-                    <div v-if="!recorderDiagDisplay" class="mt-2 rounded border border-[#F5D0A9] bg-white/80 px-2 py-2 text-[11px] text-[#8C5A32]">
+                    <div v-if="!recorderDiagDisplay" class="mt-2 rounded border border-kk-notice-line bg-kk-surface px-2 py-2 text-[11px] text-kk-notice">
                       暂无 stop 结果，完成一次录音后会显示最近一次诊断。
                     </div>
                     <div v-else class="mt-2 space-y-2">
-                      <div class="rounded border border-[#F5D0A9] bg-white/80 px-2 py-2">
-                        <p class="font-semibold text-[#7A4312]">核心状态</p>
+                      <div class="rounded border border-kk-notice-line bg-kk-surface px-2 py-2">
+                        <p class="font-semibold text-kk-notice">核心状态</p>
                         <p class="mt-1">failureType: {{ formatRecorderDiagValue(recorderDiagDisplay.failureType) }}</p>
                         <p>failureStage: {{ formatRecorderDiagValue(recorderDiagDisplay.failureStage) }}</p>
                         <p>sharedLayerUsable: {{ formatRecorderDiagValue(recorderDiagDisplay.sharedLayerUsable) }}</p>
@@ -4543,8 +4543,8 @@ onUnmounted(() => {
                         <p>stopErrorMessage: {{ formatRecorderDiagValue(recorderDiagDisplay.stopErrorMessage) }}</p>
                       </div>
 
-                      <div class="rounded border border-[#F5D0A9] bg-white/80 px-2 py-2">
-                        <p class="font-semibold text-[#7A4312]">blob / MIME</p>
+                      <div class="rounded border border-kk-notice-line bg-kk-surface px-2 py-2">
+                        <p class="font-semibold text-kk-notice">blob / MIME</p>
                         <p class="mt-1">blobSize: {{ formatRecorderDiagValue(recorderDiagDisplay.blobSize) }}</p>
                         <p>blobType: {{ formatRecorderDiagValue(recorderDiagDisplay.blobType) }}</p>
                         <p class="mt-1">selectedMimeType: {{ formatRecorderDiagValue(recorderDiagDisplay.selectedMimeType) }}</p>
@@ -4554,17 +4554,17 @@ onUnmounted(() => {
                         <p>playbackUrlCreated: {{ formatRecorderDiagValue(recorderDiagDisplay.playbackUrlCreated) }}</p>
                       </div>
 
-                      <div class="rounded border border-[#F5D0A9] bg-white/80 px-2 py-2">
-                        <p class="font-semibold text-[#7A4312]">probe 结果</p>
+                      <div class="rounded border border-kk-notice-line bg-kk-surface px-2 py-2">
+                        <p class="font-semibold text-kk-notice">probe 结果</p>
                         <p class="mt-1">hasUsableAudio: {{ formatRecorderDiagValue(recorderDiagDisplay.hasUsableAudio) }}</p>
                         <p>probePlayable: {{ formatRecorderDiagValue(recorderDiagDisplay.probeResult?.playable) }}</p>
                         <p>probeErrorCode: {{ formatRecorderDiagValue(recorderDiagDisplay.probeResult?.errorCode) }}</p>
                         <p>probeRejectedName: {{ formatRecorderDiagValue(recorderDiagDisplay.probeResult?.playRejectedName) }}</p>
-                        <pre v-if="isRecorderDebugEnabled()" class="mt-1 max-h-40 overflow-auto rounded border border-[#F5D0A9] bg-[#FFFDF8] p-2 text-[10px] leading-tight text-[#5B3A1D]">{{ recorderDiagProbeJson }}</pre>
+                        <pre v-if="isRecorderDebugEnabled()" class="mt-1 max-h-40 overflow-auto rounded border border-kk-notice-line bg-kk-notice-bg p-2 text-[10px] leading-tight text-kk-notice">{{ recorderDiagProbeJson }}</pre>
                       </div>
 
-                      <div v-if="isRecorderDebugEnabled()" class="rounded border border-[#F5D0A9] bg-white/80 px-2 py-2">
-                        <p class="font-semibold text-[#7A4312]">fallback</p>
+                      <div v-if="isRecorderDebugEnabled()" class="rounded border border-kk-notice-line bg-kk-surface px-2 py-2">
+                        <p class="font-semibold text-kk-notice">fallback</p>
                         <p class="mt-1">recorderEngineAtStart: {{ formatRecorderDiagValue(recorderDiagDisplay.recorderEngineAtStart) }}</p>
                         <p>recorderEngineAtStop: {{ formatRecorderDiagValue(recorderDiagDisplay.recorderEngineAtStop) }}</p>
                         <p class="mt-1">finalRecorderEngine: {{ formatRecorderDiagValue(recorderDiagDisplay.finalRecorderEngine) }}</p>
@@ -4596,8 +4596,8 @@ onUnmounted(() => {
                         <p>durationMs: {{ formatRecorderDiagValue(recorderDiagDisplay.durationMs) }}</p>
                       </div>
 
-                      <div class="rounded border border-[#F5D0A9] bg-white/80 px-2 py-2">
-                        <p class="font-semibold text-[#7A4312]">预览回放</p>
+                      <div class="rounded border border-kk-notice-line bg-kk-surface px-2 py-2">
+                        <p class="font-semibold text-kk-notice">预览回放</p>
                         <p class="mt-1">previewAudioCreated: {{ formatRecorderDiagValue(recorderDiagDisplay.previewAudioCreated) }}</p>
                         <p>readyState: {{ formatRecorderDiagValue(recorderDiagDisplay.previewAudioReadyState) }}</p>
                         <p>paused: {{ formatRecorderDiagValue(recorderDiagDisplay.previewAudioPaused) }}</p>
@@ -4610,16 +4610,16 @@ onUnmounted(() => {
                     </div>
                   </section>
 
-                  <p v-if="submitPending" class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]">
+                  <p v-if="submitPending" class="rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2">
                     提交中，请稍候...
                   </p>
-                  <p v-else-if="nextQuestionBusy || isAdvancingQuestion" class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]">
+                  <p v-else-if="nextQuestionBusy || isAdvancingQuestion" class="rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2">
                     正在进入下一题...
                   </p>
-                  <p v-else-if="recordingFinalizePending" class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]">
+                  <p v-else-if="recordingFinalizePending" class="rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2">
                     正在生成录音回放，请稍候...
                   </p>
-                  <div v-else-if="hasPlaybackUsableAudio && playbackUrl" class="rounded-[11px] border border-[#E8EDF5] bg-white p-3">
+                  <div v-else-if="hasPlaybackUsableAudio && playbackUrl" class="rounded-2xl border border-kk-line bg-kk-surface p-3">
                     <audio
                       :key="`${recordingStopResult?.attemptId || 0}-${playbackUrl}`"
                       ref="playbackAudioRef"
@@ -4636,15 +4636,15 @@ onUnmounted(() => {
                       @error="handleRTSPlaybackEvent('error', $event)"
                       @ended="handleRTSPlaybackEvent('ended', $event)"
                     />
-                    <p class="mt-1 text-xs text-[#8CA0C0]">时长 {{ formatDuration(playbackDurationSec) }}</p>
-                    <p v-if="recordingStopResult?.rtsProbeRejected" class="mt-1 text-xs text-[#E8845A]">
+                    <p class="kk-num mt-1 text-[13px] text-kk-ink-3">时长 {{ formatDuration(playbackDurationSec) }}</p>
+                    <p v-if="recordingStopResult?.rtsProbeRejected" class="mt-1 text-[13px] text-kk-notice">
                       RTS 二次 probe 未通过，但共享层已返回可播录音，当前仍允许直接回放。
                     </p>
-                    <p v-if="hasSilenceWarningFlag" class="mt-1 text-xs text-[#E8845A]">
+                    <p v-if="hasSilenceWarningFlag" class="mt-1 text-[13px] text-kk-notice">
                       疑似静音或有效声音较弱，建议重录；当前回放仅用于预览排查。
                     </p>
                   </div>
-                  <p v-else class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]">
+                  <p v-else class="rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2">
                     {{ recordingUnavailableMessage }}
                   </p>
 
@@ -4654,7 +4654,7 @@ onUnmounted(() => {
               <button
                 v-if="showSubmitButton"
                 type="button"
-                class="mt-3 w-full rounded-[11px] border border-[#1B3A6B] bg-white px-4 py-3 text-sm font-semibold text-[#1B3A6B] transition-colors hover:bg-[#F8FAFD] disabled:cursor-not-allowed disabled:border-[#E8EDF5] disabled:bg-[#F8FAFD] disabled:text-[#8CA0C0]"
+                class="mt-3 w-full min-h-[52px] rounded-full bg-kk-action px-4 py-3 text-[15px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover active:bg-kk-action-press disabled:cursor-not-allowed disabled:bg-kk-surface-2 disabled:text-kk-ink-3"
                 :disabled="submitButtonDisabled"
                 @click="handleSubmitPractice"
               >
@@ -4662,25 +4662,25 @@ onUnmounted(() => {
               </button>
               <p
                 v-if="submitStatusMessage"
-                class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]"
+                class="mt-2 rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2"
               >
                 {{ submitStatusMessage }}
               </p>
               <p
                 v-if="latestRTSAiReviewLoading"
-                class="mt-2 rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-2 text-xs text-[#8CA0C0]"
+                class="mt-2 rounded-2xl border border-kk-line bg-kk-surface px-3 py-2 text-[13px] text-kk-ink-2"
               >
                 AI评分处理中，完成后将跳转结果页...
               </p>
               <p
                 v-else-if="latestRTSAiReviewError"
-                class="mt-2 rounded-[11px] border border-[#F2D6D3] bg-[#FFF7F6] px-3 py-2 text-xs text-[#D92D20]"
+                class="mt-2 rounded-2xl border border-kk-error-line bg-kk-error-bg px-3 py-2 text-[13px] text-kk-error"
               >
                 {{ latestRTSAiReviewError }}
               </p>
               <button
                 type="button"
-                class="mt-3 w-full rounded-[11px] bg-[#E8845A] px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                class="mt-3 w-full min-h-[48px] rounded-full border border-kk-line bg-kk-surface px-4 py-3 text-[15px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2 disabled:cursor-not-allowed disabled:opacity-45"
                 :disabled="submitPending || nextQuestionBusy || isAdvancingQuestion"
                 @click="handleNextQuestion"
               >
@@ -4689,9 +4689,9 @@ onUnmounted(() => {
             </div>
           </section>
 
-          <section class="space-y-3 rounded-[14px] border border-[#E8EDF5] bg-white p-4">
-            <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-[#1B3A6B]">回应辅助</h2>
+          <section class="min-w-0 space-y-3 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk sm:p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="text-[17px] font-semibold text-kk-ink">回应辅助</h2>
               <div class="flex gap-1">
                 <button
                   v-for="item in [
@@ -4702,8 +4702,8 @@ onUnmounted(() => {
                   ]"
                   :key="item.key"
                   type="button"
-                  class="rounded-[20px] px-2.5 py-1 text-xs transition-colors"
-                  :class="activeTab === item.key ? 'bg-[#1B3A6B] text-white' : 'bg-[#F8FAFD] text-[#8CA0C0] hover:text-[#1B3A6B]'"
+                  class="inline-flex min-h-[36px] items-center rounded-full px-3 text-sm font-medium transition-colors"
+                  :class="activeTab === item.key ? 'bg-kk-ink text-kk-ink-inverse' : 'bg-kk-surface-2 text-kk-ink-2 hover:text-kk-ink'"
                   @click="activeTab = item.key"
                 >
                   {{ item.label }}
@@ -4713,53 +4713,52 @@ onUnmounted(() => {
 
             <div v-if="activeTab === 'mind'" class="space-y-2">
               <div class="flex flex-wrap gap-2">
-                <span class="rounded-[20px] bg-[#EDF2FB] px-2.5 py-1 text-xs text-[#1B3A6B]">{{ toneLabel }}</span>
-                <span class="rounded-[20px] px-2.5 py-1 text-xs" :class="topicMeta.badgeClass">{{ topicMeta.label }}</span>
-                <span class="rounded-[20px] bg-[#FFF3EC] px-2.5 py-1 text-xs text-[#E8845A]">{{ behaviorLabel }}</span>
+                <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ toneLabel }}</span>
+                <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ topicMeta.label }}</span>
+                <span class="rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">{{ behaviorLabel }}</span>
               </div>
 
               <article
                 v-for="(item, idx) in directions"
                 :key="`${item.head}-${idx}`"
-                class="rounded-[11px] border bg-[#F8FAFD] p-3"
-                :class="idx === 0 ? 'border-l-4 border-l-[#1B3A6B]' : idx === 1 ? 'border-l-4 border-l-[#52C41A]' : 'border-l-4 border-l-[#E8845A]'"
+                class="rounded-2xl bg-kk-surface-2 p-3"
               >
-                <p class="text-sm font-semibold text-[#1E293B]">{{ item.head }}</p>
-                <p class="mt-1 text-xs leading-relaxed text-[#8CA0C0]">{{ item.body }}</p>
-                <p class="mt-2 text-xs italic text-[#1B3A6B]">{{ item.eg }}</p>
+                <p class="text-[15px] font-semibold text-kk-ink">{{ item.head }}</p>
+                <p class="mt-1 text-[13px] leading-relaxed text-kk-ink-2">{{ item.body }}</p>
+                <p class="kk-text mt-2 text-[15px] italic text-kk-ink">{{ item.eg }}</p>
               </article>
             </div>
 
             <div v-else-if="activeTab === 'template'" class="space-y-3">
-              <div class="rounded-[11px] border border-[#E8EDF5] bg-[#F8FAFD] p-3 text-sm leading-relaxed text-[#1E293B]">
+              <div class="kk-text rounded-2xl border border-kk-line bg-kk-surface-2 p-3 text-[15px] leading-relaxed text-kk-ink">
                 <template v-for="(segment, idx) in templateOpenerSegments" :key="`${segment.text}-${idx}`">
-                  <span v-if="segment.isSlot" class="rounded bg-[#FFE6D9] px-1.5 py-0.5 text-[#E8845A]">{{ segment.text }}</span>
+                  <span v-if="segment.isSlot" class="rounded bg-kk-notice-bg px-1.5 py-0.5 text-kk-notice">{{ segment.text }}</span>
                   <span v-else>{{ segment.text }}</span>
                 </template>
-                <span v-if="!templateOpenerSegments.length" class="text-[#8CA0C0]">暂无开场模板</span>
+                <span v-if="!templateOpenerSegments.length" class="text-kk-ink-3">暂无开场模板</span>
               </div>
 
-              <button type="button" class="text-xs font-semibold text-[#1B3A6B] underline" @click="showFullTemplate = !showFullTemplate">
+              <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="showFullTemplate = !showFullTemplate">
                 {{ showFullTemplate ? "收起完整示例回应" : "查看完整示例回应" }}
               </button>
 
-              <p v-if="showFullTemplate" class="rounded-[11px] border border-[#E8EDF5] bg-white p-3 text-sm leading-relaxed text-[#1E293B]">
+              <p v-if="showFullTemplate" class="kk-text rounded-2xl border border-kk-line bg-kk-surface p-3 text-[15px] leading-relaxed text-kk-ink">
                 {{ templateFullText }}
               </p>
 
-              <span class="inline-flex rounded-[20px] bg-[#EDF2FB] px-2.5 py-1 text-xs text-[#1B3A6B]">适用语气：{{ toneLabel }}</span>
+              <span class="inline-flex rounded-full bg-kk-surface-2 px-2.5 py-1 text-xs text-kk-ink-2">适用语气：{{ toneLabel }}</span>
             </div>
 
             <div v-else-if="activeTab === 'phrases'" class="space-y-3">
               <section v-for="group in phraseGroups" :key="group.key" class="space-y-2">
-                <p class="text-xs font-semibold text-[#8CA0C0]">{{ group.label }}</p>
+                <p class="text-xs font-semibold text-kk-ink-3">{{ group.label }}</p>
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="(item, idx) in group.items"
                     :key="`${group.key}-${idx}`"
                     type="button"
-                    class="rounded-[20px] border px-2.5 py-1 text-xs transition-colors"
-                    :class="isPhraseUsed(group.key, idx, item) ? 'border-[#1B3A6B] bg-[#1B3A6B] text-white' : 'border-[#E8EDF5] bg-white text-[#1E293B] hover:bg-[#F8FAFD]'"
+                    class="min-h-[36px] rounded-full border px-3 py-1.5 text-left text-[13px] transition-colors"
+                    :class="isPhraseUsed(group.key, idx, item) ? 'border-kk-ink bg-kk-ink text-kk-ink-inverse' : 'border-kk-line bg-kk-surface text-kk-ink hover:bg-kk-surface-2'"
                     @click="togglePhrase(group.key, idx, item)"
                   >
                     {{ item }}
@@ -4772,41 +4771,41 @@ onUnmounted(() => {
               <article
                 v-for="(item, idx) in tips"
                 :key="`${item}-${idx}`"
-                class="rounded-[11px] border border-l-4 border-l-[#E8845A] border-[#E8EDF5] bg-[#FFF8F4] p-3 text-sm text-[#1E293B]"
+                class="rounded-2xl bg-kk-surface-2 p-3 text-[15px] text-kk-ink"
               >
                 {{ item }}
               </article>
-              <p v-if="!tips.length" class="text-xs text-[#8CA0C0]">暂无提示要点。</p>
+              <p v-if="!tips.length" class="text-xs text-kk-ink-3">暂无提示要点。</p>
             </div>
           </section>
         </div>
 
-        <section class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <article class="rounded-[14px] border border-[#E8EDF5] bg-white p-4">
-            <p class="text-sm font-semibold text-[#1B3A6B]">今日练习统计</p>
+        <section class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:mt-6 lg:gap-6">
+          <article class="min-w-0 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk sm:p-5">
+            <p class="text-[17px] font-semibold text-kk-ink">今日练习统计</p>
             <div class="mt-3 grid grid-cols-2 gap-2">
-              <div class="rounded-[11px] bg-[#F8FAFD] px-3 py-2">
-                <p class="text-xs text-[#8CA0C0]">已练题数</p>
-                <p class="mt-1 text-lg font-semibold text-[#1E293B]">{{ todayStats.practicedCount }}</p>
+              <div class="rounded-2xl bg-kk-surface-2 px-3 py-2">
+                <p class="text-xs text-kk-ink-3">已练题数</p>
+                <p class="kk-num mt-1 text-2xl font-extrabold text-kk-ink">{{ todayStats.practicedCount }}</p>
               </div>
-              <div class="rounded-[11px] bg-[#F8FAFD] px-3 py-2">
-                <p class="text-xs text-[#8CA0C0]">分钟</p>
-                <p class="mt-1 text-lg font-semibold text-[#1E293B]">{{ todayStats.practiceMinutes }}</p>
+              <div class="rounded-2xl bg-kk-surface-2 px-3 py-2">
+                <p class="text-xs text-kk-ink-3">分钟</p>
+                <p class="kk-num mt-1 text-2xl font-extrabold text-kk-ink">{{ todayStats.practiceMinutes }}</p>
               </div>
             </div>
           </article>
 
-          <article class="rounded-[14px] border border-[#E8EDF5] bg-white p-4">
-            <p class="text-sm font-semibold text-[#1B3A6B]">历史录音（最近20条）</p>
-            <div v-if="!historyItems.length" class="mt-3 rounded-[11px] bg-[#F8FAFD] p-3 text-xs text-[#8CA0C0]">
+          <article class="min-w-0 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk sm:p-5">
+            <p class="text-[17px] font-semibold text-kk-ink">历史录音（最近20条）</p>
+            <div v-if="!historyItems.length" class="mt-3 rounded-2xl bg-kk-surface-2 p-3 text-xs text-kk-ink-3">
               还没有可展示的录音记录。
             </div>
             <div v-else class="mt-3 space-y-2">
-              <article v-for="item in historyItems" :key="item.id" class="rounded-[11px] border border-[#E8EDF5] bg-[#F8FAFD] p-3">
+              <article v-for="item in historyItems" :key="item.id" class="rounded-2xl border border-kk-line bg-kk-surface-2 p-3">
                 <div class="flex items-center justify-between gap-2">
-                  <p class="line-clamp-1 text-xs font-medium text-[#1E293B]">{{ item.summary }}</p>
+                  <p class="line-clamp-1 text-xs font-medium text-kk-ink">{{ item.summary }}</p>
                 </div>
-                <p class="mt-1 text-xs text-[#8CA0C0]">{{ formatDateTime(item.createdAt) }} · {{ formatDuration(item.durationSec) }}</p>
+                <p class="mt-1 text-xs text-kk-ink-3">{{ formatDateTime(item.createdAt) }} · {{ formatDuration(item.durationSec) }}</p>
                 <div class="mt-2">
                   <audio
                     v-if="item.hasAudio && item.playbackUrl"
@@ -4818,16 +4817,16 @@ onUnmounted(() => {
                   <button
                     v-else-if="item.hasAudio"
                     type="button"
-                    class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+                    class="inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
                     @click="replayHistory(item)"
                   >
                     {{ item.playbackLoading ? "加载中..." : "加载并播放录音" }}
                   </button>
-                  <p v-if="item.playbackError" class="mt-1 text-xs text-[#D92D20]">{{ item.playbackError }}</p>
+                  <p v-if="item.playbackError" class="mt-1 text-xs text-kk-error">{{ item.playbackError }}</p>
                   <button
                     v-if="!item.hasAudio"
                     type="button"
-                    class="rounded-[11px] border border-[#E8EDF5] bg-white px-3 py-1.5 text-xs text-[#8CA0C0] hover:bg-[#F8FAFD]"
+                    class="inline-flex min-h-[44px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink hover:bg-kk-surface-2 disabled:opacity-45"
                     @click="replayHistory(item)"
                   >
                     进入题目重练
