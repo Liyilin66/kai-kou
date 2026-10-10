@@ -54,8 +54,9 @@ test('coach prompts and template links respect the same first-batch contracts', 
  for(const path of ['src/views/AgentView.vue','src/components/agent/AIWorkspace.vue','src/components/agent/AITutorLoading.vue']) {
   const source=readProjectFile(path);assert.doesNotMatch(source,/PTE 备考资料包|免费领取|真题 · 高频词汇/);
  }
- // The WE template entry is rendered by the workspace and loading-shell sidebars.
- for(const path of ['src/components/agent/AIWorkspace.vue','src/components/agent/AITutorLoading.vue']) assert.match(readProjectFile(path),/\/we\/templates/);
+ // The WE template entry lives in the shared AppNav sidebar, which the workspace and loading shell both render.
+ assert.match(readProjectFile('src/components/AppNav.vue'),/\/we\/templates/);
+ for(const path of ['src/components/agent/AIWorkspace.vue','src/components/agent/AITutorLoading.vue']) assert.match(readProjectFile(path),/<AppNav[\s>/]/);
  assert.match(readProjectFile('src/views/AgentView.vue'),/hasUnavailableTaskRecommendation/);
  assert.match(readProjectFile('src/components/agent/AIWorkspace.vue'),/hasUnavailableTaskRecommendation/);
 });

@@ -40,6 +40,8 @@
   --kk-font-text: "Source Serif 4", Georgia, serif;
   --kk-shadow: 0 1px 2px rgba(30, 27, 24, 0.05), 0 8px 24px rgba(30, 27, 24, 0.05);
   --kk-shadow-pop: 0 12px 40px rgba(30, 27, 24, 0.16);
+  /* Bottom tab bar under 1024px (AppNav); pages that show it pad their scroll area by this much. */
+  --kk-tabbar-h: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 
 @layer base {

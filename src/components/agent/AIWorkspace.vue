@@ -2,29 +2,7 @@
   <div class="shell">
 
     <!-- ═══════════════════════ 侧边栏 ═══════════════════════ -->
-    <aside class="sidebar">
-      <RouterLink class="sb-logo" to="/home" aria-label="返回首页">
-        <div class="logo-mark">
-          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".95"/>
-            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5"/>
-            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5"/>
-            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".75"/>
-          </svg>
-        </div>
-        <span class="logo-text">开口 PTE</span>
-      </RouterLink>
-
-      <nav class="sb-nav">
-        <RouterLink v-for="item in navItems" :key="item.label"
-          :to="item.to"
-          class="nav-item" :class="{ active: item.active }"
-          :aria-current="item.active ? 'page' : undefined">
-          <span class="nav-icon" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-        </RouterLink>
-      </nav>
-
+    <AppNav>
       <!-- 历史对话 -->
       <div class="history-section">
         <div class="history-label">历史对话</div>
@@ -89,16 +67,7 @@
         </div>
       </div>
 
-      <div class="sb-footer">
-        <div class="promo-card">
-          <div>
-            <div class="promo-title">WE 模板库</div>
-            <div class="promo-sub">写作结构 · 模板参考</div>
-          </div>
-          <button class="promo-btn" type="button" @click="router.push('/we/templates')">查看模板</button>
-        </div>
-      </div>
-    </aside>
+    </AppNav>
 
     <!-- ═══════════════════════ 主区域 ═══════════════════════ -->
     <div class="main">
@@ -404,14 +373,11 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import AppNav from "@/components/AppNav.vue";
 import { hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
 import { parseAgentContent } from "@/lib/agent-rich-content";
 
-const router = useRouter();
-
 const props = defineProps({
-  navItems: { type: Array, default: () => [] },
   userDisplayName: { type: String, default: "同学" },
   userInitial: { type: String, default: "Y" },
   userAvatarUrl: { type: String, default: "" },
@@ -487,13 +453,7 @@ const confirmingDeleteSessionId = ref("");
 const historyMenuRoot = ref(null);
 
 const navIconMap = {
-  home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
-  list: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
   spark: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1.5C4.24 1.5 2 3.74 2 6.5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h4M7 4.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  square: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  report: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 11l3-4 3 2.5 3-5 2 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  box: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 3h11M1.5 7h7M1.5 11h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  circle: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
   trend: '<svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 12l4-5 3 3 3-6 2 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   plan: '<svg width="16" height="16" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
   chat: '<svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 4c0-1.1.9-2 2-2h8a2 2 0 012 2v5a2 2 0 01-2 2H6l-4 3V4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
@@ -512,12 +472,6 @@ const featureShortDescMap = {
   coach: "继续聊"
 };
 
-const navItems = computed(() => props.navItems.map((item) => ({
-  ...item,
-  to: item.to || item.target || "/home",
-  active: Boolean(item.active),
-  icon: navIconMap[item.icon] || navIconMap[item.key] || navIconMap.circle
-})));
 const chatHistory = computed(() => (
   Array.isArray(props.sessionHistory) ? props.sessionHistory : []
 )
@@ -733,78 +687,8 @@ function normalizeText(value) {
 /* ═══════════════════════════════════════════════════
    侧边栏
 ═══════════════════════════════════════════════════ */
-.sidebar {
-  width: 200px;
-  flex: 0 0 200px;
-  background: var(--cream-3);
-  border-right: 0.5px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sb-logo {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: var(--workspace-header-height);
-  padding: 0 18px;
-  border-bottom: 0.5px solid var(--border);
-  flex-shrink: 0;
-  text-decoration: none;
-}
-
-.logo-mark {
-  width: 30px; height: 30px;
-  background: var(--brown);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-
-.logo-text { font-size: 17px; font-weight: 500; color: var(--text-main); letter-spacing: .03em; }
-
-.sb-nav {
-  padding: 22px 12px 24px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.nav-item {
-  display: flex; align-items: center; gap: 11px;
-  min-height: 42px;
-  padding: 0 12px; border-radius: 10px;
-  font-size: 15px; line-height: 1.3; color: var(--text-soft); cursor: pointer;
-  transition: background .13s, border-color .13s, color .13s;
-  border: 0.5px solid transparent;
-  text-decoration: none;
-}
-.nav-item:hover { background: var(--cream-2); color: var(--text-mid); }
-.nav-item.active {
-  background: var(--kk-action-soft);
-  border-color: var(--kk-line);
-  color: var(--brown);
-  font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
-}
-.nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
-}
-.nav-icon svg {
-  width: 15px;
-  height: 15px;
-}
-
-/* 历史 */
-.history-section { flex: 1; overflow-y: auto; padding: 12px 8px 8px; }
+/* History sits in the AppNav sidebar slot, between the nav and the template promo. */
+.history-section { flex: 1; min-height: 0; overflow-y: auto; border-top: 0.5px solid var(--border); padding: 12px 8px 8px; }
 .history-section::-webkit-scrollbar { width: 3px; }
 .history-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
@@ -950,22 +834,6 @@ function normalizeText(value) {
 .history-delete:disabled {
   cursor: wait;
   opacity: .66;
-}
-
-/* 底部推广 */
-.sb-footer { padding: 16px 12px 18px; border-top: 0.5px solid var(--border); flex-shrink: 0; }
-.promo-card {
-  background: var(--kk-surface-2); border: 0.5px solid var(--border-2);
-  border-radius: 10px; padding: 12px;
-  display: block;
-}
-.promo-title { margin-bottom: 2px; font-size: 13px; font-weight: 500; color: var(--brown); }
-.promo-sub   { margin-bottom: 9px; font-size: 12px; color: var(--text-mute); }
-.promo-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--brown); color: var(--cream);
-  border: none; font-size: 13px; line-height: 1; padding: 6px 13px; border-radius: 6px;
-  cursor: pointer; font-family: inherit; white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1571,9 +1439,9 @@ function normalizeText(value) {
     grid-template-columns: minmax(0, 1fr) 270px;
   }
 }
-@media (max-width: 1000px) {
+/* Under 1024 the AppNav sidebar gives way to its bottom tab bar, so the column layout starts there too. */
+@media (max-width: 1023.98px) {
   .insight-panel { display: none; }
-  .sidebar { display: none; }
   .topbar {
     grid-template-columns: 1fr;
     height: auto;
@@ -1587,6 +1455,7 @@ function normalizeText(value) {
     width: 100%;
     min-height: 100vh;
     height: auto;
+    padding-bottom: var(--kk-tabbar-h);
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -1635,13 +1504,9 @@ function normalizeText(value) {
 
 /* docs/ui-guidelines.md: the send button is this page's one primary action; everything else stays neutral. */
 .shell { background: var(--kk-bg); }
-.logo-mark { background: var(--kk-action); border-radius: 50%; }
-.nav-item.active { background: var(--kk-action-soft); border-color: transparent; color: var(--kk-action-text); box-shadow: none; }
 .history-more[aria-expanded="true"] { background: var(--kk-surface-2); border-color: var(--kk-line); }
 .history-popover { box-shadow: var(--kk-shadow-pop); }
 .history-delete--confirm { background: var(--kk-error-bg); color: var(--kk-error); }
-.promo-card { border-color: transparent; }
-.promo-btn { background: var(--kk-surface); color: var(--kk-ink); border: 1px solid var(--kk-line); border-radius: 999px; }
 .action-btn { background: var(--kk-surface); color: var(--kk-ink); border: 1px solid var(--kk-line); border-radius: 999px; }
 .action-btn:hover { background: var(--kk-surface-2); color: var(--kk-ink); }
 .action-btn--ghost, .action-btn--ghost:hover { background: transparent; color: var(--kk-ink-2); border-color: transparent; }
@@ -1665,5 +1530,4 @@ function normalizeText(value) {
 .followup-mark { background: var(--kk-surface-2); color: var(--kk-ink-2); }
 .tutor-tool-icon { background: var(--kk-surface-2); color: var(--kk-ink); }
 .plan-ready-code { background: var(--kk-ink); color: var(--kk-ink-inverse); }
-.promo-title { color: var(--kk-ink); }
 </style>

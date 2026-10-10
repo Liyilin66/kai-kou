@@ -1,16 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { useRouter } from "vue-router";
-const router = useRouter();
-
-const DEFAULT_NAV_ITEMS = [
-  { key: "home", label: "首页", to: "/home" },
-  { key: "practice", label: "练习中心", to: "/home#quick" },
-  { key: "agent", label: "AI 私教", to: "/agent", active: true },
-  { key: "plan", label: "学习计划", to: "/home#goal" },
-  { key: "report", label: "学习报告", to: "/home#report" },
-  { key: "profile", label: "个人中心", to: "/profile" }
-];
+import AppNav from "@/components/AppNav.vue";
 
 const DEFAULT_STEPS = [
   {
@@ -54,10 +44,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  navItems: {
-    type: Array,
-    default: () => []
-  },
   steps: {
     type: Array,
     default: () => []
@@ -100,24 +86,8 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["disabled-nav", "primary-action", "secondary-action", "avatar-error"]);
+const emit = defineEmits(["primary-action", "secondary-action", "avatar-error"]);
 
-const navIconMap = {
-  home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
-  list: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  spark: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1.5C4.24 1.5 2 3.74 2 6.5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h4M7 4.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  square: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  report: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 11l3-4 3 2.5 3-5 2 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  box: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 3h11M1.5 7h7M1.5 11h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  circle: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>'
-};
-
-const displayNavItems = computed(() => (
-  (props.navItems?.length ? props.navItems : DEFAULT_NAV_ITEMS).map((item) => ({
-    ...item,
-    icon: navIconMap[item.icon] || navIconMap[item.key] || navIconMap.circle
-  }))
-));
 const displaySteps = computed(() => (
   props.steps?.length ? props.steps : DEFAULT_STEPS
 ));
@@ -173,53 +143,7 @@ function normalizeText(value) {
       'ai-tutor-loading-shell--access': isAccessMode
     }"
   >
-    <aside class="ai-tutor-loading-sidebar">
-      <RouterLink class="ai-tutor-loading-logo" to="/home" aria-label="返回首页">
-        <div class="ai-tutor-loading-logo-icon" aria-hidden="true">
-          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".95" />
-            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".75" />
-          </svg>
-        </div>
-        <span class="ai-tutor-loading-logo-name">开口 PTE</span>
-      </RouterLink>
-
-      <nav class="ai-tutor-loading-nav" aria-label="AI 私教加载页导航">
-        <template v-for="item in displayNavItems" :key="item.key || item.label">
-          <RouterLink
-            v-if="item.to && !item.disabled"
-            class="ai-tutor-loading-nav-item"
-            :class="{ 'ai-tutor-loading-nav-item--active': item.active }"
-            :to="item.to"
-            :aria-current="item.active ? 'page' : undefined"
-          >
-            <span class="ai-tutor-loading-nav-icon" aria-hidden="true" v-html="item.icon"></span>
-            <span>{{ item.label }}</span>
-          </RouterLink>
-          <button
-            v-else
-            class="ai-tutor-loading-nav-item ai-tutor-loading-nav-item--disabled"
-            type="button"
-            :title="item.disabledReason || '该页面暂未开放'"
-            disabled
-            @click="emit('disabled-nav', item)"
-          >
-            <span class="ai-tutor-loading-nav-icon" aria-hidden="true" v-html="item.icon"></span>
-            <span>{{ item.label }}</span>
-          </button>
-        </template>
-      </nav>
-
-      <div class="ai-tutor-loading-sidebar-footer">
-        <div class="ai-tutor-loading-promo">
-          <div class="ai-tutor-loading-promo-title">WE 模板库</div>
-          <div class="ai-tutor-loading-promo-sub">写作结构 · 模板参考</div>
-          <button class="ai-tutor-loading-promo-button" type="button" @click="router.push('/we/templates')">查看模板</button>
-        </div>
-      </div>
-    </aside>
+    <AppNav />
 
     <main class="ai-tutor-loading-main">
       <header class="ai-tutor-loading-topbar">
@@ -394,145 +318,6 @@ function normalizeText(value) {
   font-family: var(--kk-font);
   font-synthesis: none;
   letter-spacing: 0;
-}
-
-.ai-tutor-loading-sidebar {
-  display: flex;
-  flex: 0 0 200px;
-  width: 200px;
-  flex-direction: column;
-  background: var(--kk-surface);
-  border-right: .5px solid var(--kk-line);
-}
-
-.ai-tutor-loading-logo {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  box-sizing: border-box;
-  height: 64px;
-  flex: 0 0 64px;
-  padding: 0 18px;
-  border-bottom: .5px solid var(--kk-line);
-  text-decoration: none;
-}
-
-.ai-tutor-loading-logo-icon {
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: var(--kk-ink);
-}
-
-.ai-tutor-loading-logo-name {
-  color: var(--kk-ink);
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: .03em;
-}
-
-.ai-tutor-loading-nav {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  padding: 22px 12px 24px;
-}
-
-.ai-tutor-loading-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-height: 42px;
-  padding: 0 12px;
-  border: .5px solid transparent;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--kk-ink-3);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 15px;
-  line-height: 1.3;
-  text-align: left;
-  text-decoration: none;
-  transition: background .13s, border-color .13s, color .13s;
-}
-
-.ai-tutor-loading-nav-item:hover {
-  background: var(--kk-bg);
-  color: var(--kk-ink-2);
-}
-
-.ai-tutor-loading-nav-item--active {
-  border-color: var(--kk-line);
-  background: var(--kk-action-soft);
-  color: var(--kk-ink);
-  font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
-}
-
-.ai-tutor-loading-nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
-}
-
-.ai-tutor-loading-nav-icon svg {
-  width: 15px;
-  height: 15px;
-}
-
-.ai-tutor-loading-nav-item--active .ai-tutor-loading-nav-icon {
-  opacity: 1;
-}
-
-.ai-tutor-loading-nav-item--disabled {
-  cursor: not-allowed;
-  opacity: .52;
-}
-
-.ai-tutor-loading-sidebar-footer {
-  padding: 16px 12px 18px;
-  border-top: .5px solid var(--kk-line);
-}
-
-.ai-tutor-loading-promo {
-  padding: 12px;
-  border: .5px solid var(--kk-line);
-  border-radius: 10px;
-  background: var(--kk-surface-2);
-}
-
-.ai-tutor-loading-promo-title {
-  margin-bottom: 2px;
-  color: var(--kk-ink);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.ai-tutor-loading-promo-sub {
-  margin-bottom: 9px;
-  color: var(--kk-ink-3);
-  font-size: 12px;
-}
-
-.ai-tutor-loading-promo-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 6px;
-  background: var(--kk-ink);
-  color: var(--kk-surface);
-  font-size: 13px;
-  line-height: 1;
-  padding: 6px 13px;
 }
 
 .ai-tutor-loading-main {
@@ -1115,11 +900,15 @@ function normalizeText(value) {
   }
 }
 
-@media (max-width: 768px) {
-  .ai-tutor-loading-sidebar {
-    display: none;
+/* Under 1024 the AppNav tab bar is fixed at the bottom; the shell stops above it. */
+@media (max-width: 1023.98px) {
+  .ai-tutor-loading-shell {
+    box-sizing: border-box;
+    padding-bottom: var(--kk-tabbar-h);
   }
+}
 
+@media (max-width: 768px) {
   .ai-tutor-loading-topbar {
     padding: 0 18px;
   }
@@ -1138,9 +927,6 @@ function normalizeText(value) {
 }
 
 /* docs/ui-guidelines.md: failure uses the error colour, locked access uses notice, the main action is vermilion. */
-.ai-tutor-loading-logo-icon { background: var(--kk-action); border-radius: 50%; }
-.ai-tutor-loading-nav-item--active { background: var(--kk-action-soft); color: var(--kk-action-text); border-color: transparent; box-shadow: none; }
-.ai-tutor-loading-promo-button { background: var(--kk-surface); color: var(--kk-ink); border: 1px solid var(--kk-line); border-radius: 999px; }
 .ai-tutor-loading-user-avatar { color: var(--kk-ink-inverse); }
 .ai-tutor-loading-shell--access .ai-tutor-loading-live-dot { background: var(--kk-notice); }
 .ai-tutor-loading-shell--access .ai-tutor-loading-live-text { color: var(--kk-notice); }

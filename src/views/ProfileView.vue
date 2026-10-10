@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useUIStore } from "@/stores/ui";
+import AppNav from "@/components/AppNav.vue";
 import { BILLING_PAUSED, BILLING_PAUSED_MESSAGE } from "@/lib/billing";
 import { classifyDeviceFamily, getDeviceIconSource } from "@/lib/device-icons";
 import {
@@ -23,7 +24,6 @@ import {
 import { supabase } from "@/lib/supabase";
 import { rankFocusModules, visibleFavoriteTiles, withoutClosedTaskTypes } from "@/lib/profile-task-filters";
 
-const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const uiStore = useUIStore();
@@ -61,24 +61,6 @@ const profileInfoIconMap = {
     '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M5 8l6.1 4.4a1.6 1.6 0 0 0 1.8 0L19 8"/></svg>'
 };
 
-const navIconMap = {
-  home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
-  list: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  spark: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1.5C4.24 1.5 2 3.74 2 6.5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h4M7 4.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  square: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  report: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 11l3-4 3 2.5 3-5 2 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  box: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 3h11M1.5 7h7M1.5 11h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  circle: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>'
-};
-
-const navItems = [
-  { key: "home", label: "首页", icon: "home", to: "/home" },
-  { key: "practice", label: "练习中心", icon: "list", to: "/home#quick" },
-  { key: "agent", label: "AI 私教", icon: "spark", to: "/agent" },
-  { key: "plan", label: "学习计划", icon: "square", to: "/home#goal" },
-  { key: "report", label: "学习报告", icon: "report", to: "/home#report" },
-  { key: "profile", label: "个人中心", icon: "circle", to: "/profile" }
-];
 
 const plans = [
   {
@@ -154,13 +136,6 @@ const favoriteIconMap = {
   rts:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 18.5 4 21v-5.5A7.5 7.5 0 0 1 11.5 8h1A7.5 7.5 0 0 1 20 15.5 7.5 7.5 0 0 1 12.5 23h-1a7.4 7.4 0 0 1-4-1.2"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>'
 };
-
-const displayNavItems = computed(() =>
-  navItems.map((item) => ({
-    ...item,
-    icon: navIconMap[item.icon] || navIconMap.circle
-  }))
-);
 
 const profile = computed(() => authStore.profile || {});
 const userDisplayName = computed(() => authStore.displayName || "同学");
@@ -416,19 +391,6 @@ const loginRecords = computed(() => {
     status: index === currentRecordIndex ? "当前设备" : ""
   }));
 });
-
-function isNavActive(item) {
-  if (item.key === "profile") return route.path === "/profile";
-  if (item.key === "home") return route.path === "/home" || route.path === "/";
-  return route.path === item.to || route.fullPath === item.to;
-}
-
-function goTo(path) {
-  const normalized = normalizeText(path);
-  if (!normalized) return;
-  if (normalized === route.fullPath) return;
-  router.push(normalized);
-}
 
 function selectPlan(planKey) {
   selectedPlanKey.value = planKey;
@@ -1241,41 +1203,7 @@ function sumBy(items, key) {
 
 <template>
   <div class="personal-center-page">
-    <aside class="profile-sidebar">
-      <RouterLink class="profile-logo" to="/home" aria-label="返回首页">
-        <div class="profile-logo-icon" aria-hidden="true">
-          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".95" />
-            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".75" />
-          </svg>
-        </div>
-        <span class="profile-logo-name">开口 PTE</span>
-      </RouterLink>
-
-      <nav class="profile-nav" aria-label="个人中心导航">
-        <RouterLink
-          v-for="item in displayNavItems"
-          :key="item.key"
-          class="profile-nav-item"
-          :class="{ 'profile-nav-item--active': isNavActive(item) }"
-          :to="item.to"
-          :aria-current="isNavActive(item) ? 'page' : undefined"
-        >
-          <span class="profile-nav-icon" aria-hidden="true" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-        </RouterLink>
-      </nav>
-
-      <div class="profile-sidebar-footer">
-        <div class="profile-promo">
-          <div class="profile-promo-title">WE 模板库</div>
-          <div class="profile-promo-sub">写作结构 · 模板参考</div>
-          <button class="profile-promo-button" type="button" @click="goTo('/we/templates')">查看模板</button>
-        </div>
-      </div>
-    </aside>
+    <AppNav />
 
     <section class="profile-shell">
       <header class="profile-topbar">
@@ -1636,23 +1564,6 @@ function sumBy(items, key) {
 .personal-center-page{display:flex;width:100%;height:100vh;overflow:hidden;background:var(--kk-bg);color:var(--kk-ink);font-family:var(--kk-font);font-size:15px;line-height:1.55;}
 button,input,select{font:inherit;}
 
-/* Sidebar (desktop only), same as home */
-.profile-sidebar{display:none;flex:0 0 232px;width:232px;flex-direction:column;background:var(--kk-surface);border-right:1px solid var(--kk-line);}
-.profile-logo{display:flex;align-items:center;gap:10px;height:72px;flex:0 0 72px;padding:0 24px;text-decoration:none;}
-.profile-logo-icon{display:flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--kk-action);flex-shrink:0;}
-.profile-logo-name{color:var(--kk-ink);font-size:18px;font-weight:700;}
-.profile-nav{display:flex;flex:1;flex-direction:column;gap:4px;padding:8px 16px 24px;}
-.profile-nav-item{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-radius:12px;color:var(--kk-ink-2);font-size:15px;text-decoration:none;transition:background .15s,color .15s;}
-.profile-nav-item:hover{background:var(--kk-surface-2);color:var(--kk-ink);}
-.profile-nav-item--active,.profile-nav-item--active:hover{background:var(--kk-action-soft);color:var(--kk-action-text);font-weight:600;}
-.profile-nav-icon{display:flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;}
-.profile-nav-icon :deep(svg){width:18px;height:18px;}
-.profile-sidebar-footer{padding:16px;}
-.profile-promo{padding:16px;border-radius:16px;background:var(--kk-surface-2);}
-.profile-promo-title{margin-bottom:2px;color:var(--kk-ink);font-size:15px;font-weight:600;}
-.profile-promo-sub{margin-bottom:12px;color:var(--kk-ink-3);font-size:13px;}
-.profile-promo-button{display:inline-flex;align-items:center;min-height:36px;padding:0 16px;border:1px solid var(--kk-line);border-radius:999px;background:var(--kk-surface);color:var(--kk-ink);font-size:13px;font-weight:600;cursor:pointer;}
-
 /* Shell and top bar */
 .profile-shell{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;}
 .profile-topbar{min-height:64px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--kk-surface);border-bottom:1px solid var(--kk-line);}
@@ -1830,7 +1741,6 @@ button,input,select{font:inherit;}
 
 /* Desktop ≥1024: sidebar appears; two-column dashboard */
 @media (min-width:1024px){
-  .profile-sidebar{display:flex;}
   .user-mini > span:last-child{display:inline;}
   .profile-topbar{min-height:72px;padding:12px 40px;}
   .hello{font-size:26px;}
@@ -1838,6 +1748,14 @@ button,input,select{font:inherit;}
   .page-heading{margin-bottom:20px;}
   .dashboard-grid{gap:20px;}
   .dashboard-column{gap:20px;}
+}
+
+/* Under 1024 the AppNav tab bar is fixed at the bottom; keep the last card clear of it. */
+@media (max-width:1023.98px){
+  .profile-main{padding-bottom:calc(40px + var(--kk-tabbar-h));}
+}
+@media (min-width:768px) and (max-width:1023.98px){
+  .profile-main{padding-bottom:calc(48px + var(--kk-tabbar-h));}
 }
 
 @media (min-width:1200px){

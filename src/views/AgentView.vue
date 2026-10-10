@@ -97,15 +97,6 @@ let executablePlanInFlight = null;
 let pendingForcedDailySuggestionRefresh = false;
 let pendingForcedExecutablePlanRefresh = false;
 
-const navItems = [
-  { key: "home", label: "首页", icon: "home", target: "/home" },
-  { key: "practice", label: "练习中心", icon: "list", target: "/home#quick" },
-  { key: "agent", label: "AI 私教", icon: "spark", target: "/agent", active: true },
-  { key: "plan", label: "学习计划", icon: "square", target: "/home#goal" },
-  { key: "report", label: "学习报告", icon: "report", target: "/home#report" },
-  { key: "profile", label: "个人中心", icon: "circle", target: "/profile" }
-];
-
 const RESTORE_STEP_LABELS = {
   done: "已完成",
   going: "同步中",
@@ -352,17 +343,6 @@ const agentWorkspaceState = computed(() => {
   if (agentSessionState.value.error) return "failed";
   return isConversationEmpty.value ? "empty" : "chat";
 });
-const agentLoadingNavItems = computed(() => navItems.map((item) => ({
-  key: item.key,
-  label: item.label,
-  icon: item.icon,
-  to: item.target,
-  active: item.key === "agent",
-  // Keep this explicit so future entries without real routes stay disabled
-  // instead of pretending to navigate somewhere.
-  disabled: !item.target,
-  disabledReason: item.target ? "" : "该页面暂未开放"
-})));
 const agentRestoreSteps = computed(() => restoreChecklist.map((item) => {
   const status = agentRestoreStepStatus.value[item.id] || "wait";
   return {
@@ -2765,7 +2745,6 @@ function normalizeText(value) {
     :user-initial="userInitial"
     :user-avatar-url="userAvatarUrl"
     :show-user-avatar="showUserAvatar"
-    :nav-items="agentLoadingNavItems"
     :steps="agentWarmShellSteps"
     :feature-items="agentWarmShellFeatures"
     :progress-percent="agentWarmShellProgressPercent"
@@ -2783,7 +2762,6 @@ function normalizeText(value) {
   <AIWorkspace
     v-else-if="!isWarmShellState"
     v-model:draft="draft"
-    :nav-items="navItems"
     :user-display-name="userDisplayName"
     :user-initial="userInitial"
     :user-avatar-url="userAvatarUrl"

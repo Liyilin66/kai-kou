@@ -1,42 +1,7 @@
 <template>
   <div class="shell">
 
-    <!-- ═══════════════ SIDEBAR ═══════════════ -->
-    <aside class="home-agent-sidebar">
-      <RouterLink class="home-agent-logo" to="/home" aria-label="返回首页">
-        <div class="home-agent-logo-icon" aria-hidden="true">
-          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <rect x="2" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".95" />
-            <rect x="10" y="2" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="2" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".5" />
-            <rect x="10" y="10" width="6" height="6" rx="1.5" fill="#F5EFE4" opacity=".75" />
-          </svg>
-        </div>
-        <span class="home-agent-logo-name">开口 PTE</span>
-      </RouterLink>
-
-      <nav class="home-agent-nav" aria-label="首页导航">
-        <RouterLink
-          v-for="item in displayNavItems"
-          :key="item.key"
-          class="home-agent-nav-item"
-          :class="{ 'home-agent-nav-item--active': isNavActive(item) }"
-          :to="item.to"
-          :aria-current="isNavActive(item) ? 'page' : undefined"
-        >
-          <span class="home-agent-nav-icon" aria-hidden="true" v-html="item.icon"></span>
-          <span>{{ item.label }}</span>
-        </RouterLink>
-      </nav>
-
-      <div class="home-agent-sidebar-footer">
-        <div class="home-agent-promo">
-          <div class="home-agent-promo-title">WE 模板库</div>
-          <div class="home-agent-promo-sub">写作结构 · 常用表达</div>
-          <button class="home-agent-promo-button" type="button" @click="goTo('/we/templates')">查看模板</button>
-        </div>
-      </div>
-    </aside>
+    <AppNav />
 
     <!-- ═══════════════ MAIN ═══════════════ -->
     <div class="main">
@@ -47,11 +12,13 @@
         </div>
         <div class="tb-right">
           <div class="vip-pill" :class="`vip-pill--${membershipPill.kind}`">{{ membershipPill.label }}</div>
-          <div class="user-av">
-            <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" />
-            <span v-else>{{ userInitial }}</span>
-          </div>
-          <span class="user-name">{{ username }}</span>
+          <RouterLink class="user-link" to="/profile" aria-label="进入个人中心">
+            <div class="user-av">
+              <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="头像" />
+              <span v-else>{{ userInitial }}</span>
+            </div>
+            <span class="user-name">{{ username }}</span>
+          </RouterLink>
         </div>
       </header>
 
@@ -131,6 +98,13 @@
               <div v-for="act in aiActions" :key="act.label" class="ai-act-btn" role="button" tabindex="0" @click="goTo(act.to)" @keydown.enter.prevent="goTo(act.to)" @keydown.space.prevent="goTo(act.to)">{{ act.label }}</div>
             </div>
           </div>
+
+          <!-- Under 1024 the coach card collapses to this one-line suggestion. -->
+          <RouterLink class="ai-line" to="/agent">
+            <span class="ai-line-label">AI 私教</span>
+            <span class="ai-line-text">{{ homeCoachBanner }}</span>
+            <span class="ai-line-arr" aria-hidden="true">→</span>
+          </RouterLink>
         </div>
 
         <!-- ── ROW 2：今日 AI 建议 ── -->
@@ -169,150 +143,167 @@
         <!-- ── ROW 3：学习报告：热力图 + 趋势 + 弱项 + 本周目标 + 最近练习 ── -->
         <div id="report" class="row row-report">
 
-          <div class="card hm-card">
-            <div class="sec-title">本周学习热力图</div>
-            <div class="hm-days">
-              <div
-                v-for="day in heatDays"
-                :key="`${day.label}-${day.dateLabel}`"
-                class="hm-dlbl"
-                :class="{ today: day.isToday }"
-                :title="day.dateLabel"
-              >
-                {{ day.label }}
-              </div>
-            </div>
-            <div class="hm-grid">
-              <div v-for="row in heatRows" :key="row.label" class="hm-row">
-                <span class="hm-code">{{ row.label }}</span>
-                <div
-                  v-for="(cell, i) in row.cells"
-                  :key="`${row.label}-${i}`"
-                  class="hm-cell"
-                  :class="[heatClass(cell.level), { 'hm-today': cell.isToday }]"
-                  :title="formatHeatCellTitle(row, cell)"
-                ></div>
-              </div>
-            </div>
-            <div class="hm-footer">
-              <span>少</span>
-              <div class="hm-legend">
-                <div v-for="level in heatLegendLevels" :key="level" class="hml" :class="heatClass(level)"></div>
-              </div>
-              <span>多</span>
-              <span class="hm-total">{{ weeklyStudyFoot }}</span>
-            </div>
-          </div>
+          <!-- Under 1024 the four report cards fold behind one summary line; on desktop the wrapper is layout-transparent. -->
+          <section class="report-fold" :class="{ 'report-fold--open': reportOpen }">
+            <button
+              type="button"
+              class="report-fold-head"
+              :aria-expanded="reportOpen ? 'true' : 'false'"
+              aria-controls="report-fold-body"
+              @click="reportOpen = !reportOpen"
+            >
+              <span class="report-fold-title">学习报告</span>
+              <span class="report-fold-summary">{{ reportFoldSummary }}</span>
+              <svg class="report-fold-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div id="report-fold-body" class="report-fold-body">
 
-          <div class="card trend-card">
-            <div class="trend-header">
-              <div class="sec-title" style="margin-bottom:0">得分趋势（近 7 天）</div>
-              <div class="trend-avg">
-                <div class="trend-avg-lbl">{{ trendScoreChip.label }}</div>
-                <div class="trend-avg-val kk-num">{{ trendScoreChip.value }}</div>
-              </div>
-            </div>
-            <svg class="chart-svg" viewBox="0 0 260 136" role="img" aria-label="近 7 天得分趋势">
-              <line
-                v-for="tick in trendYTicks"
-                :key="`trend-grid-${tick.value}`"
-                :x1="TREND_CHART.left"
-                :x2="TREND_CHART.right"
-                :y1="tick.y"
-                :y2="tick.y"
-                class="trend-grid"
-              />
-              <text
-                v-for="tick in trendYTicks"
-                :key="`trend-tick-${tick.value}`"
-                :x="6"
-                :y="tick.y + 3"
-                class="trend-axis"
-              >
-                {{ tick.value }}
-              </text>
-              <polyline
-                v-for="segment in trendDrawableSegments"
-                :key="segment.key"
-                :points="segment.polyline"
-                class="trend-line"
-              />
-              <text v-if="!trendHasData" x="135" y="62" text-anchor="middle" class="trend-empty">{{ trendEmptyText }}</text>
-              <text
-                v-for="label in trendAxisLabels"
-                :key="`trend-date-${label.key}`"
-                :x="label.x"
-                y="126"
-                text-anchor="middle"
-                class="trend-date"
-              >
-                {{ label.label }}
-              </text>
-              <circle
-                v-for="point in trendPlotPoints"
-                :key="point.key"
-                :cx="point.x"
-                :cy="point.y"
-                r="4"
-                class="trend-point"
-              >
-                <title>{{ formatTrendPointTitle(point) }}</title>
-              </circle>
-            </svg>
-            <div class="trend-note">{{ trendFootText }}</div>
-          </div>
-
-          <div class="card weak-card">
-            <div class="sec-title">我的弱项 Top 3</div>
-            <div v-if="hasWeakItems" class="weak-list">
-              <div v-for="w in weakItems" :key="w.rank" class="weak-item">
-                <div class="weak-rank">{{ w.rank }}</div>
-                <div>
-                  <div class="weak-name">{{ w.title }}</div>
-                  <div class="weak-score">{{ w.metricLabel }} · {{ w.delta }}</div>
+              <div class="card hm-card">
+                <div class="sec-title">本周学习热力图</div>
+                <div class="hm-days">
+                  <div
+                    v-for="day in heatDays"
+                    :key="`${day.label}-${day.dateLabel}`"
+                    class="hm-dlbl"
+                    :class="{ today: day.isToday }"
+                    :title="day.dateLabel"
+                  >
+                    {{ day.label }}
+                  </div>
+                </div>
+                <div class="hm-grid">
+                  <div v-for="row in heatRows" :key="row.label" class="hm-row">
+                    <span class="hm-code">{{ row.label }}</span>
+                    <div
+                      v-for="(cell, i) in row.cells"
+                      :key="`${row.label}-${i}`"
+                      class="hm-cell"
+                      :class="[heatClass(cell.level), { 'hm-today': cell.isToday }]"
+                      :title="formatHeatCellTitle(row, cell)"
+                    ></div>
+                  </div>
+                </div>
+                <div class="hm-footer">
+                  <span>少</span>
+                  <div class="hm-legend">
+                    <div v-for="level in heatLegendLevels" :key="level" class="hml" :class="heatClass(level)"></div>
+                  </div>
+                  <span>多</span>
+                  <span class="hm-total">{{ weeklyStudyFoot }}</span>
                 </div>
               </div>
-            </div>
-            <div v-else class="weak-empty">练习数据还不够，完成几道题后会自动识别弱项。</div>
-          </div>
 
-          <div id="goal" class="card goal-card">
-            <div class="goal-header">
-              <div class="sec-title" style="margin-bottom:0">本周目标进度</div>
-              <span class="badge-green">{{ weeklyGoalStatusLabel }}</span>
-            </div>
-            <div class="goal-top">
-              <div class="goal-left">
-                <div class="goal-pct kk-num">{{ weekProgress }}%</div>
-                <div class="goal-done">已完成 {{ weekDone }} / {{ weekTotal }} 题</div>
-              </div>
-              <div class="goal-ring-wrap">
-                <svg width="66" height="66" viewBox="0 0 66 66">
-                  <circle class="ring-track" cx="33" cy="33" r="26" fill="none" stroke-width="6"/>
-                  <circle class="ring-fill" cx="33" cy="33" r="26" fill="none" stroke-width="6"
-                    stroke-linecap="round" :stroke-dasharray="ringDash"
-                    stroke-dashoffset="41" transform="rotate(-90 33 33)"/>
+              <div class="card trend-card">
+                <div class="trend-header">
+                  <div class="sec-title" style="margin-bottom:0">得分趋势（近 7 天）</div>
+                  <div class="trend-avg">
+                    <div class="trend-avg-lbl">{{ trendScoreChip.label }}</div>
+                    <div class="trend-avg-val kk-num">{{ trendScoreChip.value }}</div>
+                  </div>
+                </div>
+                <svg class="chart-svg" viewBox="0 0 260 136" role="img" aria-label="近 7 天得分趋势">
+                  <line
+                    v-for="tick in trendYTicks"
+                    :key="`trend-grid-${tick.value}`"
+                    :x1="TREND_CHART.left"
+                    :x2="TREND_CHART.right"
+                    :y1="tick.y"
+                    :y2="tick.y"
+                    class="trend-grid"
+                  />
+                  <text
+                    v-for="tick in trendYTicks"
+                    :key="`trend-tick-${tick.value}`"
+                    :x="6"
+                    :y="tick.y + 3"
+                    class="trend-axis"
+                  >
+                    {{ tick.value }}
+                  </text>
+                  <polyline
+                    v-for="segment in trendDrawableSegments"
+                    :key="segment.key"
+                    :points="segment.polyline"
+                    class="trend-line"
+                  />
+                  <text v-if="!trendHasData" x="135" y="62" text-anchor="middle" class="trend-empty">{{ trendEmptyText }}</text>
+                  <text
+                    v-for="label in trendAxisLabels"
+                    :key="`trend-date-${label.key}`"
+                    :x="label.x"
+                    y="126"
+                    text-anchor="middle"
+                    class="trend-date"
+                  >
+                    {{ label.label }}
+                  </text>
+                  <circle
+                    v-for="point in trendPlotPoints"
+                    :key="point.key"
+                    :cx="point.x"
+                    :cy="point.y"
+                    r="4"
+                    class="trend-point"
+                  >
+                    <title>{{ formatTrendPointTitle(point) }}</title>
+                  </circle>
                 </svg>
-                <div class="ring-center">{{ weekProgress }}%</div>
+                <div class="trend-note">{{ trendFootText }}</div>
               </div>
-            </div>
-            <div class="goal-bar-section">
-              <div class="goal-bar-labels"><span>本周进度</span><span>{{ weekDone }}/{{ weekTotal }} 题</span></div>
-              <div class="goal-bar-bg"><div class="goal-bar-fill" :style="{ width: weekProgress + '%' }"></div></div>
-            </div>
-            <div class="goal-breakdown">
-              <div v-for="g in goalBreakdown" :key="g.code" class="gb-row">
-                <span class="gb-code">{{ g.code }}</span>
-                <div class="gb-bar-bg">
-                  <div class="gb-bar-fill" :style="{ width: g.percent + '%' }"></div>
+
+              <div class="card weak-card">
+                <div class="sec-title">我的弱项 Top 3</div>
+                <div v-if="hasWeakItems" class="weak-list">
+                  <div v-for="w in weakItems" :key="w.rank" class="weak-item">
+                    <div class="weak-rank">{{ w.rank }}</div>
+                    <div>
+                      <div class="weak-name">{{ w.title }}</div>
+                      <div class="weak-score">{{ w.metricLabel }} · {{ w.delta }}</div>
+                    </div>
+                  </div>
                 </div>
-                <span class="gb-val">{{ g.done }}/{{ g.total }}</span>
+                <div v-else class="weak-empty">练习数据还不够，完成几道题后会自动识别弱项。</div>
+              </div>
+
+              <div id="goal" class="card goal-card">
+                <div class="goal-header">
+                  <div class="sec-title" style="margin-bottom:0">本周目标进度</div>
+                  <span class="badge-green">{{ weeklyGoalStatusLabel }}</span>
+                </div>
+                <div class="goal-top">
+                  <div class="goal-left">
+                    <div class="goal-pct kk-num">{{ weekProgress }}%</div>
+                    <div class="goal-done">已完成 {{ weekDone }} / {{ weekTotal }} 题</div>
+                  </div>
+                  <div class="goal-ring-wrap">
+                    <svg width="66" height="66" viewBox="0 0 66 66">
+                      <circle class="ring-track" cx="33" cy="33" r="26" fill="none" stroke-width="6"/>
+                      <circle class="ring-fill" cx="33" cy="33" r="26" fill="none" stroke-width="6"
+                        stroke-linecap="round" :stroke-dasharray="ringDash"
+                        stroke-dashoffset="41" transform="rotate(-90 33 33)"/>
+                    </svg>
+                    <div class="ring-center">{{ weekProgress }}%</div>
+                  </div>
+                </div>
+                <div class="goal-bar-section">
+                  <div class="goal-bar-labels"><span>本周进度</span><span>{{ weekDone }}/{{ weekTotal }} 题</span></div>
+                  <div class="goal-bar-bg"><div class="goal-bar-fill" :style="{ width: weekProgress + '%' }"></div></div>
+                </div>
+                <div class="goal-breakdown">
+                  <div v-for="g in goalBreakdown" :key="g.code" class="gb-row">
+                    <span class="gb-code">{{ g.code }}</span>
+                    <div class="gb-bar-bg">
+                      <div class="gb-bar-fill" :style="{ width: g.percent + '%' }"></div>
+                    </div>
+                    <span class="gb-val">{{ g.done }}/{{ g.total }}</span>
+                  </div>
+                </div>
+                <div class="goal-btns">
+                  <button type="button" class="goal-btn goal-btn-p goal-btn-wide" @click="openGoalModal">设置本周目标</button>
+                </div>
               </div>
             </div>
-            <div class="goal-btns">
-              <button type="button" class="goal-btn goal-btn-p goal-btn-wide" @click="openGoalModal">设置本周目标</button>
-            </div>
-          </div>
+          </section>
           <div class="card recent-card">
             <div class="sec-title">最近练习</div>
             <div v-if="hasRecentItems" class="recent-list">
@@ -374,6 +365,7 @@
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import AppNav from "@/components/AppNav.vue";
 import { requestDailyAiSuggestion } from "@/lib/agent";
 import { isDIEnabled } from "@/lib/di-feature";
 import { HOME_TASK_TYPES, getEnabledTaskTypes, hasUnavailableTaskRecommendation } from "@/lib/enabled-task-types";
@@ -427,6 +419,8 @@ const taskPathMap = {
 const dailyAiSuggestionState = ref(createDailySuggestionState());
 let dailySuggestionLoadPromise = null;
 const goalModalOpen = ref(false);
+// Mobile-only fold for the report cards; desktop ignores it and always shows them.
+const reportOpen = ref(false);
 const goalDraft = ref({});
 
 const username = computed(() => authStore.displayName || "同学");
@@ -459,45 +453,15 @@ const membershipPill = computed(() => {
   return { kind: "locked", icon: "🔒", label: "未开通" };
 });
 
-const navIconMap = {
-  home: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>',
-  list: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  spark: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M7 1.5C4.24 1.5 2 3.74 2 6.5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6.5h4M7 4.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  square: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h5M4.5 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  report: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 11l3-4 3 2.5 3-5 2 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  box: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1.5 3h11M1.5 7h7M1.5 11h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
-  circle: '<svg width="14" height="14" fill="none" viewBox="0 0 14 14"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>'
-};
-
-const navItems = [
-  { key: "home", label: "首页", icon: "home", to: "/home" },
-  { key: "practice", label: "练习中心", icon: "list", to: "/home#quick" },
-  { key: "agent", label: "AI 私教", icon: "spark", to: "/agent" },
-  { key: "plan", label: "学习计划", icon: "square", to: "/home#goal" },
-  { key: "report", label: "学习报告", icon: "report", to: "/home#report" },
-  { key: "profile", label: "个人中心", icon: "circle", to: "/profile" }
-];
-
-const displayNavItems = computed(() =>
-  navItems.map((item) => ({
-    ...item,
-    icon: navIconMap[item.icon] || navIconMap.circle
-  }))
-);
-
 function goTo(path) {
   if (!path || path === route.path) return;
   router.push(path);
 }
 
-function isNavActive(item) {
-  if (item.key === "home") return (route.path === "/home" || route.path === "/") && !route.hash;
-  return route.path === item.to || route.fullPath === item.to;
-}
-
 function scrollToHash(hash = route.hash) {
   const id = `${hash || ""}`.replace(/^#/, "");
   if (!id || typeof document === "undefined") return;
+  if (id === "report" || id === "goal") reportOpen.value = true;
   const element = document.getElementById(id);
   if (!element) return;
   element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1025,23 +989,33 @@ const aiActions = ref([
 
 const moduleCardConfigs = [
   { code: "RA", icon: "🎙", iconBg: "#F2E4D0", desc: "朗读句子\n语流表达", tagBg: "#F2E4D0", tagColor: "#C07840", tagBorder: "#D4B090", to: "/ra" },
+  { code: "RS", desc: "复述句子\n关键词抓取", to: "/rs" },
+  { code: "RL", desc: "复述讲座\n模板组织表达", to: "/rl" },
   { code: "WFD", icon: "✍", iconBg: "#DFF0E4", desc: "听写句子\n拼写准确", tagBg: "#DFF0E4", tagColor: "#3A7E50", tagBorder: "#A8D4B4", to: "/wfd" },
   { code: "RTS", icon: "🔁", iconBg: "#F2E4D0", desc: "情景回应\n情境沟通", tagBg: "#F0E0D8", tagColor: "#B05040", tagBorder: "#D4B0A0", to: "/rts/practice" },
   { code: "DI", icon: "📊", iconBg: "#E8E4F4", desc: "描述图表\n数据分析", tagBg: "#E8E4F4", tagColor: "#6050A0", tagBorder: "#C0B8E0", to: "/di" },
   { code: "WE", icon: "📝", iconBg: "#F0EAF4", desc: "写作议论\n结构论证", tagBg: "#F0EAF4", tagColor: "#7050A0", tagBorder: "#C8B8DC", to: "/we" }
 ];
 
+// Entry tiles cover every open task type, RS and RL included. The dashboard only aggregates the
+// home card types, so RS/RL have no average here and show a plain call to action instead.
+const moduleTaskTypes = computed(() => getEnabledTaskTypes({
+  types: moduleCardConfigs.map((module) => module.code),
+  diEnabled: diEnabled.value
+}));
 const modules = computed(() =>
-  moduleCardConfigs.filter((module) => enabledHomeTaskTypeSet.value.has(module.code)).map((module) => {
-    const metrics = moduleMetrics.value[module.code] || {};
-    const hasScore = metrics.averageScore !== null && metrics.averageScore !== undefined;
+  moduleTaskTypes.value.map((code) => moduleCardConfigs.find((module) => module.code === code)).map((module) => {
+    const metrics = moduleMetrics.value[module.code];
+    const hasScore = metrics?.averageScore !== null && metrics?.averageScore !== undefined;
     return {
       ...module,
       tag: dashboard.value.loading
         ? "同步中"
-        : hasScore
-          ? `均分 ${formatScore(metrics.averageScore)}`
-          : "暂无数据"
+        : !metrics
+          ? "去练习"
+          : hasScore
+            ? `均分 ${formatScore(metrics.averageScore)}`
+            : "暂无数据"
     };
   })
 );
@@ -1104,6 +1078,11 @@ const weekTotal = computed(() =>
 const weekProgress = computed(() =>
   weekTotal.value > 0 ? Math.min(100, Math.round((weekDone.value / weekTotal.value) * 100)) : 0
 );
+const reportFoldSummary = computed(() => {
+  if (dashboard.value.loading) return "同步中…";
+  const practiced = `本周练了 ${formatInteger(dashboard.value.weeklyStudy?.totalCount || 0)} 题`;
+  return weekTotal.value > 0 ? `${practiced} · 目标 ${weekProgress.value}%` : practiced;
+});
 const weeklyGoalStatusLabel = computed(() => {
   if (dashboard.value.loading) return "同步中";
   if (weekTotal.value <= 0) return "未设置";
@@ -1422,23 +1401,6 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 .shell{display:flex;width:100vw;height:100vh;overflow:hidden;background:var(--kk-bg);color:var(--kk-ink);font-family:var(--kk-font);font-size:15px;line-height:1.55;}
 
-/* Sidebar (desktop only) */
-.home-agent-sidebar{display:none;flex:0 0 232px;width:232px;flex-direction:column;background:var(--kk-surface);border-right:1px solid var(--kk-line);}
-.home-agent-logo{display:flex;align-items:center;gap:10px;height:72px;flex:0 0 72px;padding:0 24px;text-decoration:none;}
-.home-agent-logo-icon{display:flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--kk-action);flex-shrink:0;}
-.home-agent-logo-name{color:var(--kk-ink);font-size:18px;font-weight:700;}
-.home-agent-nav{display:flex;flex:1;flex-direction:column;gap:4px;padding:8px 16px 24px;}
-.home-agent-nav-item{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 14px;border-radius:12px;color:var(--kk-ink-2);font-size:15px;text-decoration:none;transition:background .15s,color .15s;}
-.home-agent-nav-item:hover{background:var(--kk-surface-2);color:var(--kk-ink);}
-.home-agent-nav-item--active,.home-agent-nav-item--active:hover{background:var(--kk-action-soft);color:var(--kk-action-text);font-weight:600;}
-.home-agent-nav-icon{display:flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;}
-.home-agent-nav-icon :deep(svg){width:18px;height:18px;}
-.home-agent-sidebar-footer{padding:16px;}
-.home-agent-promo{padding:16px;border-radius:16px;background:var(--kk-surface-2);}
-.home-agent-promo-title{margin-bottom:2px;color:var(--kk-ink);font-size:15px;font-weight:600;}
-.home-agent-promo-sub{margin-bottom:12px;color:var(--kk-ink-3);font-size:13px;}
-.home-agent-promo-button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 16px;border:1px solid var(--kk-line);border-radius:999px;background:var(--kk-surface);color:var(--kk-ink);font:600 13px/1 var(--kk-font);cursor:pointer;}
-
 /* Top bar */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
 .topbar{min-height:64px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--kk-surface);border-bottom:1px solid var(--kk-line);}
@@ -1448,6 +1410,8 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
 .tb-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .vip-pill{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--kk-surface-2);color:var(--kk-ink-2);}
 .vip-pill--vip{background:var(--kk-notice-bg);color:var(--kk-notice);}
+.user-link{display:flex;align-items:center;gap:10px;min-height:44px;border-radius:999px;color:inherit;text-decoration:none;}
+.user-link:hover .user-name{color:var(--kk-action-text);}
 .user-av{width:36px;height:36px;border-radius:50%;background:var(--kk-ink);color:var(--kk-ink-inverse);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
 .user-av img{width:100%;height:100%;object-fit:cover;display:block;}
 .user-name{display:none;font-size:14px;font-weight:500;color:var(--kk-ink);}
@@ -1629,13 +1593,28 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
 .rec-arr{font-size:18px;color:var(--kk-ink-3);margin-left:auto;}
 .weak-empty,.recent-empty{min-height:88px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;border:1px dashed var(--kk-line);border-radius:12px;font-size:14px;color:var(--kk-ink-3);line-height:1.6;}
 
+/* One-line coach entry and report fold: only rendered as boxes under 1024 */
+.ai-line{display:flex;align-items:center;gap:10px;min-width:0;min-height:52px;padding:12px 16px;border:1px solid var(--kk-line);border-radius:16px;background:var(--kk-surface);color:var(--kk-ink);text-decoration:none;}
+.ai-line-label{flex-shrink:0;font-size:14px;font-weight:700;}
+.ai-line-text{flex:1;min-width:0;overflow:hidden;color:var(--kk-ink-2);font-size:14px;text-overflow:ellipsis;white-space:nowrap;}
+.ai-line-arr{flex-shrink:0;color:var(--kk-action-text);font-size:16px;font-weight:700;}
+.report-fold{display:flex;flex-direction:column;gap:16px;min-width:0;}
+.report-fold-head{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:14px 20px;border:1px solid var(--kk-line);border-radius:20px;background:var(--kk-surface);box-shadow:var(--kk-shadow);color:var(--kk-ink);font:inherit;text-align:left;cursor:pointer;}
+.report-fold-title{flex-shrink:0;font-size:16px;font-weight:700;}
+.report-fold-summary{flex:1;min-width:0;overflow:hidden;color:var(--kk-ink-3);font-size:13px;text-align:right;text-overflow:ellipsis;white-space:nowrap;}
+.report-fold-chevron{flex-shrink:0;color:var(--kk-ink-2);transition:transform .2s;}
+.report-fold--open .report-fold-chevron{transform:rotate(180deg);}
+.report-fold-body{display:none;grid-template-columns:minmax(0,1fr);gap:16px;}
+.report-fold--open .report-fold-body{display:grid;}
+
 /* Tablet 768–1023 */
 @media (min-width:768px){
   .topbar{padding:12px 24px;}
   .tb-greet{font-size:22px;}
   .tb-sub{display:block;}
   .scroll{padding:24px 24px 48px;}
-  .sc-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));}
+  /* Six open task types sit as a 3×2 grid instead of wrapping 4 + 2. */
+  .sc-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
   .hc-top{padding:26px 28px 24px;}
   .hc-title{font-size:26px;}
   .s3-val{font-size:28px;}
@@ -1643,9 +1622,29 @@ const hasRecentItems = computed(() => recentItems.value.length > 0);
   .row-report .recent-card{grid-column:1 / -1;}
 }
 
-/* Desktop ≥1024: sidebar appears */
+/* Phone and tablet <1024: a short home. Rows dissolve so the cards can be reordered —
+   today's tasks and numbers, task entries, recent practice, then the coach line and the report fold. */
+@media (max-width:1023.98px){
+  .scroll{padding-bottom:calc(40px + var(--kk-tabbar-h));}
+  .row-top,.row-report{display:contents;}
+  .row-advice,.ai-card{display:none;}
+  /* Cards are now items of the scrolling flex column; without this the overflow-hidden hero would shrink. */
+  .hero-card,.sc-card,.recent-card,.ai-line,.report-fold{flex-shrink:0;}
+  .hero-card{order:1;}
+  .sc-card{order:2;}
+  .recent-card{order:3;}
+  .ai-line{order:4;}
+  .report-fold{order:5;}
+}
+@media (min-width:768px) and (max-width:1023.98px){
+  .scroll{padding-bottom:calc(48px + var(--kk-tabbar-h));}
+  .report-fold-body{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+/* Desktop ≥1024: sidebar appears; the fold wrapper is layout-transparent so the report grid is unchanged */
 @media (min-width:1024px){
-  .home-agent-sidebar{display:flex;}
+  .ai-line,.report-fold-head{display:none;}
+  .report-fold,.report-fold .report-fold-body{display:contents;}
   .user-name{display:block;}
   .topbar{min-height:72px;padding:12px 40px;}
   .tb-greet{font-size:26px;}
