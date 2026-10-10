@@ -26,7 +26,7 @@ const dimensionConfig = [
     label: "Pronunciation 发音",
     shortLabel: "发音",
     en: "Pronunciation",
-    color: "#5A9E6A",
+    color: "var(--kk-ink-2)",
     desc: "发音清晰度与准确性",
     high: "发音整体清楚，重音和收尾比较稳定。",
     mid: "发音基本可懂，个别元音、辅音或词尾需要再收准。",
@@ -37,7 +37,7 @@ const dimensionConfig = [
     label: "Fluency 流利度",
     shortLabel: "流利度",
     en: "Fluency",
-    color: "#C07840",
+    color: "var(--kk-ink-2)",
     desc: "语速节奏与停顿自然度",
     high: "节奏比较自然，停顿没有明显打断句意。",
     mid: "整体能连贯读完，但长句或标点处仍有节奏波动。",
@@ -48,7 +48,7 @@ const dimensionConfig = [
     label: "Content 内容",
     shortLabel: "内容",
     en: "Content",
-    color: "#5A9E6A",
+    color: "var(--kk-ink-2)",
     desc: "关键词覆盖与句意完整",
     high: "原文关键词覆盖较完整，内容稳定。",
     mid: "多数关键词已读到，仍有少量漏读或替换。",
@@ -198,20 +198,20 @@ const suggestions = computed(() => {
   const weak = weakestDimension.value;
   const items = [];
   if (weak?.key === "fluency") {
-    items.push({ text: "流利度是本次扣分重点，下一轮先按逗号和从句切分节奏。", color: "#C07840" });
-    items.push({ text: "长词提前在脑中分节，宁愿略慢，也不要突然停顿。", color: "#C07840" });
+    items.push({ text: "流利度是本次扣分重点，下一轮先按逗号和从句切分节奏。", color: "var(--kk-notice)" });
+    items.push({ text: "长词提前在脑中分节，宁愿略慢，也不要突然停顿。", color: "var(--kk-notice)" });
   } else if (weak?.key === "pronunciation") {
-    items.push({ text: "发音清晰度还有提升空间，重点收好词尾辅音。", color: "#C07840" });
-    items.push({ text: "读前先扫一遍专有名词和长词，避免临场卡顿。", color: "#C07840" });
+    items.push({ text: "发音清晰度还有提升空间，重点收好词尾辅音。", color: "var(--kk-notice)" });
+    items.push({ text: "读前先扫一遍专有名词和长词，避免临场卡顿。", color: "var(--kk-notice)" });
   } else {
-    items.push({ text: "内容覆盖偏弱，先确保每个关键词都完整读到。", color: "#C07840" });
-    items.push({ text: "遇到长句不要跳词，按意群慢一点读完。", color: "#C07840" });
+    items.push({ text: "内容覆盖偏弱，先确保每个关键词都完整读到。", color: "var(--kk-notice)" });
+    items.push({ text: "遇到长句不要跳词，按意群慢一点读完。", color: "var(--kk-notice)" });
   }
 
   if (overallScore.value >= 65) {
-    items.push({ text: "发音和内容已具备基础稳定性，继续保持每日短练。", color: "#5A9E6A" });
+    items.push({ text: "发音和内容已具备基础稳定性，继续保持每日短练。", color: "var(--kk-success)" });
   } else {
-    items.push({ text: "先把完整度拉上来，再追求更快语速。", color: "#5A9E6A" });
+    items.push({ text: "先把完整度拉上来，再追求更快语速。", color: "var(--kk-success)" });
   }
   return items;
 });
@@ -257,8 +257,8 @@ const todayStats = computed(() => {
   return [
     { val: rows.length || 0, label: "今日练习", color: "var(--c0)" },
     { val: todayAverage === null ? "--" : Math.round(todayAverage), label: "今日均分", color: "var(--c2)" },
-    { val: delta === null ? "--" : `${delta >= 0 ? "+" : ""}${delta}`, label: "较昨日", color: delta === null || delta >= 0 ? "var(--grn)" : "var(--red)" },
-    { val: remaining, label: "剩余题数", color: "var(--org)" }
+    { val: delta === null ? "--" : `${delta >= 0 ? "+" : ""}${delta}`, label: "较昨日", color: delta === null || delta >= 0 ? "var(--kk-success)" : "var(--kk-notice)" },
+    { val: remaining, label: "剩余题数", color: "var(--kk-ink)" }
   ];
 });
 
@@ -588,9 +588,9 @@ function getDifficultyLevel(question) {
 
 function scoreColor(score) {
   const value = normalizeScore(score, 0);
-  if (value >= 75) return "#5A9E6A";
-  if (value >= 58) return "#C07840";
-  return "#B84040";
+  if (value >= 75) return "var(--kk-success)";
+  if (value >= 58) return "var(--kk-ink)";
+  return "var(--kk-notice)";
 }
 
 function formatDuration(seconds) {
@@ -720,7 +720,7 @@ function inferNextQuestionId(id) {
     <div class="page-body">
       <aside class="left-col">
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">◈</span> 本题信息</div>
+          <div class="lc-hd">本题信息</div>
           <div class="lc-body">
             <div class="info-rows">
               <div class="ir"><span class="ir-k">题号</span><span class="ir-v">{{ questionId }}</span></div>
@@ -742,7 +742,7 @@ function inferNextQuestionId(id) {
         </section>
 
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">◎</span> 本题历史趋势</div>
+          <div class="lc-hd">本题历史趋势</div>
           <div class="lc-body">
             <div v-if="historyLoading" class="muted-line">正在同步本题历史...</div>
             <div v-else-if="trendRows.length" class="trend-list">
@@ -766,7 +766,7 @@ function inferNextQuestionId(id) {
         </section>
 
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">✦</span> 改进建议</div>
+          <div class="lc-hd">改进建议</div>
           <div class="lc-body">
             <div v-for="item in suggestions" :key="item.text" class="suggestion-item">
               <div class="sug-dot" :style="{ background: item.color }"></div>
@@ -846,7 +846,7 @@ function inferNextQuestionId(id) {
       <aside class="right-col">
         <section class="ai-card">
           <div class="ai-hd">
-            <div class="ai-hd-title"><span>✦</span> AI 私教评分反馈</div>
+            <div class="ai-hd-title">AI 私教评分反馈</div>
             <button class="ai-hd-link" type="button" data-testid="ra-result-agent-link" @click="goAgent">进入私教 →</button>
           </div>
           <div class="ai-suggest">
@@ -873,7 +873,7 @@ function inferNextQuestionId(id) {
         </section>
 
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">◈</span> 综合表现</div>
+          <div class="lc-hd">综合表现</div>
           <div class="lc-body">
             <div v-for="dimension in dimensionItems" :key="`${dimension.key}-right`" class="rdim-row">
               <span class="rdim-name">{{ dimension.shortLabel }}</span>
@@ -890,25 +890,25 @@ function inferNextQuestionId(id) {
         </section>
 
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">◎</span> 本题近期趋势</div>
+          <div class="lc-hd">本题近期趋势</div>
           <div class="lc-body">
             <svg v-if="chartRows.length > 1" class="mini-chart" width="100%" height="60" viewBox="0 0 220 60" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="raResultChartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#7C5C3E" stop-opacity=".22" />
-                  <stop offset="100%" stop-color="#7C5C3E" stop-opacity="0" />
+                  <stop offset="0%" stop-color="currentColor" stop-opacity=".16" />
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
                 </linearGradient>
               </defs>
               <path :d="chartAreaPath" fill="url(#raResultChartGrad)" />
-              <path :d="chartLinePath" fill="none" stroke="#7C5C3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path :d="chartLinePath" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               <circle
                 v-for="(point, index) in chartPoints"
                 :key="index"
                 :cx="point.x"
                 :cy="point.y"
                 r="3"
-                fill="#7C5C3E"
-                stroke="#FAF6EF"
+                fill="currentColor"
+                stroke="var(--kk-surface)"
                 stroke-width="1.5"
               />
             </svg>
@@ -923,7 +923,7 @@ function inferNextQuestionId(id) {
         </section>
 
         <section class="lc-card">
-          <div class="lc-hd"><span class="lc-star">◈</span> 今日 RA 统计</div>
+          <div class="lc-hd">今日 RA 统计</div>
           <div class="lc-body">
             <div v-if="statsLoading" class="muted-line">正在同步今日统计...</div>
             <div class="today-stat-grid">
@@ -946,26 +946,26 @@ function inferNextQuestionId(id) {
 }
 
 .ra-result-shell {
-  --c0: #1e1208;
-  --c1: #3a2510;
-  --c2: #7c5c3e;
-  --c3: #a07850;
-  --bg1: #ede8dc;
-  --bg2: #e4ddd0;
-  --card: #faf6ef;
-  --card2: #f2ebe0;
-  --bdr: #d4c8b4;
-  --bdr2: #c4b49c;
-  --grn: #5a9e6a;
-  --grn2: #dff0e4;
-  --grn3: #a8d4b4;
-  --org: #c07840;
-  --org2: #f2e4d0;
-  --org3: #d4b090;
-  --red: #b84040;
-  --red2: #f5e0dc;
-  --red3: #d4a8a0;
-  --mute: #a89070;
+  --c0: var(--kk-ink);
+  --c1: var(--kk-ink);
+  --c2: var(--kk-ink);
+  --c3: var(--kk-ink-2);
+  --bg1: var(--kk-bg);
+  --bg2: var(--kk-surface);
+  --card: var(--kk-surface);
+  --card2: var(--kk-surface-2);
+  --bdr: var(--kk-line);
+  --bdr2: var(--kk-line);
+  --grn: var(--kk-success);
+  --grn2: var(--kk-success-bg);
+  --grn3: var(--kk-success-line);
+  --org: var(--kk-notice);
+  --org2: var(--kk-notice-bg);
+  --org3: var(--kk-notice-line);
+  --red: var(--kk-error);
+  --red2: var(--kk-error-bg);
+  --red3: var(--kk-error-line);
+  --mute: var(--kk-ink-3);
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -973,7 +973,7 @@ function inferNextQuestionId(id) {
   overflow: hidden;
   background: var(--bg1);
   color: var(--c0);
-  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  font-family: var(--kk-font);
 }
 
 .topbar {
@@ -1000,7 +1000,7 @@ function inferNextQuestionId(id) {
   align-items: center;
   gap: 6px;
   color: rgba(250, 246, 239, .72);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .tb-arr {
@@ -1011,7 +1011,7 @@ function inferNextQuestionId(id) {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  color: #faf6ef;
+  color: var(--kk-ink-inverse);
   font-size: 15px;
   font-weight: 800;
 }
@@ -1027,11 +1027,11 @@ function inferNextQuestionId(id) {
   align-items: center;
   gap: 5px;
   padding: 4px 11px;
-  border: 1px solid #a8d4b4;
+  border: 1px solid var(--kk-success-line);
   border-radius: 999px;
-  background: #dff0e4;
-  color: #2d6a3a;
-  font-size: 11px;
+  background: var(--kk-success-bg);
+  color: var(--kk-success);
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -1039,12 +1039,12 @@ function inferNextQuestionId(id) {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #5a9e6a;
+  background: var(--kk-success);
 }
 
 .exit-btn {
   color: rgba(250, 246, 239, .66);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 
 .step-bar {
@@ -1076,7 +1076,7 @@ function inferNextQuestionId(id) {
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -1087,11 +1087,11 @@ function inferNextQuestionId(id) {
 
 .step-num.act {
   background: var(--c2);
-  color: #faf6ef;
+  color: var(--kk-ink-inverse);
 }
 
 .step-label {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -1112,7 +1112,7 @@ function inferNextQuestionId(id) {
 .step-q-info {
   margin-left: auto;
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .page-body {
@@ -1178,7 +1178,7 @@ function inferNextQuestionId(id) {
   padding: 10px 13px 9px;
   border-bottom: 1px solid var(--bdr);
   color: var(--c0);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -1208,19 +1208,19 @@ function inferNextQuestionId(id) {
 
 .ir-k {
   color: var(--mute);
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .ir-v {
   color: var(--c0);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   text-align: right;
 }
 
 .score-highlight {
   color: var(--c2);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
 }
 
@@ -1236,7 +1236,7 @@ function inferNextQuestionId(id) {
 .diff-badge {
   padding: 2px 7px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1270,7 +1270,7 @@ function inferNextQuestionId(id) {
   border-radius: 8px;
   background: var(--card2);
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -1283,7 +1283,7 @@ function inferNextQuestionId(id) {
 
 .tl-date {
   color: var(--mute);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .tl-bar-bg {
@@ -1300,7 +1300,7 @@ function inferNextQuestionId(id) {
 }
 
 .tl-val {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 800;
   text-align: right;
 }
@@ -1310,15 +1310,15 @@ function inferNextQuestionId(id) {
   border: 1px solid var(--grn3);
   border-radius: 7px;
   background: var(--grn2);
-  color: #2d6a3a;
-  font-size: 11px;
+  color: var(--kk-success);
+  font-size: 13px;
   font-weight: 600;
 }
 
 .trend-note.muted,
 .muted-line {
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -1338,7 +1338,7 @@ function inferNextQuestionId(id) {
 
 .sug-text {
   color: var(--c1);
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.65;
 }
 
@@ -1362,20 +1362,20 @@ function inferNextQuestionId(id) {
   justify-content: space-between;
   gap: 22px;
   padding: 16px 24px;
-  background: linear-gradient(135deg, var(--c2) 0%, var(--c3) 58%, #c4a070 100%);
+  background: linear-gradient(135deg, var(--c2) 0%, var(--c3) 58%, var(--kk-ink-2) 100%);
 }
 
 .rb-kicker {
   margin-bottom: 5px;
   color: rgba(250, 246, 239, .62);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .14em;
 }
 
 .rb-title {
   margin: 0 0 3px;
-  color: #faf6ef;
+  color: var(--kk-ink-inverse);
   font-size: 20px;
   font-weight: 900;
 }
@@ -1383,7 +1383,7 @@ function inferNextQuestionId(id) {
 .rb-sub {
   margin: 0;
   color: rgba(250, 246, 239, .7);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .source-pill {
@@ -1395,7 +1395,7 @@ function inferNextQuestionId(id) {
   border-radius: 999px;
   background: rgba(250, 246, 239, .12);
   color: rgba(250, 246, 239, .82);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .02em;
 }
@@ -1418,7 +1418,7 @@ function inferNextQuestionId(id) {
 }
 
 .rb-score {
-  color: #faf6ef;
+  color: var(--kk-ink-inverse);
   font-size: 52px;
   font-weight: 900;
   line-height: 1;
@@ -1427,7 +1427,7 @@ function inferNextQuestionId(id) {
 .rb-score-label {
   margin-top: 2px;
   color: rgba(250, 246, 239, .62);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -1450,7 +1450,7 @@ function inferNextQuestionId(id) {
 .di-name {
   margin-bottom: 4px;
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -1469,7 +1469,7 @@ function inferNextQuestionId(id) {
 
 .di-max {
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .di-bar-bg,
@@ -1492,7 +1492,7 @@ function inferNextQuestionId(id) {
 .di-desc {
   margin-top: 5px;
   color: var(--mute);
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .transcript-card {
@@ -1509,14 +1509,14 @@ function inferNextQuestionId(id) {
 
 .tc-title {
   color: var(--c0);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
 }
 
 .tc-source {
   margin-top: 3px;
   color: var(--mute);
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .tc-legend {
@@ -1527,7 +1527,7 @@ function inferNextQuestionId(id) {
 }
 
 .tcl-item {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1547,7 +1547,7 @@ function inferNextQuestionId(id) {
   margin: 0;
   color: var(--c1);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.9;
 }
 
@@ -1588,7 +1588,7 @@ function inferNextQuestionId(id) {
   gap: 12px;
   margin-bottom: 8px;
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: .08em;
 }
@@ -1597,7 +1597,7 @@ function inferNextQuestionId(id) {
   margin: 0;
   color: var(--c1);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.75;
 }
 
@@ -1612,7 +1612,7 @@ function inferNextQuestionId(id) {
   min-height: 42px;
   border-radius: 10px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -1620,11 +1620,11 @@ function inferNextQuestionId(id) {
 .ba-primary {
   border: 0;
   background: var(--c2);
-  color: #faf6ef;
+  color: var(--kk-ink-inverse);
 }
 
 .ba-primary:hover {
-  background: #6a4d32;
+  background: var(--kk-action-hover);
 }
 
 .ba-ghost {
@@ -1660,14 +1660,14 @@ function inferNextQuestionId(id) {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #faf6ef;
-  font-size: 12px;
+  color: var(--kk-ink-inverse);
+  font-size: 13px;
   font-weight: 800;
 }
 
 .ai-hd-link {
   color: rgba(250, 246, 239, .72);
-  font-size: 10.5px;
+  font-size: 12px;
   text-decoration: underline;
 }
 
@@ -1678,7 +1678,7 @@ function inferNextQuestionId(id) {
   border-bottom: 1px solid var(--org3);
   background: var(--org2);
   color: var(--org);
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -1705,8 +1705,8 @@ function inferNextQuestionId(id) {
   margin-top: 1px;
   border-radius: 50%;
   background: var(--c2);
-  color: #faf6ef;
-  font-size: 8.5px;
+  color: var(--kk-ink-inverse);
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1721,14 +1721,14 @@ function inferNextQuestionId(id) {
 .ai-bubble-text,
 .coach-feedback {
   color: var(--c1);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
 .ai-bubble-time {
   margin-top: 2px;
   color: var(--mute);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .coach-feedback {
@@ -1742,7 +1742,7 @@ function inferNextQuestionId(id) {
 .ai-source-line,
 .stats-source {
   color: var(--mute);
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -1768,7 +1768,7 @@ function inferNextQuestionId(id) {
   background: var(--card2);
   color: var(--c1);
   font-family: inherit;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -1781,7 +1781,7 @@ function inferNextQuestionId(id) {
 
 .rdim-name {
   color: var(--mute);
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .rdim-bar-bg {
@@ -1789,7 +1789,7 @@ function inferNextQuestionId(id) {
 }
 
 .rdim-val {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   text-align: right;
 }
@@ -1802,7 +1802,7 @@ function inferNextQuestionId(id) {
   padding-top: 8px;
   border-top: 1px solid var(--bdr);
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .rdim-total-val {
@@ -1813,7 +1813,7 @@ function inferNextQuestionId(id) {
 
 .rdim-total-max {
   color: var(--mute);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -1841,7 +1841,7 @@ function inferNextQuestionId(id) {
 
 .single-score-trend small {
   color: var(--mute);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .chart-labels {
@@ -1853,7 +1853,7 @@ function inferNextQuestionId(id) {
 
 .chart-labels span {
   color: var(--mute);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .today-stat-grid {
@@ -1879,7 +1879,7 @@ function inferNextQuestionId(id) {
 .tsg-lbl {
   margin-top: 3px;
   color: var(--mute);
-  font-size: 9.5px;
+  font-size: 12px;
 }
 
 .stats-source {
@@ -1910,7 +1910,7 @@ function inferNextQuestionId(id) {
 
   .ba-primary,
   .ba-ghost {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
@@ -1926,7 +1926,7 @@ function inferNextQuestionId(id) {
 @media (max-width: 767px) {
   .ra-result-shell { width: 100%; height: auto; min-height: 100dvh; overflow: visible; }
   .topbar { height: auto; min-height: 52px; padding: 6px 12px; gap: 8px; flex-wrap: wrap; }
-  .tb-title { position: static; transform: none; font-size: 13px; }
+  .tb-title { position: static; transform: none; font-size: 15px; }
   .tb-right { gap: 6px; }
   .vip-pill { padding: 4px 7px; }
   .tb-back, .exit-btn { min-height: 44px; }
@@ -1954,4 +1954,32 @@ function inferNextQuestionId(id) {
   .ba-primary, .ba-ghost, .ai-hd-link, .ai-q-item { min-height: 44px; }
   .ai-hd { flex-wrap: wrap; gap: 8px; }
 }
+
+/* docs/ui-guidelines.md: light chrome, the score banner is the one dark card, "继续练习" is the primary action. */
+.topbar { background: var(--kk-surface); border-bottom: 1px solid var(--kk-line); }
+.tb-back { color: var(--kk-ink); min-height: 44px; }
+.tb-back:hover { color: var(--kk-action-text); }
+.tb-title { color: var(--kk-ink); font-weight: 600; }
+.vip-pill { background: var(--kk-surface-2); border-color: transparent; color: var(--kk-ink-2); }
+.vip-dot { display: none; }
+.exit-btn { min-height: 36px; padding: 0 14px; border: 1px solid var(--kk-line); border-radius: 999px; background: var(--kk-surface); color: var(--kk-ink-2); }
+.step-bar { background: var(--kk-surface); }
+.step-num.act { background: var(--kk-action); color: var(--kk-on-action); }
+.step-num.done { background: var(--kk-ink); color: var(--kk-ink-inverse); }
+.step-label.act { color: var(--kk-action-text); }
+.step-label.done { color: var(--kk-ink); }
+.rb-top { background: var(--kk-ink); }
+.rb-score { font-family: var(--kk-font-num); }
+.ba-primary { background: var(--kk-action); color: var(--kk-on-action); border-color: var(--kk-action); border-radius: 999px; }
+.ba-primary:hover { background: var(--kk-action-hover); }
+.ba-ghost { border-radius: 999px; }
+.ai-hd { background: var(--kk-surface); border-bottom: 1px solid var(--kk-line); }
+.ai-hd-title { color: var(--kk-ink); }
+.ai-hd-link { color: var(--kk-action-text); text-decoration: none; font-weight: 600; }
+.ai-av { background: var(--kk-ink); color: var(--kk-ink-inverse); }
+.mini-chart { color: var(--kk-ink); }
+.diff-badge, .diff-badge.hard, .diff-badge.medium, .diff-badge.easy { background: var(--kk-surface-2); border-color: transparent; color: var(--kk-ink-2); border-radius: 999px; }
+.ba-ghost.warm { background: var(--kk-surface); border-color: var(--kk-line); color: var(--kk-ink); }
+.ai-suggest { background: var(--kk-surface-2); border-color: transparent; color: var(--kk-ink); }
+@media (max-width: 767px) { .vip-pill { display: none; } }
 </style>

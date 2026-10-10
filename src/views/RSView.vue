@@ -405,25 +405,25 @@ onUnmounted(() => {
     @back="router.push('/home')"
     @exit="handleLogout"
   >
-    <main class="mx-auto max-w-2xl px-4 py-6 rs-practice-main">
-      <p class="mb-4 text-sm text-muted">Question {{ questionIndex }}</p>
+    <main class="mx-auto max-w-2xl px-4 py-6 rs-practice-main sm:px-6 lg:py-8">
+      <p class="kk-num mb-4 text-[13px] font-semibold text-kk-ink-3">Question {{ questionIndex }}</p>
 
       <div v-if="questionLoading" class="py-16 text-center">
-        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
-        <p class="mt-3 text-sm text-muted">Loading question...</p>
+        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
+        <p class="mt-3 text-sm text-kk-ink-3">Loading question...</p>
       </div>
 
       <template v-else>
         <section v-if="phase === 'playing'" class="space-y-4">
-          <section class="rounded-xl border bg-white p-6 text-center shadow-card">
-            <p class="text-base font-semibold text-navy">Listen carefully and repeat immediately.</p>
-            <p class="mt-1 text-sm text-muted">Playback is automatic (PTE-like flow).</p>
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-6 text-center shadow-kk">
+            <p class="text-[17px] font-semibold text-kk-ink">Listen carefully and repeat immediately.</p>
+            <p class="mt-1 text-sm text-kk-ink-3">Playback is automatic (PTE-like flow).</p>
           </section>
 
-          <section class="rounded-xl border bg-white p-4 shadow-card">
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
             <div class="mb-3 flex items-center justify-between text-sm">
-              <span class="text-muted">Audio Playback</span>
-              <span :class="tts.isPlaying ? 'font-semibold text-orange' : 'text-muted'">
+              <span class="text-kk-ink-3">Audio Playback</span>
+              <span :class="tts.isPlaying ? 'font-semibold text-kk-action-text' : 'text-kk-ink-3'">
                 {{ tts.isPlaying ? "Playing..." : "Starting..." }}
               </span>
             </div>
@@ -432,42 +432,42 @@ onUnmounted(() => {
               <div
                 v-for="(h, i) in barHeights"
                 :key="i"
-                class="w-1.5 rounded-full bg-orange transition-all"
+                class="w-1.5 rounded-full bg-kk-ink transition-all"
                 :class="tts.isPlaying ? 'animate-pulse' : 'opacity-25'"
                 :style="{ height: `${h}px`, animationDelay: `${i * 0.08}s` }"
               />
             </div>
           </section>
 
-          <button type="button" class="w-full text-sm text-muted underline transition-colors hover:text-navy" @click="skipQuestion">Skip</button>
+          <button type="button" class="inline-flex min-h-[44px] w-full items-center justify-center text-sm font-semibold text-kk-action-text" @click="skipQuestion">Skip</button>
         </section>
 
         <section v-else-if="phase === 'recording'" class="space-y-4">
           <div class="flex items-start gap-3">
             <div class="flex-1">
-              <TimerBar label="Recording" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
+              <TimerBar tone="kk" label="Recording" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
             </div>
-            <button type="button" class="pt-1 text-sm text-muted underline transition-colors hover:text-navy" @click="skipQuestion">Skip</button>
+            <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="skipQuestion">Skip</button>
           </div>
 
-          <section class="rounded-xl border bg-white p-4 text-center shadow-card">
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 text-center shadow-kk">
             <div v-if="!recorder.isReady" class="flex items-center justify-center gap-2">
-              <div class="h-4 w-4 animate-spin rounded-full border-2 border-orange border-t-transparent" />
-              <p class="text-sm text-muted">Microphone warming up...</p>
+              <div class="h-4 w-4 animate-spin rounded-full border-2 border-kk-ink border-t-transparent" />
+              <p class="text-sm text-kk-ink-3">Microphone warming up...</p>
             </div>
             <div v-else class="flex items-center justify-center gap-2">
-              <div class="h-3 w-3 animate-pulse rounded-full bg-red-500" />
-              <p class="font-bold text-navy">Start speaking now</p>
+              <div class="h-3 w-3 animate-pulse rounded-full bg-kk-action" />
+              <p class="font-bold text-kk-ink">Start speaking now</p>
             </div>
           </section>
 
-          <section class="rounded-xl border bg-white p-4 shadow-card">
-            <RecordingWave :is-recording="Boolean(recorder.isRecording.value)" />
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <RecordingWave tone="kk" :is-recording="Boolean(recorder.isRecording.value)" />
 
             <div class="mt-4 flex gap-3">
               <button
                 type="button"
-                class="flex-1 rounded-xl border-2 border-gray-200 py-4 text-sm font-semibold text-muted transition-all hover:border-orange hover:text-orange"
+                class="min-h-[52px] flex-1 rounded-full border border-kk-line bg-kk-surface py-3 text-[15px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="restartRecording"
               >
                 Re-record
@@ -475,8 +475,8 @@ onUnmounted(() => {
 
               <button
                 type="button"
-                class="flex-1 rounded-xl py-4 text-lg font-bold transition-all"
-                :class="canSubmit ? 'bg-orange text-white shadow-md hover:opacity-90 active:scale-95' : 'cursor-not-allowed bg-gray-200 text-gray-400'"
+                class="min-h-[52px] flex-1 rounded-full py-3 text-[15px] font-bold transition-colors"
+                :class="canSubmit ? 'bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press' : 'cursor-not-allowed bg-kk-surface-2 text-kk-ink-3'"
                 :disabled="!canSubmit"
                 @click="handleSubmit"
               >
@@ -486,39 +486,39 @@ onUnmounted(() => {
           </section>
 
           <section>
-            <button type="button" class="text-sm text-orange underline transition-opacity hover:opacity-75" @click="showAnswer = !showAnswer">
+            <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="showAnswer = !showAnswer">
               {{ showAnswer ? "Hide sentence" : "Show sentence" }}
             </button>
-            <div v-if="showAnswer" class="mt-2 rounded-xl border border-blue-100 bg-blue-50 p-4">
-              <p class="mb-1 text-xs text-muted">Original sentence</p>
-              <p class="leading-relaxed text-navy">{{ question.content }}</p>
+            <div v-if="showAnswer" class="mt-2 rounded-2xl border border-kk-line bg-kk-surface-2 p-4">
+              <p class="mb-1 text-xs text-kk-ink-3">Original sentence</p>
+              <p class="kk-text text-[17px] leading-relaxed text-kk-ink">{{ question.content }}</p>
             </div>
           </section>
         </section>
 
         <section v-else-if="phase === 'processing'" class="py-10 text-center">
-          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange/10">
-            <div class="h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
+          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-kk-surface-2">
+            <div class="h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
           </div>
-          <p class="text-xl font-bold text-navy">Analysing your response...</p>
+          <p class="text-xl font-bold text-kk-ink">Analysing your response...</p>
         </section>
 
-        <section v-else class="rounded-xl border bg-white p-6 text-center shadow-card">
-          <p class="text-sm text-muted">Microphone permission or speech recognition is required.</p>
-          <button type="button" class="mt-4 text-sm text-orange underline" @click="startQuestionPlayback(200)">Try again</button>
+        <section v-else class="rounded-[20px] border border-kk-line bg-kk-surface p-6 text-center shadow-kk">
+          <p class="text-sm text-kk-ink-3">Microphone permission or speech recognition is required.</p>
+          <button type="button" class="mt-4 inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="startQuestionPlayback(200)">Try again</button>
         </section>
 
-        <section v-if="phase !== 'processing'" class="mt-4 rounded-xl border-l-4 border-orange bg-white p-4 shadow-sm">
-          <p class="mb-2 text-sm font-semibold text-navy">Tips</p>
-          <ul class="space-y-1 text-sm text-muted">
+        <section v-if="phase !== 'processing'" class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="mb-2 text-sm font-semibold text-kk-ink">Tips</p>
+          <ul class="space-y-1 text-sm text-kk-ink-3">
             <li>- Focus on rhythm and intonation, not just words.</li>
             <li>- For long sentences, capture the first chunk and the ending.</li>
             <li>- Keep speaking confidently even if you miss one word.</li>
           </ul>
         </section>
 
-        <section v-if="recorder.error.value && phase !== 'processing'" class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-          <p class="text-sm text-red-600">{{ recorder.error }}</p>
+        <section v-if="recorder.error.value && phase !== 'processing'" class="mt-4 rounded-2xl border border-kk-error-line bg-kk-error-bg p-4">
+          <p class="text-sm text-kk-error">{{ recorder.error }}</p>
         </section>
       </template>
     </main>

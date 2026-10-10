@@ -53,6 +53,9 @@ async function loadComparison() {
   }
 }
 onBeforeUnmount(() => feedbackController.abort());
+// docs/ui-guidelines.md 2.4: misread words are errors; disfluencies are notices. Class names only.
+const ERROR_EVIDENCE = new Set(['omission', 'substitution']);
+const evidenceTone = (type) => (ERROR_EVIDENCE.has(type) ? 'tone-error' : 'tone-notice');
 const labels = { omission: '漏读', substitution: '可能读错或识别不清', repetition: '重复', insertion: '多读', hesitation: '犹豫', long_pause: '长停顿', late_start: '开口延迟' };
 const words = computed(() => diagnosisWordItems(props.result.alignment, props.result.evidence, props.result.question?.content));
 const metrics = computed(() => props.result.metrics || {});
@@ -159,7 +162,7 @@ function retrySameQuestion() {
         <article data-testid="ra-score-card-fluency"><h2>流利度</h2>
           <template v-if="score.fluency.band === null"><strong>内容为 0，不评分</strong><p>Score Guide 第 8 页：内容为 0 时，本题不再评流利度和发音。</p></template>
           <template v-else><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
-          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div></template>
+          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" :class="evidenceTone(item.type)" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div></template>
         </article>
         <article data-testid="ra-score-card-pronunciation"><h2>发音</h2><strong>本版本未评估</strong><p>现有技术无法可靠测量发音，测不出来的项不给分。</p></article>
       </div>
@@ -186,7 +189,7 @@ function retrySameQuestion() {
         <section v-for="group in comparisonGroups" :key="group.key" class="compare-group">
           <h3>{{ group.title }} <small>{{ group.note }}</small></h3>
           <div v-if="group.items.length" class="compare-tags">
-            <button v-for="item in group.items" :key="item.key" type="button" data-testid="ra-comparison-chip" :disabled="!group.playable" @click="group.playable && playEvidence(item.evidence)">
+            <button v-for="item in group.items" :key="item.key" type="button" data-testid="ra-comparison-chip" :class="evidenceTone(item.type)" :disabled="!group.playable" @click="group.playable && playEvidence(item.evidence)">
               {{ labels[item.type] || item.type }}<span v-if="item.text"> · {{ item.text }}</span>
             </button>
           </div>
@@ -205,14 +208,14 @@ function retrySameQuestion() {
             <p>{{ suggestion.action }}</p>
             <div class="evidence-tags">
               <template v-for="id in suggestion.evidence_ids" :key="id">
-                <button v-if="evidenceById.has(id)" type="button" @click="playEvidence(evidenceById.get(id))" :aria-label="`回听证据 ${id}：${labels[evidenceById.get(id).type] || ''}`">▶ {{ id }} · {{ labels[evidenceById.get(id).type] || '回听' }}</button>
+                <button v-if="evidenceById.has(id)" type="button" :class="evidenceTone(evidenceById.get(id).type)" @click="playEvidence(evidenceById.get(id))" :aria-label="`回听证据 ${id}：${labels[evidenceById.get(id).type] || ''}`">▶ {{ id }} · {{ labels[evidenceById.get(id).type] || '回听' }}</button>
               </template>
             </div>
           </li>
         </ol>
       </template>
     </section>
-    <section class="panel"><details :open="taskType !== 'RS'"><summary><h2>原文与标注</h2></summary><p class="legend">漏读 / 可能读错或识别不清 · 重复 / 多读 · 犹豫 / 长停顿</p>
+    <section class="panel"><details :open="taskType !== 'RS'"><summary><h2>原文与标注</h2></summary><p class="legend"><span class="legend-item"><i class="swatch swatch-error" aria-hidden="true"></i>漏读 / 可能读错或识别不清</span><span class="legend-item"><i class="swatch swatch-notice" aria-hidden="true"></i>重复 / 多读 · 犹豫 / 长停顿</span></p>
       <div class="annotated-text">
         <template v-for="word in words" :key="word.index">
           <button v-if="word.annotations.length" type="button" :class="['word', word.type]" :title="word.annotations.map(item => labels[item.type]).join('、')" @click="playEvidence(word.annotations[0])">{{ word.text }}</button>
@@ -226,7 +229,7 @@ function retrySameQuestion() {
     <section class="panel"><h2>可回听的证据</h2>
       <p v-if="!result.evidence?.length">本次未检测到符合当前规则的明显问题。</p>
       <button v-for="item in result.evidence || []" :key="item.id" type="button" :class="['evidence', { active: activeEvidence === item.id }]" @click="playEvidence(item)">
-        <span><strong>{{ labels[item.type] || item.type }}</strong><span v-if="item.text"> · {{ item.text }}</span><small>{{ item.detail?.description || (item.detail?.pause_ms ? `持续 ${(item.detail.pause_ms / 1000).toFixed(1)} 秒` : '点击回听核验') }}</small></span><span aria-hidden="true">▶</span>
+        <span><strong :class="['ev-tag', evidenceTone(item.type)]">{{ labels[item.type] || item.type }}</strong><span v-if="item.text"> · {{ item.text }}</span><small>{{ item.detail?.description || (item.detail?.pause_ms ? `持续 ${(item.detail.pause_ms / 1000).toFixed(1)} 秒` : '点击回听核验') }}</small></span><span aria-hidden="true">▶</span>
       </button>
     </section>
     <button class="primary-action retry" type="button" @click="retrySameQuestion">再练一次</button>
@@ -236,39 +239,43 @@ function retrySameQuestion() {
 </template>
 
 <style scoped>
+/* Visual rules: docs/ui-guidelines.md 2.4. Action colour only on "再练一次"; marks use status colours. */
 .diagnosis-page {
-  flex: 1;
-  min-height: 0;
   width: 100%;
-  max-width: 960px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 24px 28px 48px;
-  overflow-y: auto;
-  color: var(--c0);
+  padding: 16px 16px 40px;
+  color: var(--kk-ink);
 }
 
 button {
   cursor: pointer;
+  font: inherit;
 }
 
 .intro {
-  margin: 28px 0;
+  margin: 8px 0 20px;
 }
 
 .eyebrow {
+  margin: 0;
   font-size: 12px;
-  letter-spacing: 2px;
-  color: var(--c2);
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--kk-ink-3);
 }
 
 h1 {
-  font-size: 30px;
-  margin: 8px 0 12px;
+  margin: 4px 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 h2 {
-  font-size: 17px;
   margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .intro > p:last-child,
@@ -276,112 +283,165 @@ h2 {
 .note,
 footer {
   font-size: 13px;
-  color: var(--muted);
   line-height: 1.7;
+  color: var(--kk-ink-2);
 }
 
 .panel,
 .metric-grid article {
-  border: 1px solid var(--bdr);
-  background: var(--card);
-  border-radius: 13px;
-  padding: 18px;
+  border: 1px solid var(--kk-line);
+  border-radius: var(--speaking-card-radius);
+  background: var(--kk-surface);
+  box-shadow: var(--kk-shadow);
+  padding: 20px;
 }
 
 .panel {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .score-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
 }
 
 .total-score {
-  font-size: 64px;
-  line-height: 1.2;
+  font-family: var(--kk-font-num);
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .score-heading button,
-.rules-close {
-  padding: 10px 16px;
-  border: 1px solid var(--bdr2);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--c1);
+.rules-close,
+.compare-head button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--kk-line);
+  border-radius: 999px;
+  background: var(--kk-surface);
+  color: var(--kk-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.score-heading button:hover,
+.rules-close:hover,
+.compare-head button:hover {
+  background: var(--kk-surface-2);
 }
 
 .score-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 16px;
 }
 
 .score-grid article {
   min-width: 0;
-  border-top: 1px solid var(--bdr);
-  padding-top: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--kk-line);
+}
+
+.score-grid article:last-child {
+  padding-bottom: 0;
+}
+
+.score-grid h2 {
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--kk-ink-2);
+}
+
+.score-grid strong {
+  font-size: 17px;
 }
 
 .score-grid p {
+  margin: 4px 0 0;
   font-size: 13px;
   line-height: 1.7;
+  color: var(--kk-ink-2);
 }
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.metric-grid article {
+  padding: 14px 16px;
 }
 
 .metric-grid span {
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--kk-ink-2);
 }
 
 .metric-grid strong {
   display: block;
-  font-size: 23px;
-  margin-top: 10px;
+  margin-top: 6px;
+  font-family: var(--kk-font-num);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+details > summary {
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+details > summary h2 {
+  display: inline;
+}
+
+.legend {
+  margin: 8px 0 14px;
 }
 
 .annotated-text {
-  line-height: 2.3;
-  font-size: 19px;
+  font-family: var(--kk-font-text);
+  font-size: 20px;
+  line-height: 2.1;
   overflow-wrap: anywhere;
 }
 
 .word {
   display: inline;
-  border: 0;
   padding: 2px 3px;
+  border: 0;
   border-radius: 4px;
-  color: inherit;
   background: none;
-  font-size: inherit;
+  color: inherit;
+  font: inherit;
   line-height: inherit;
 }
 
 .omission,
 .substitution {
-  background: var(--red2);
-  text-decoration: underline;
-  text-decoration-color: var(--red);
+  background: var(--kk-error-bg);
+  text-decoration: underline 2px var(--kk-error-line);
+  text-underline-offset: 4px;
 }
 
 .repetition,
 .insertion,
 .hesitation,
-.long_pause {
-  background: var(--orange2);
+.long_pause,
+.late_start {
+  background: var(--kk-notice-bg);
 }
 
 .uncertain {
-  color: var(--muted);
+  color: var(--kk-ink-3);
   text-decoration: underline dotted;
+  text-underline-offset: 4px;
 }
 
 .match {
@@ -390,7 +450,7 @@ footer {
 
 audio {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .evidence {
@@ -399,26 +459,59 @@ audio {
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  text-align: left;
-  border: 1px solid var(--bdr);
-  background: transparent;
-  border-radius: 9px;
-  margin-top: 10px;
-  padding: 12px;
+  min-height: 56px;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--kk-line);
+  border-radius: 12px;
+  background: var(--kk-surface);
   color: inherit;
+  text-align: left;
+  font-size: 14px;
   overflow-wrap: anywhere;
+}
+
+.evidence:hover {
+  background: var(--kk-surface-2);
 }
 
 .evidence small {
   display: block;
+  margin-top: 4px;
   font-size: 12px;
-  color: var(--muted);
-  margin-top: 5px;
+  color: var(--kk-ink-3);
 }
 
 .evidence.active {
-  border-color: var(--c2);
-  background: var(--orange2);
+  border-color: var(--kk-ink);
+  box-shadow: inset 0 0 0 1px var(--kk-ink);
+}
+
+.ev-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin-right: 6px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ev-tag.tone-error,
+.evidence-tags button.tone-error,
+.compare-tags button.tone-error {
+  background: var(--kk-error-bg);
+  color: var(--kk-error);
+  border-color: var(--kk-error-line);
+}
+
+.ev-tag.tone-notice,
+.evidence-tags button.tone-notice,
+.compare-tags button.tone-notice {
+  background: var(--kk-notice-bg);
+  color: var(--kk-notice);
+  border-color: var(--kk-notice-line);
 }
 
 .retry {
@@ -428,11 +521,12 @@ audio {
 footer {
   margin-top: 20px;
   text-align: center;
+  color: var(--kk-ink-3);
   overflow-wrap: anywhere;
 }
 
 button:focus-visible {
-  outline: 3px solid var(--c2);
+  outline: 3px solid var(--kk-ink);
   outline-offset: 3px;
 }
 
@@ -440,22 +534,29 @@ button:focus-visible {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: var(--speaking-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  background: var(--speaking-overlay);
 }
 
 .rules-dialog {
   width: min(700px, 100%);
   max-height: 90vh;
   overflow: auto;
-  background: var(--card);
-  border-radius: 13px;
   padding: 24px;
+  border-radius: var(--speaking-card-radius);
+  background: var(--kk-surface);
+  box-shadow: var(--kk-shadow-pop);
+  font-size: 14px;
   line-height: 1.7;
   overflow-wrap: anywhere;
+}
+
+.rules-dialog h2 {
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .rules-close {
@@ -464,21 +565,29 @@ button:focus-visible {
 
 .rules-dialog h3 {
   margin-top: 20px;
+  font-size: 15px;
+}
+
+.rules-dialog a {
+  color: var(--kk-action-text);
+  font-weight: 600;
 }
 
 .score-formula {
-  font-family: monospace;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
 }
 
 .feedback-summary {
-  line-height: 1.7;
   margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
 .suggestions {
-  padding-left: 22px;
   margin: 16px 0 0;
+  padding-left: 22px;
 }
 
 .suggestions li + li {
@@ -486,8 +595,10 @@ button:focus-visible {
 }
 
 .suggestions li > p {
+  margin: 6px 0 10px;
+  font-size: 14px;
   line-height: 1.7;
-  margin: 8px 0;
+  color: var(--kk-ink-2);
   overflow-wrap: anywhere;
 }
 
@@ -500,13 +611,14 @@ button:focus-visible {
 
 .evidence-tags button,
 .compare-tags button {
-  min-height: 42px;
-  border: 1px solid var(--bdr);
-  border-radius: 20px;
-  padding: 8px 12px;
-  background: transparent;
-  color: inherit;
-  font-size: 12px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--kk-line);
+  border-radius: 999px;
+  background: var(--kk-surface);
+  color: var(--kk-ink);
+  font-size: 13px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -516,67 +628,69 @@ button:focus-visible {
 
 .compare-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 12px;
 }
 
 .compare-head .eyebrow {
   margin: 0 0 4px;
 }
 
-.compare-head button {
-  border: 0;
-  border-radius: 10px;
-  background: var(--c0);
-  color: var(--card);
-  padding: 10px 14px;
-  font-weight: 700;
+.compare-head h2 {
+  margin: 0;
 }
 
 .compare-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .compare-metrics article {
-  border: 1px solid var(--bdr);
-  border-radius: 10px;
-  padding: 12px;
-  background: var(--card);
+  padding: 12px 14px;
+  border: 1px solid var(--kk-line);
+  border-radius: 12px;
+  background: var(--kk-surface);
 }
 
 .compare-metrics span {
   display: block;
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 13px;
+  color: inherit;
+  opacity: .9;
 }
 
 .compare-metrics strong {
   display: block;
-  margin-top: 6px;
-  font-size: 15px;
+  margin-top: 4px;
+  font-family: var(--kk-font-num);
+  font-size: 16px;
 }
 
 .compare-metrics .better {
-  border-color: var(--green3);
-  background: var(--green2);
+  border-color: var(--kk-success-line);
+  background: var(--kk-success-bg);
+  color: var(--kk-success);
 }
 
 .compare-metrics .worse {
-  border-color: var(--orange3);
-  background: var(--orange2);
+  border-color: var(--kk-notice-line);
+  background: var(--kk-notice-bg);
+  color: var(--kk-notice);
 }
 
 .compare-metrics .neutral {
-  border-color: var(--bdr);
+  border-color: var(--kk-line);
+  color: var(--kk-ink);
 }
 
 .compare-groups {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
   margin-top: 16px;
 }
 
@@ -585,15 +699,17 @@ button:focus-visible {
 }
 
 .compare-group h3 {
-  font-size: 14px;
   margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .compare-group small {
   display: block;
   margin-top: 2px;
-  color: var(--muted);
+  font-size: 12px;
   font-weight: 400;
+  color: var(--kk-ink-3);
 }
 
 .compare-tags button:disabled {
@@ -601,62 +717,82 @@ button:focus-visible {
   opacity: .85;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 768px) {
   .diagnosis-page {
-    padding: 12px 16px 32px;
-    overflow: visible;
-  }
-
-  .intro {
-    margin: 18px 0;
+    padding: 24px 24px 56px;
   }
 
   h1 {
-    font-size: 25px;
+    font-size: 28px;
   }
 
-  .score-grid,
-  .metric-grid,
-  .compare-metrics,
-  .compare-groups {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .panel {
+    padding: 24px;
   }
 
   .total-score {
-    font-size: 54px;
+    font-size: 64px;
   }
 
-  .metric-grid article,
-  .panel,
-  .rules-dialog {
-    padding: 14px;
+  .score-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
   }
 
-  .metric-grid strong {
-    font-size: 21px;
+  .score-grid article,
+  .score-grid article:last-child {
+    padding: 14px 0 0;
   }
 
-  .compare-head {
-    align-items: flex-start;
-    flex-direction: column;
+  .metric-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
-  .compare-head button {
-    width: 100%;
-    min-height: 44px;
+  .compare-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .compare-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .annotated-text {
-    font-size: 18px;
+    font-size: 22px;
   }
 
-  .evidence {
-    min-height: 48px;
+  .retry {
+    width: auto;
+    min-width: 280px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
 
-  .word {
-    min-height: 36px;
-  }
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 22px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.swatch-error {
+  background: var(--kk-error-bg);
+  border-bottom: 2px solid var(--kk-error-line);
+}
+
+.swatch-notice {
+  background: var(--kk-notice-bg);
 }
 </style>
