@@ -104,7 +104,6 @@ const navItems = [
   { key: "agent", label: "AI 私教", icon: "spark", target: "/agent", active: true },
   { key: "plan", label: "学习计划", icon: "square", target: "/home#goal" },
   { key: "report", label: "学习报告", icon: "report", target: "/home#report" },
-  { key: "library", label: "题库", icon: "box", target: "/home#quick" },
   { key: "profile", label: "个人中心", icon: "circle", target: "/profile" }
 ];
 
@@ -214,8 +213,8 @@ const recommendedQuestions = [
     prompt: "DI 如何快速提高信息覆盖率？请给我一个今天可以执行的练习方法。"
   },
   {
-    text: "RTS 复述流畅度怎么练？",
-    prompt: "如何提升 RTS 复述流畅度？请给我 3 个可以今天执行的训练动作。"
+    text: "RTS 怎样回应得更自然得体？",
+    prompt: "RTS 情景回应怎样说得更自然得体？请给我 3 个可以今天执行的训练动作。"
   },
   {
     text: "WFD 总丢冠词和复数怎么办？",

@@ -9,7 +9,6 @@ const DEFAULT_NAV_ITEMS = [
   { key: "agent", label: "AI 私教", to: "/agent", active: true },
   { key: "plan", label: "学习计划", to: "/home#goal" },
   { key: "report", label: "学习报告", to: "/home#report" },
-  { key: "library", label: "题库", to: "/home#quick" },
   { key: "profile", label: "个人中心", to: "/profile" }
 ];
 

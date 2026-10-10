@@ -140,7 +140,7 @@
           <div class="messages-area" ref="messagesRef">
             <template v-if="displayMessages.length === 0">
               <div class="empty-state">
-                <div class="empty-icon">✦</div>
+                <div class="empty-icon" aria-hidden="true" v-html="navIconMap.spark"></div>
                 <div class="empty-title">开启你的 AI 私教对话</div>
                 <div class="empty-sub">输入任何问题，或使用下方快捷指令开始</div>
               </div>
@@ -212,7 +212,7 @@
           <div class="quick-cmds">
             <button v-for="cmd in quickCmds" :key="cmd.label"
               class="quick-btn" @click="sendQuick(cmd)">
-              <span class="quick-icon">{{ cmd.icon }}</span>
+              <span class="quick-icon" aria-hidden="true" v-html="cmd.icon"></span>
               {{ cmd.label }}
             </button>
           </div>
@@ -244,7 +244,7 @@
           <!-- 私教工具 -->
           <div class="insight-section tutor-tools-section">
             <div class="insight-section-hd">
-              <span class="insight-icon insight-icon--tools">✦</span>
+              <span class="insight-icon insight-icon--tools" aria-hidden="true" v-html="navIconMap.trend"></span>
               <span class="insight-section-title">私教工具</span>
             </div>
             <div class="tutor-tool-grid" aria-label="AI 私教能力入口">
@@ -268,7 +268,7 @@
           <!-- 今日 AI 结论 -->
           <div class="insight-section">
             <div class="insight-section-hd">
-              <span class="insight-icon insight-icon--star">✦</span>
+              <span class="insight-icon insight-icon--star" aria-hidden="true" v-html="navIconMap.spark"></span>
               <span class="insight-section-title">今日 AI 结论</span>
               <button
                 class="insight-badge insight-badge--mute insight-badge--button"
@@ -304,7 +304,7 @@
           <!-- AI 可执行计划 -->
           <div class="insight-section">
             <div class="insight-section-hd">
-              <span class="insight-icon insight-icon--plan">📋</span>
+              <span class="insight-icon insight-icon--plan" aria-hidden="true" v-html="navIconMap.plan"></span>
               <span class="insight-section-title">AI 可执行计划</span>
               <span class="insight-badge insight-badge--wait">{{ planProgressDisplay }}</span>
             </div>
@@ -383,7 +383,7 @@
           <!-- 推荐追问 -->
           <div class="insight-section followup-section">
             <div class="insight-section-hd">
-              <span class="insight-icon insight-icon--chat">💬</span>
+              <span class="insight-icon insight-icon--chat" aria-hidden="true" v-html="navIconMap.chat"></span>
               <span class="insight-section-title">继续问 AI</span>
             </div>
             <div class="followup-intro">把建议继续问到具体动作</div>
@@ -498,14 +498,14 @@ const navIconMap = {
   plan: '<svg width="16" height="16" fill="none" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
   chat: '<svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 4c0-1.1.9-2 2-2h8a2 2 0 012 2v5a2 2 0 01-2 2H6l-4 3V4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
 };
+// Line icons for the quick prompts (docs/ui-guidelines.md: no emoji in the UI).
 const quickIconMap = {
-  trend: "📊",
-  calendar: "📋",
-  question: "🎯",
-  clock: "⏱",
-  heart: "💪"
+  trend: '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12l4-5 3 3 3-6 2 4"/></svg>',
+  calendar: '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M5 2v3M11 2v3M2.5 7h11"/></svg>',
+  question: '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M6.4 6.2a1.7 1.7 0 113 1.1c-.6.4-1.4.8-1.4 1.7M8 11.2h.01"/></svg>',
+  clock: '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.2l2 1.3"/></svg>',
+  heart: '<svg width="14" height="14" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S2.5 10.3 2.5 6.4A2.9 2.9 0 018 5a2.9 2.9 0 015.5 1.4c0 3.9-5.5 7.1-5.5 7.1z"/></svg>'
 };
-const featureColorMap = ["#EED8C8", "#D4EDD4", "#D4D4EE"];
 const featureShortDescMap = {
   diagnose: "看弱项",
   plan: "排训练",
@@ -534,10 +534,9 @@ const features = computed(() => {
     { id: "plan", title: "计划", text: "把建议转成今天能执行的题型、次数和训练顺序。", icon: "plan" },
     { id: "coach", title: "陪练", text: "在聊天中继续追问，直到下一步动作足够清晰。", icon: "chat" }
   ];
-  return source.map((item, index) => ({
+  return source.map((item) => ({
     ...item,
     icon: navIconMap[item.icon] || navIconMap.trend,
-    iconBg: featureColorMap[index] || "#EED8C8",
     desc: item.text || item.desc || "",
     shortDesc: item.shortText || item.short || featureShortDescMap[item.id] || item.title
   }));
@@ -552,19 +551,19 @@ const displayMessages = computed(() => props.messages.map((item) => ({
   blocks: parseAgentContent(item.content || item.text)
 })));
 const quickCmds = computed(() => (props.quickActions.length ? props.quickActions : [
-  { icon: "📊", label: "分析弱项", text: "请帮我分析近期的弱项题型，给出优先级排序。" },
-  { icon: "📋", label: "生成今日计划", text: "请根据我的练习记录生成今日学习计划。" },
-  { icon: "🎯", label: "解释低分", text: "请解释我最近分数偏低的原因，并给出改进建议。" },
-  { icon: "⏱", label: "安排 40 分钟", text: "我有 40 分钟，请帮我安排一个高效的练习计划。" },
-  { icon: "💪", label: "给我鼓励", text: "给我一些针对 PTE 备考的鼓励和建议。" }
+  { icon: "trend", label: "分析弱项", text: "请帮我分析近期的弱项题型，给出优先级排序。" },
+  { icon: "calendar", label: "生成今日计划", text: "请根据我的练习记录生成今日学习计划。" },
+  { icon: "question", label: "解释低分", text: "请解释我最近分数偏低的原因，并给出改进建议。" },
+  { icon: "clock", label: "安排 40 分钟", text: "我有 40 分钟，请帮我安排一个高效的练习计划。" },
+  { icon: "heart", label: "给我鼓励", text: "给我一些针对 PTE 备考的鼓励和建议。" }
 ]).map((item) => ({
   ...item,
-  icon: quickIconMap[item.icon] || item.icon || "✦",
+  icon: quickIconMap[item.icon] || quickIconMap.trend,
   text: item.prompt || item.text || item.label
 })));
 const followupQuestions = computed(() => (props.recommendedQuestions.length
   ? props.recommendedQuestions.map((item) => normalizeText(item.text || item.prompt || item)).filter(Boolean)
-  : ["我今天最应该练哪个题型？", "DI 如何快速提高信息覆盖率？", "RTS 复述流畅度怎么练？", "WFD 总丢冠词和复数怎么办？"]).filter(question => !hasUnavailableTaskRecommendation({ advice: question })));
+  : ["我今天最应该练哪个题型？", "DI 如何快速提高信息覆盖率？", "RTS 怎样回应得更自然得体？", "WFD 总丢冠词和复数怎么办？"]).filter(question => !hasUnavailableTaskRecommendation({ advice: question })));
 const userName = computed(() => normalizeText(props.userDisplayName) || "同学");
 const userLetter = computed(() => normalizeText(props.userInitial) || userName.value.charAt(0).toUpperCase() || "Y");
 
@@ -1114,7 +1113,8 @@ function normalizeText(value) {
   align-items: center; justify-content: center; text-align: center;
   padding: 36px 0;
 }
-.empty-icon  { font-size: 36px; color: var(--border-2); margin-bottom: 16px; line-height: 1; }
+.empty-icon  { display: flex; justify-content: center; color: var(--kk-ink-3); margin-bottom: 16px; }
+.empty-icon :deep(svg) { width: 32px; height: 32px; }
 .empty-title { font-size: 18px; font-weight: 600; color: var(--text-mid); margin-bottom: 8px; }
 .empty-sub   { font-size: 15px; color: var(--text-mute); }
 
@@ -1243,7 +1243,7 @@ function normalizeText(value) {
   transition: background .13s, border-color .13s, color .13s;
 }
 .quick-btn:hover { background: var(--kk-surface-2); border-color: var(--kk-line); color: var(--brown); }
-.quick-icon { font-size: 13px; }
+.quick-icon { display: inline-flex; color: var(--kk-ink-2); }
 
 /* 输入框 */
 .input-wrap {
@@ -1307,7 +1307,7 @@ function normalizeText(value) {
   display: flex; align-items: center; gap: 6px;
   margin-bottom: 10px;
 }
-.insight-icon { font-size: 15px; }
+.insight-icon { display: inline-flex; color: var(--kk-ink-2); }
 .insight-icon--tools { color: var(--brown); }
 .insight-icon--star  { color: var(--brown); }
 .insight-icon--plan  {}

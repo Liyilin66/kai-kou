@@ -1048,7 +1048,7 @@ const modules = computed(() =>
 
 const adviceQuestions = ref([
   { label: "我今天最该练哪个题型？", to: "/agent" },
-  { label: "RTS 怎么提升复述流畅度？", to: "/agent" }
+  { label: "RTS 怎样回应得更自然得体？", to: "/agent" }
 ]);
 
 const WEEKLY_GOAL_TARGETS = {

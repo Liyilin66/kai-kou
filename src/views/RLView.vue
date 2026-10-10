@@ -519,7 +519,7 @@ onUnmounted(() => {
           <button type="button" class="mt-4 inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="startLecturePlayback(200)">Try again</button>
         </section>
 
-        <section v-if="recorder.error && phase !== 'processing'" class="mt-4 rounded-lg border border-kk-error-line bg-kk-error-bg p-4">
+        <section v-if="recorder.error.value && phase !== 'processing'" class="mt-4 rounded-lg border border-kk-error-line bg-kk-error-bg p-4">
           <p class="text-sm text-kk-error">{{ recorder.error }}</p>
         </section>
       </template>

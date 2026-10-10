@@ -77,7 +77,6 @@ const navItems = [
   { key: "agent", label: "AI 私教", icon: "spark", to: "/agent" },
   { key: "plan", label: "学习计划", icon: "square", to: "/home#goal" },
   { key: "report", label: "学习报告", icon: "report", to: "/home#report" },
-  { key: "library", label: "题库", icon: "box", to: "/home#quick" },
   { key: "profile", label: "个人中心", icon: "circle", to: "/profile" }
 ];
 

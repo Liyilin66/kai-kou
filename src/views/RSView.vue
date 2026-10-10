@@ -517,7 +517,7 @@ onUnmounted(() => {
           </ul>
         </section>
 
-        <section v-if="recorder.error && phase !== 'processing'" class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+        <section v-if="recorder.error.value && phase !== 'processing'" class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
           <p class="text-sm text-red-600">{{ recorder.error }}</p>
         </section>
       </template>
