@@ -17,10 +17,10 @@ const dailySummaryInFlight = new Map();
 
 const TASK_META = {
   RA: { title: "RA 朗读句子", method: "重点保持不断句，卡顿超过 3 秒就重读一遍。" },
-  WFD: { title: "WFD 写作填空", method: "先听主干，再补冠词、复数和时态细节。" },
+  WFD: { title: "WFD 听写句子", method: "先听主干，再补冠词、复数和时态细节。" },
   WE: { title: "WE 写作议论文", method: "先列结构，再写正文，避免边想边写。" },
   DI: { title: "DI 描述图表", method: "先说主图信息，再补 2 个细节，最后总结一句。" },
-  RTS: { title: "RTS 复述句子", method: "先抓场景和任务，再复述关键动作。" }
+  RTS: { title: "RTS 情景回应", method: "先抓场景和任务，再复述关键动作。" }
 };
 
 export async function buildDailySuggestionResponse({ supabase, user, requestId = "", force = false, practiceSignature = "" } = {}) {

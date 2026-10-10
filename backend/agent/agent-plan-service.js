@@ -16,7 +16,7 @@ export const PLAN_TASK_META = {
     defaultMinutes: 10
   },
   WFD: {
-    label: "听写填空训练",
+    label: "听写句子训练",
     route: "/wfd",
     color: "#5c8df6",
     focus: "先听主干，再补冠词、复数和时态细节",
@@ -24,7 +24,7 @@ export const PLAN_TASK_META = {
     defaultMinutes: 10
   },
   WE: {
-    label: "学术短文写作",
+    label: "写作议论文",
     route: "/we",
     color: "#a7adb8",
     focus: "先列结构，再写正文，避免边想边写",
@@ -40,7 +40,7 @@ export const PLAN_TASK_META = {
     defaultMinutes: 15
   },
   RTS: {
-    label: "复述句子",
+    label: "情景回应",
     route: "/rts/practice",
     color: "#ff9142",
     focus: "抓场景和任务，再复述关键动作",

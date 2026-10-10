@@ -63,14 +63,14 @@ const ANALYSIS_TASK_META = {
     minutes: 12
   },
   WFD: {
-    title: "WFD 写作填空",
+    title: "WFD 听写句子",
     reason: "常见扣分点是主干听准了，但冠词、复数、时态和小词漏掉。",
     focus: "先听主干，再逐句补冠词、复数和时态细节。",
     count: 6,
     minutes: 15
   },
   WE: {
-    title: "WE 学术短文写作",
+    title: "WE 写作议论文",
     reason: "常见扣分点是结构先后不清、观点展开不足或语法错误拖累整体分。",
     focus: "先列结构和主题句，再限时写正文。",
     count: 1,
@@ -84,7 +84,7 @@ const ANALYSIS_TASK_META = {
     minutes: 15
   },
   RTS: {
-    title: "RTS 复述句子",
+    title: "RTS 情景回应",
     reason: "常见扣分点是只记住零散词，漏掉场景、动作和对象之间的关系。",
     focus: "先抓场景和任务，再复述关键动作。",
     count: 5,
