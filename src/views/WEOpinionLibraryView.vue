@@ -94,17 +94,17 @@ function goRandomPractice() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="WE 观点句总库" back-to="/we" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="WE 观点句总库" back-to="/we" variant="kk" />
 
-    <main class="mx-auto max-w-5xl px-4 py-6">
-      <section class="mb-4 rounded-xl border bg-white p-4 shadow-sm">
+    <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:py-8">
+      <section class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="text-sm font-semibold text-navy">观点句总库</p>
-            <p class="text-xs text-muted">按 6 大分类整理，可复制并直接带去练习使用。</p>
+            <p class="text-sm font-semibold text-kk-ink">观点句总库</p>
+            <p class="text-xs text-kk-ink-3">按 6 大分类整理，可复制并直接带去练习使用。</p>
           </div>
-          <OrangeButton tone="outline" @click="goRandomPractice">去随机练习</OrangeButton>
+          <OrangeButton tone="secondary" @click="goRandomPractice">去随机练习</OrangeButton>
         </div>
 
         <div class="mt-3">
@@ -112,7 +112,7 @@ function goRandomPractice() {
             v-model="searchText"
             type="text"
             placeholder="Search opinion sentences..."
-            class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-orange"
+            class="h-11 w-full rounded-lg border border-kk-line px-3 text-sm outline-none focus:border-kk-ink"
           />
         </div>
       </section>
@@ -121,35 +121,35 @@ function goRandomPractice() {
         <section
           v-for="group in groupedOpinionSentences"
           :key="group.topicKey"
-          class="rounded-xl border bg-white p-4 shadow-sm"
+          class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk"
         >
           <div class="mb-3 flex items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-navy">{{ group.label }}</p>
-            <span class="text-xs text-muted">{{ group.items.length }} sentences</span>
+            <p class="text-sm font-semibold text-kk-ink">{{ group.label }}</p>
+            <span class="text-xs text-kk-ink-3">{{ group.items.length }} sentences</span>
           </div>
 
           <div class="space-y-2">
             <article
               v-for="sentence in group.items"
               :key="sentence.id"
-              class="rounded-lg border border-gray-200 p-3"
+              class="rounded-lg border border-kk-line p-3"
             >
               <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <div class="min-w-0">
-                  <p class="text-xs font-semibold text-navy">{{ sentence.subTopicLabel || sentence.subTopicKey }}</p>
-                  <p class="text-[11px] text-muted">{{ stanceLabelMap[sentence.stance] || sentence.stance }} · {{ sentence.id }}</p>
+                  <p class="text-xs font-semibold text-kk-ink">{{ sentence.subTopicLabel || sentence.subTopicKey }}</p>
+                  <p class="text-[11px] text-kk-ink-3">{{ stanceLabelMap[sentence.stance] || sentence.stance }} · {{ sentence.id }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                    class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-[13px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                     @click="copySentence(sentence)"
                   >
                     复制
                   </button>
                   <button
                     type="button"
-                    class="rounded-lg bg-orange px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                    class="inline-flex min-h-[36px] items-center rounded-full bg-kk-action px-3 text-[13px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover"
                     @click="useInPractice(sentence)"
                   >
                     去练习中使用
@@ -157,15 +157,15 @@ function goRandomPractice() {
                 </div>
               </div>
 
-              <p class="text-sm leading-relaxed text-text">{{ sentence.text }}</p>
-              <p class="mt-1 text-xs leading-relaxed text-muted">{{ sentence.translationZh }}</p>
+              <p class="text-sm leading-relaxed text-kk-ink">{{ sentence.text }}</p>
+              <p class="mt-1 text-xs leading-relaxed text-kk-ink-3">{{ sentence.translationZh }}</p>
             </article>
           </div>
         </section>
 
-        <section v-if="!groupedOpinionSentences.length" class="rounded-xl border bg-white p-10 text-center shadow-sm">
-          <p class="text-sm font-semibold text-navy">No matched opinion sentence</p>
-          <p class="mt-1 text-xs text-muted">Try another keyword.</p>
+        <section v-if="!groupedOpinionSentences.length" class="rounded-[20px] border border-kk-line bg-kk-surface p-10 text-center shadow-kk">
+          <p class="text-sm font-semibold text-kk-ink">No matched opinion sentence</p>
+          <p class="mt-1 text-xs text-kk-ink-3">Try another keyword.</p>
         </section>
       </div>
     </main>

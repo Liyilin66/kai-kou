@@ -252,41 +252,41 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="WFD 磨耳朵模式" back-to="/wfd" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="WFD 磨耳朵模式" back-to="/wfd" variant="kk" />
 
-    <main class="mx-auto max-w-2xl px-4 py-6">
+    <main class="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:py-8">
       <div v-if="loading" class="py-16 text-center">
-        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
-        <p class="mt-3 text-sm text-muted">正在加载题库...</p>
+        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
+        <p class="mt-3 text-sm text-kk-ink-3">正在加载题库...</p>
       </div>
 
       <template v-else>
-        <div v-if="!questions.length" class="rounded-xl border bg-white p-6 text-center shadow-sm">
-          <p class="text-lg font-bold text-navy">暂无 WFD 音频题目</p>
-          <p class="mt-1 text-sm text-muted">请稍后再试，或联系管理员检查题库。</p>
+        <div v-if="!questions.length" class="rounded-[20px] border border-kk-line bg-kk-surface p-6 text-center shadow-kk">
+          <p class="text-lg font-bold text-kk-ink">暂无 WFD 音频题目</p>
+          <p class="mt-1 text-sm text-kk-ink-3">请稍后再试，或联系管理员检查题库。</p>
         </div>
 
         <template v-else>
-          <section class="mb-6 rounded-xl bg-white p-5 shadow-md">
+          <section class="mb-6 rounded-[20px] bg-kk-surface p-5 shadow-kk">
             <div class="flex items-start gap-3">
               <div class="text-3xl">🎧</div>
               <div>
-                <h2 class="text-lg font-bold text-navy">磨耳朵模式</h2>
-                <p class="mt-1 text-sm leading-relaxed text-muted">
+                <h2 class="text-lg font-bold text-kk-ink">磨耳朵模式</h2>
+                <p class="mt-1 text-sm leading-relaxed text-kk-ink-3">
                   自动顺序播放全部 {{ questions.length }} 道 WFD 音频，适合通勤、走路、碎片时间练听力。
                 </p>
               </div>
             </div>
           </section>
 
-          <section class="mb-4 rounded-xl bg-white p-6 shadow-md">
+          <section class="mb-4 rounded-[20px] bg-kk-surface p-6 shadow-kk">
             <div class="mb-6 text-center">
-              <p class="mb-1 text-xs text-muted">第 {{ currentIndex + 1 }} 题 / 共 {{ questions.length }} 题</p>
-              <p class="text-lg font-bold text-navy">{{ currentQuestion?.id || "WFD" }}</p>
+              <p class="mb-1 text-xs text-kk-ink-3">第 {{ currentIndex + 1 }} 题 / 共 {{ questions.length }} 题</p>
+              <p class="text-lg font-bold text-kk-ink">{{ currentQuestion?.id || "WFD" }}</p>
 
-              <div class="mt-3 h-1.5 w-full rounded-full bg-gray-100">
-                <div class="h-1.5 rounded-full bg-orange transition-all duration-300" :style="{ width: `${progressPercent}%` }" />
+              <div class="mt-3 h-1.5 w-full rounded-full bg-kk-surface-2">
+                <div class="h-1.5 rounded-full bg-kk-ink transition-all duration-300" :style="{ width: `${progressPercent}%` }" />
               </div>
             </div>
 
@@ -295,7 +295,7 @@ onUnmounted(() => {
                 v-for="i in 13"
                 :key="i"
                 class="w-2 rounded-full transition-all duration-150"
-                :class="isPlaying ? 'bg-orange animate-bounce' : 'bg-gray-200'"
+                :class="isPlaying ? 'bg-kk-ink animate-bounce' : 'bg-kk-surface-2'"
                 :style="{
                   height: isPlaying ? `${[8, 16, 24, 32, 40, 48, 56, 48, 40, 32, 24, 16, 8][i - 1]}px` : '8px',
                   animationDelay: `${i * 0.06}s`
@@ -306,13 +306,13 @@ onUnmounted(() => {
             <div class="mb-6">
               <button
                 type="button"
-                class="w-full text-center text-sm text-muted underline transition-colors hover:text-navy"
+                class="inline-flex min-h-[44px] w-full items-center justify-center text-sm font-semibold text-kk-action-text"
                 @click="showText = !showText"
               >
                 {{ showText ? "隐藏句子" : "显示句子" }}
               </button>
-              <div v-if="showText" class="mt-3 rounded-xl bg-gray-50 p-4">
-                <p class="text-center leading-relaxed text-navy">{{ currentQuestion?.content }}</p>
+              <div v-if="showText" class="mt-3 rounded-[20px] bg-kk-surface-2 p-4">
+                <p class="text-center leading-relaxed text-kk-ink">{{ currentQuestion?.content }}</p>
               </div>
             </div>
 
@@ -321,7 +321,7 @@ onUnmounted(() => {
                 type="button"
                 class="flex h-12 w-12 items-center justify-center rounded-full transition-all"
                 :disabled="currentIndex === 0"
-                :class="currentIndex === 0 ? 'cursor-not-allowed bg-gray-100 text-gray-300' : 'bg-gray-100 text-navy hover:bg-gray-200'"
+                :class="currentIndex === 0 ? 'cursor-not-allowed bg-kk-surface-2 text-kk-ink-3 opacity-45' : 'bg-kk-surface-2 text-kk-ink hover:bg-kk-line'"
                 @click="prevQuestion"
               >
                 ‹
@@ -329,7 +329,7 @@ onUnmounted(() => {
 
               <button
                 type="button"
-                class="flex h-16 w-16 items-center justify-center rounded-full bg-orange text-2xl text-white shadow-md transition-all hover:opacity-90 active:scale-95"
+                class="flex h-16 w-16 items-center justify-center rounded-full bg-kk-action text-2xl text-kk-on-action shadow-[0_0_0_8px_var(--kk-action-soft)] transition-colors hover:bg-kk-action-hover active:bg-kk-action-press"
                 @click="togglePlay"
               >
                 {{ isPlaying ? "⏸" : "▶" }}
@@ -341,8 +341,8 @@ onUnmounted(() => {
                 :disabled="currentIndex === questions.length - 1"
                 :class="
                   currentIndex === questions.length - 1
-                    ? 'cursor-not-allowed bg-gray-100 text-gray-300'
-                    : 'bg-gray-100 text-navy hover:bg-gray-200'
+                    ? 'cursor-not-allowed bg-kk-surface-2 text-kk-ink-3 opacity-45'
+                    : 'bg-kk-surface-2 text-kk-ink hover:bg-kk-surface-2'
                 "
                 @click="nextQuestion"
               >
@@ -350,21 +350,21 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <p v-if="autoplayHint" class="mt-3 text-center text-xs text-muted">{{ autoplayHint }}</p>
+            <p v-if="autoplayHint" class="mt-3 text-center text-xs text-kk-ink-3">{{ autoplayHint }}</p>
           </section>
 
-          <section class="mb-4 rounded-xl bg-white p-4 shadow-sm">
-            <p class="mb-3 text-sm font-semibold text-navy">播放设置</p>
+          <section class="mb-4 rounded-[20px] bg-kk-surface p-4 shadow-kk">
+            <p class="mb-3 text-sm font-semibold text-kk-ink">播放设置</p>
 
             <div class="mb-3 flex items-center justify-between">
-              <span class="text-sm text-muted">每题间隔</span>
+              <span class="text-sm text-kk-ink-3">每题间隔</span>
               <div class="flex gap-2">
                 <button
                   v-for="sec in [1, 2, 3, 5]"
                   :key="sec"
                   type="button"
-                  class="rounded-lg px-3 py-1 text-xs font-medium transition-all"
-                  :class="intervalSeconds === sec ? 'bg-orange text-white' : 'bg-gray-100 text-muted hover:bg-gray-200'"
+                  class="inline-flex min-h-[36px] items-center rounded-full px-3 text-sm font-medium transition-colors"
+                  :class="intervalSeconds === sec ? 'bg-kk-ink text-kk-ink-inverse' : 'bg-kk-surface-2 text-kk-ink-2 hover:bg-kk-line'"
                   @click="intervalSeconds = sec"
                 >
                   {{ sec }}s
@@ -373,54 +373,54 @@ onUnmounted(() => {
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-sm text-muted">播完后循环</span>
+              <span class="text-sm text-kk-ink-3">播完后循环</span>
               <button
                 type="button"
                 class="relative h-6 w-12 rounded-full transition-all"
-                :class="autoLoop ? 'bg-orange' : 'bg-gray-200'"
+                :class="autoLoop ? 'bg-kk-ink' : 'bg-kk-line'"
                 @click="autoLoop = !autoLoop"
               >
-                <div class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-all" :class="autoLoop ? 'left-6' : 'left-0.5'" />
+                <div class="absolute top-0.5 h-5 w-5 rounded-full bg-kk-surface shadow-kk transition-all" :class="autoLoop ? 'left-6' : 'left-0.5'" />
               </button>
             </div>
           </section>
 
-          <section class="rounded-xl bg-white p-4 shadow-sm">
-            <p class="mb-3 text-sm font-semibold text-navy">全部题目</p>
+          <section class="rounded-[20px] bg-kk-surface p-4 shadow-kk">
+            <p class="mb-3 text-sm font-semibold text-kk-ink">全部题目</p>
             <div class="max-h-64 space-y-2 overflow-y-auto">
               <button
                 v-for="(q, idx) in questions"
                 :key="q.id"
                 type="button"
-                class="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-all"
-                :class="idx === currentIndex ? 'border border-orange bg-orange/10' : 'hover:bg-gray-50'"
+                class="flex min-h-[48px] w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors"
+                :class="idx === currentIndex ? 'bg-kk-surface-2 ring-1 ring-kk-ink' : 'hover:bg-kk-surface-2'"
                 @click="jumpTo(idx)"
               >
                 <div
                   class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
                   :class="
                     idx === currentIndex
-                      ? 'bg-orange text-white'
+                      ? 'bg-kk-ink text-kk-ink-inverse'
                       : idx < currentIndex
-                        ? 'bg-green-100 text-green-600'
-                        : 'bg-gray-100 text-muted'
+                        ? 'bg-kk-success-bg text-kk-success'
+                        : 'bg-kk-surface-2 text-kk-ink-3'
                   "
                 >
                   {{ idx < currentIndex ? "✓" : idx + 1 }}
                 </div>
-                <p class="line-clamp-1 flex-1 text-sm text-text">{{ q.content }}</p>
-                <span v-if="idx === currentIndex" class="text-xs text-orange">播放中</span>
+                <p class="line-clamp-1 flex-1 text-sm text-kk-ink">{{ q.content }}</p>
+                <span v-if="idx === currentIndex" class="text-xs font-semibold text-kk-action-text">播放中</span>
               </button>
             </div>
           </section>
 
-          <section v-if="finished" class="mt-4 rounded-xl border border-green-200 bg-green-50 p-5 text-center">
+          <section v-if="finished" class="mt-4 rounded-[20px] border border-kk-success-line bg-kk-success-bg p-5 text-center">
             <p class="mb-2 text-2xl">🎉</p>
-            <p class="font-bold text-navy">全部听完了</p>
-            <p class="mt-1 text-sm text-muted">今天已完成 {{ questions.length }} 道听力磨耳朵练习。</p>
+            <p class="font-bold text-kk-ink">全部听完了</p>
+            <p class="mt-1 text-sm text-kk-ink-3">今天已完成 {{ questions.length }} 道听力磨耳朵练习。</p>
             <button
               type="button"
-              class="mt-4 rounded-lg bg-orange px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              class="mt-4 min-h-[48px] rounded-full px-6 py-3 text-[15px] font-bold transition-colors bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press"
               @click="restart"
             >
               再听一遍

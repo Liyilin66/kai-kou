@@ -40,15 +40,15 @@ const resultTitle = computed(() => {
 });
 
 function scoreColor(score) {
-  if (score >= 75) return "text-green-500";
-  if (score >= 60) return "text-orange";
-  return "text-gray-400";
+  if (score >= 75) return "text-kk-success";
+  if (score >= 60) return "text-kk-ink";
+  return "text-kk-notice";
 }
 
 function scoreBarColor(score) {
-  if (score >= 75) return "bg-green-400";
-  if (score >= 60) return "bg-orange";
-  return "bg-gray-300";
+  if (score >= 75) return "bg-kk-success";
+  if (score >= 60) return "bg-kk-ink-2";
+  return "bg-kk-notice-line";
 }
 
 onMounted(() => {
@@ -59,68 +59,68 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="Re-tell Lecture Result" back-to="/rl" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="Re-tell Lecture Result" back-to="/rl" variant="kk" />
 
-    <main class="mx-auto max-w-2xl px-4 py-6">
+    <main class="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:py-8">
       <section class="mb-6 text-center">
-        <p class="text-sm font-semibold uppercase tracking-wide text-orange">{{ resultBadge }}</p>
-        <h1 class="mt-1 text-2xl font-bold text-navy">{{ resultTitle }}</h1>
-        <p class="mt-1 text-muted">
-          Overall Score <span class="text-xl font-bold text-orange">{{ result.overall }}</span>
+        <p class="text-xs font-semibold uppercase tracking-[0.08em] text-kk-ink-3">{{ resultBadge }}</p>
+        <h1 class="mt-1 text-[24px] font-bold leading-snug text-kk-ink sm:text-[28px]">{{ resultTitle }}</h1>
+        <p class="mt-1 text-kk-ink-3">
+          Overall Score <span class="kk-num ml-1 text-[32px] font-extrabold text-kk-ink">{{ result.overall }}</span>
         </p>
       </section>
 
       <section class="mb-6 space-y-3">
-        <article v-for="item in scoreItems" :key="item.key" class="rounded-xl bg-white p-4 shadow-sm">
+        <article v-for="item in scoreItems" :key="item.key" class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
           <template v-if="item.key === 'pronunciation' && result.scores.pronunciation == null">
             <div class="flex items-center justify-between" data-testid="rl-pronunciation-not-assessed">
-              <span class="text-sm font-semibold text-navy">{{ item.label }}</span>
-              <span class="text-sm font-semibold text-muted">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</span>
+              <span class="text-sm font-semibold text-kk-ink">{{ item.label }}</span>
+              <span class="text-sm font-semibold text-kk-ink-3">{{ PRONUNCIATION_NOT_ASSESSED_LABEL }}</span>
             </div>
-            <p class="mt-1 text-xs text-muted">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
+            <p class="mt-1 text-xs text-kk-ink-3">{{ PRONUNCIATION_NOT_ASSESSED_REASON }}</p>
           </template>
           <template v-else>
           <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-semibold text-navy">{{ item.label }}</span>
-            <span class="text-lg font-bold" :class="scoreColor(result.scores[item.key])">
+            <span class="text-sm font-semibold text-kk-ink">{{ item.label }}</span>
+            <span class="kk-num text-xl font-extrabold" :class="scoreColor(result.scores[item.key])">
               {{ result.scores[item.key] }}
             </span>
           </div>
-          <div class="h-2 w-full rounded-full bg-gray-100">
+          <div class="h-2 w-full rounded-full bg-kk-surface-2">
             <div
               class="h-2 rounded-full transition-all duration-700"
               :class="scoreBarColor(result.scores[item.key])"
               :style="{ width: `${result.scores[item.key]}%` }"
             />
           </div>
-          <p class="mt-1 text-xs text-muted">{{ item.tip }}</p>
+          <p class="mt-1 text-xs text-kk-ink-3">{{ item.tip }}</p>
           </template>
         </article>
       </section>
 
-      <section class="mb-6 rounded-xl bg-white p-4 shadow-sm">
+      <section class="mb-6 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
         <div class="flex items-start gap-3">
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">AI</div>
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-kk-ink text-sm font-bold text-kk-ink-inverse">AI</div>
           <div>
-            <p class="mb-1 text-xs text-muted">Coach Feedback</p>
-            <p class="leading-relaxed text-text">{{ result.feedback }}</p>
+            <p class="mb-1 text-xs text-kk-ink-3">Coach Feedback</p>
+            <p class="leading-relaxed text-kk-ink">{{ result.feedback }}</p>
           </div>
         </div>
       </section>
 
-      <section class="mb-6 rounded-xl bg-white p-4 shadow-sm">
-        <p class="mb-2 text-sm font-semibold text-navy">Recognized Summary</p>
-        <p class="text-sm italic leading-relaxed text-muted">
+      <section class="mb-6 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
+        <p class="mb-2 text-sm font-semibold text-kk-ink">Recognized Summary</p>
+        <p class="kk-text text-[17px] italic leading-relaxed text-kk-ink">
           "{{ transcript || '(No speech recognized. Please check microphone permissions.)' }}"
         </p>
       </section>
 
       <section class="space-y-3">
-        <OrangeButton full @click="router.push('/rl')">Practice Another RL</OrangeButton>
+        <OrangeButton full tone="action" @click="router.push('/rl')">Practice Another RL</OrangeButton>
         <button
           type="button"
-          class="w-full rounded-xl border border-gray-200 py-3 text-muted transition-all hover:border-navy hover:text-navy"
+          class="min-h-[48px] w-full rounded-full border border-kk-line bg-kk-surface py-3 font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
           @click="router.push('/home')"
         >
           Back Home

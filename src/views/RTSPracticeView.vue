@@ -4504,7 +4504,7 @@ onUnmounted(() => {
                   {{ recordingStopButtonLabel }}
                 </button>
                 <div class="mt-2 rounded-2xl bg-kk-surface px-3 py-2">
-                  <RecordingWave :is-recording="Boolean(recorder.isRecording.value)" />
+                  <RecordingWave tone="kk" :is-recording="Boolean(recorder.isRecording.value)" />
                 </div>
                 <p v-if="recordingStatusHint" class="mt-2 text-[13px] text-kk-ink-2">
                   {{ recordingStatusHint }}

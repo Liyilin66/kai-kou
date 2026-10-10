@@ -870,57 +870,57 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="Write Essay" back-to="/home" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="Write Essay" back-to="/home" variant="kk" />
 
-    <main class="mx-auto max-w-3xl px-4 py-6">
+    <main class="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:py-8">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-muted">Question {{ questionNumberLabel }}</p>
+        <p class="text-sm text-kk-ink-3">Question {{ questionNumberLabel }}</p>
         <div class="flex flex-wrap gap-2">
-          <OrangeButton tone="outline" @click="goTemplateLibrary">看模板</OrangeButton>
-          <OrangeButton tone="outline" @click="goOpinionLibrary">观点句</OrangeButton>
-          <OrangeButton tone="outline" @click="goSelectPractice">选题练习</OrangeButton>
-          <OrangeButton tone="outline" @click="goHistory">历史提交</OrangeButton>
+          <OrangeButton tone="secondary" @click="goTemplateLibrary">看模板</OrangeButton>
+          <OrangeButton tone="secondary" @click="goOpinionLibrary">观点句</OrangeButton>
+          <OrangeButton tone="secondary" @click="goSelectPractice">选题练习</OrangeButton>
+          <OrangeButton tone="secondary" @click="goHistory">历史提交</OrangeButton>
         </div>
       </div>
 
       <div v-if="questionLoading" class="py-16 text-center">
-        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
-        <p class="mt-3 text-sm text-muted">Loading question...</p>
+        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
+        <p class="mt-3 text-sm text-kk-ink-3">Loading question...</p>
       </div>
 
       <template v-else>
-        <section class="mb-4 rounded-xl border-l-4 border-orange bg-white p-5 shadow-sm">
+        <section class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-navy">{{ questionTitle }}</p>
-            <span class="rounded-full bg-orange/10 px-3 py-1 text-xs font-semibold text-orange">{{ difficultyLabel }}</span>
+            <p class="text-sm font-semibold text-kk-ink">{{ questionTitle }}</p>
+            <span class="rounded-full bg-kk-surface-2 px-3 py-1 text-xs font-semibold text-kk-ink-2">{{ difficultyLabel }}</span>
           </div>
 
-          <p class="mb-3 text-sm leading-relaxed text-text">{{ questionPromptText }}</p>
+          <p class="mb-3 text-sm leading-relaxed text-kk-ink">{{ questionPromptText }}</p>
 
           <div class="flex flex-wrap gap-2">
-            <span class="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">{{ questionType }}</span>
-            <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-700">{{ questionTopic }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2 py-0.5 text-xs text-kk-ink-2">{{ questionType }}</span>
+            <span class="rounded-full bg-kk-surface-2 px-2 py-0.5 text-xs text-kk-ink-2">{{ questionTopic }}</span>
           </div>
         </section>
 
-        <section class="mb-4 rounded-xl border bg-white p-4 shadow-sm">
+        <section class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p class="text-sm font-semibold text-navy">当前模板预览</p>
-              <p class="text-xs text-muted">10 个全文通用模板（默认模板 1）</p>
+              <p class="text-sm font-semibold text-kk-ink">当前模板预览</p>
+              <p class="text-xs text-kk-ink-3">10 个全文通用模板（默认模板 1）</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button
                 type="button"
-                class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-[13px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="toggleTemplateSwitcher"
               >
                 切换模板
               </button>
               <button
                 type="button"
-                class="rounded-lg bg-orange px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                class="inline-flex min-h-[36px] items-center rounded-full bg-kk-action px-3 text-[13px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover"
                 @click="importCurrentTemplate"
               >
                 一键导入模板
@@ -928,15 +928,15 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div v-if="currentTemplate" class="rounded-lg border border-gray-200 p-3">
+          <div v-if="currentTemplate" class="rounded-lg border border-kk-line p-3">
             <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <p class="text-sm font-semibold text-navy">{{ currentTemplate.title }}</p>
-              <span class="text-xs text-muted">{{ currentTemplate.shortLabel || currentTemplate.id }}</span>
+              <p class="text-sm font-semibold text-kk-ink">{{ currentTemplate.title }}</p>
+              <span class="text-xs text-kk-ink-3">{{ currentTemplate.shortLabel || currentTemplate.id }}</span>
             </div>
-            <pre class="overflow-auto whitespace-pre-wrap rounded-md bg-[#F8FAFC] p-3 text-xs leading-relaxed text-text">{{ currentTemplate.content }}</pre>
+            <pre class="overflow-auto whitespace-pre-wrap rounded-2xl bg-kk-surface-2 p-3 text-[13px] leading-relaxed text-kk-ink">{{ currentTemplate.content }}</pre>
           </div>
 
-          <p v-else class="text-sm text-muted">暂无可用模板。</p>
+          <p v-else class="text-sm text-kk-ink-3">暂无可用模板。</p>
 
           <div v-if="showTemplateSwitcher" class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
             <button
@@ -945,24 +945,24 @@ onUnmounted(() => {
               type="button"
               class="rounded-lg border px-3 py-2 text-left text-xs transition-colors"
               :class="template.id === currentTemplateId
-                ? 'border-orange bg-orange/10 text-orange'
-                : 'border-gray-200 text-text hover:border-orange hover:bg-orange/5'"
+                ? 'border-kk-ink bg-kk-ink text-kk-ink-inverse'
+                : 'border-kk-line text-kk-ink hover:bg-kk-surface-2'"
               @click="selectTemplate(template.id)"
             >
               <span class="font-semibold">{{ template.shortLabel || template.title }}</span>
-              <span class="ml-1 text-muted">({{ template.id }})</span>
+              <span class="ml-1 text-kk-ink-3">({{ template.id }})</span>
             </button>
           </div>
         </section>
 
-        <section class="mb-4 rounded-xl border bg-white p-4 shadow-sm">
+        <section class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
           <div class="mb-3 flex items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-navy">Recommended Opinion Sentences</p>
+            <p class="text-sm font-semibold text-kk-ink">Recommended Opinion Sentences</p>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-muted">{{ recommendedOpinionCount }} sentences</span>
+              <span class="text-xs text-kk-ink-3">{{ recommendedOpinionCount }} sentences</span>
               <button
                 type="button"
-                class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-[13px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="toggleRecommendedOpinions"
               >
                 {{ showRecommendedOpinions ? "收起观点句" : "展开观点句" }}
@@ -973,82 +973,82 @@ onUnmounted(() => {
           <div v-if="showRecommendedOpinions">
             <div v-if="hasRecommendedOpinions" class="space-y-3">
               <div v-for="block in opinionStanceBlocks" :key="block.key" class="space-y-2">
-                <div v-if="block.items.length" class="rounded-lg border border-gray-200 p-3">
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-navy">{{ block.label }}</p>
+                <div v-if="block.items.length" class="rounded-lg border border-kk-line p-3">
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-kk-ink">{{ block.label }}</p>
                   <div class="space-y-2">
                     <article
                       v-for="sentence in block.items"
                       :key="sentence.id"
                       class="rounded-md border p-2"
-                      :class="sentence.id === activeOpinionId ? 'border-orange bg-orange/5' : 'border-gray-200'"
+                      :class="sentence.id === activeOpinionId ? 'border-kk-ink bg-kk-surface-2' : 'border-kk-line'"
                     >
                       <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-[11px] font-semibold text-muted">{{ sentence.subTopicLabel || sentence.subTopicKey }} · {{ sentence.id }}</p>
+                        <p class="text-[11px] font-semibold text-kk-ink-3">{{ sentence.subTopicLabel || sentence.subTopicKey }} · {{ sentence.id }}</p>
                         <div class="flex flex-wrap gap-2">
                           <button
                             type="button"
-                            class="rounded border border-gray-300 px-2 py-0.5 text-[11px] font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                            class="inline-flex min-h-[32px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-xs font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                             @click="copyOpinionSentence(sentence)"
                           >
                             复制
                           </button>
                           <button
                             type="button"
-                            class="rounded bg-orange px-2 py-0.5 text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
+                            class="inline-flex min-h-[32px] items-center rounded-full bg-kk-action px-3 text-xs font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover"
                             @click="insertOpinionSentence(sentence)"
                           >
                             插入正文
                           </button>
                         </div>
                       </div>
-                      <p class="text-xs leading-relaxed text-text">{{ sentence.text }}</p>
-                      <p class="mt-1 text-[11px] leading-relaxed text-muted">{{ sentence.translationZh }}</p>
+                      <p class="text-xs leading-relaxed text-kk-ink">{{ sentence.text }}</p>
+                      <p class="mt-1 text-[11px] leading-relaxed text-kk-ink-3">{{ sentence.translationZh }}</p>
                     </article>
                   </div>
                 </div>
               </div>
             </div>
-            <p v-else class="text-sm text-muted">No recommended opinion sentences for this question yet.</p>
+            <p v-else class="text-sm text-kk-ink-3">No recommended opinion sentences for this question yet.</p>
           </div>
-          <p v-else class="text-xs text-muted">已折叠，点击“展开观点句”查看。</p>
+          <p v-else class="text-xs text-kk-ink-3">已折叠，点击“展开观点句”查看。</p>
         </section>
 
-        <section class="rounded-xl border bg-white p-6 shadow-card">
+        <section class="rounded-[20px] border border-kk-line bg-kk-surface p-6 shadow-kk">
           <div>
             <div class="mb-2 flex items-center justify-between">
-              <label class="block text-sm font-medium text-text">Body</label>
-              <span class="text-sm text-orange">Words: {{ wordCount }}</span>
+              <label class="block text-sm font-medium text-kk-ink">Body</label>
+              <span class="kk-num text-sm font-semibold text-kk-ink-2">Words: {{ wordCount }}</span>
             </div>
             <textarea
               v-model="body"
-              class="min-h-[320px] w-full resize-y rounded-lg border border-[#D1D5DB] p-3 text-sm outline-none focus:border-[#9BB7E3]"
+              class="kk-text min-h-[320px] w-full resize-y rounded-2xl border border-kk-line bg-kk-surface p-4 text-[16px] leading-relaxed text-kk-ink outline-none focus:border-kk-ink"
               placeholder="Write your response here..."
             />
           </div>
 
           <div class="mt-5 flex flex-wrap justify-end gap-3">
-            <OrangeButton tone="outline" @click="nextQuestion">Next Question</OrangeButton>
-            <OrangeButton tone="outline" @click="clearAll">Clear</OrangeButton>
-            <OrangeButton :disabled="isSubmitting || questionLoading" @click="submitEssay">
+            <OrangeButton tone="secondary" @click="nextQuestion">Next Question</OrangeButton>
+            <OrangeButton tone="secondary" @click="clearAll">Clear</OrangeButton>
+            <OrangeButton tone="action" :disabled="isSubmitting || questionLoading" @click="submitEssay">
               {{ isSubmitting ? "提交中..." : "提交评阅" }}
             </OrangeButton>
           </div>
         </section>
 
-        <section v-if="reviewState === 'reviewing'" class="mt-4 rounded-xl border bg-white p-6 shadow-card">
-          <p class="text-sm font-semibold text-navy">AI评阅（估分）进行中...</p>
-          <p class="mt-2 text-sm text-muted">正在处理本次提交内容，请稍候。</p>
+        <section v-if="reviewState === 'reviewing'" class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-6 shadow-kk">
+          <p class="text-sm font-semibold text-kk-ink">AI评阅（估分）进行中...</p>
+          <p class="mt-2 text-sm text-kk-ink-3">正在处理本次提交内容，请稍候。</p>
         </section>
 
-        <section v-if="reviewState === 'failed' && reviewErrorMessage" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-6 shadow-card">
-          <p class="text-sm font-semibold text-red-600">{{ reviewErrorMessage }}</p>
-          <div class="mt-3 space-y-1 text-xs text-red-700/90">
+        <section v-if="reviewState === 'failed' && reviewErrorMessage" class="mt-4 rounded-xl border border-kk-error-line bg-kk-error-bg p-6 shadow-kk">
+          <p class="text-sm font-semibold text-kk-error">{{ reviewErrorMessage }}</p>
+          <div class="mt-3 space-y-1 text-xs text-kk-error/90">
             <div class="flex flex-wrap items-center gap-2">
               <span>请求编号：{{ reviewFailureRequestId || "N/A" }}</span>
               <button
                 v-if="reviewFailureRequestId"
                 type="button"
-                class="rounded border border-red-300 px-2 py-0.5 text-[11px] font-semibold text-red-700 transition-colors hover:border-red-500 hover:text-red-800"
+                class="inline-flex min-h-[32px] items-center rounded-full border border-kk-error-line bg-kk-surface px-3 text-xs font-semibold text-kk-error"
                 @click="copyFailureRequestId"
               >
                 复制编号
@@ -1063,13 +1063,13 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <div v-if="showDebugApiDiagnostics" class="mt-4 rounded-lg border border-red-200 bg-white/70 p-3">
+          <div v-if="showDebugApiDiagnostics" class="mt-4 rounded-lg border border-kk-error-line bg-kk-surface/70 p-3">
             <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <p class="text-xs font-semibold text-red-700">API连通性诊断</p>
+              <p class="text-xs font-semibold text-kk-error">API连通性诊断</p>
               <div class="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  class="rounded border border-red-300 px-2 py-0.5 text-[11px] font-semibold text-red-700 transition-colors hover:border-red-500 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  class="inline-flex min-h-[32px] items-center rounded-full border border-kk-error-line bg-kk-surface px-3 text-xs font-semibold text-kk-error disabled:cursor-not-allowed disabled:opacity-60"
                   :disabled="clientFetchDiagState === 'running'"
                   @click="runClientFetchDiagnostic"
                 >
@@ -1077,7 +1077,7 @@ onUnmounted(() => {
                 </button>
                 <button
                   type="button"
-                  class="rounded border border-red-300 px-2 py-0.5 text-[11px] font-semibold text-red-700 transition-colors hover:border-red-500 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  class="inline-flex min-h-[32px] items-center rounded-full border border-kk-error-line bg-kk-surface px-3 text-xs font-semibold text-kk-error disabled:cursor-not-allowed disabled:opacity-60"
                   :disabled="postProbeDiagState === 'running'"
                   @click="runPostProbeDiagnostic"
                 >
@@ -1086,18 +1086,18 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <p class="text-[11px] text-red-700/80">
+            <p class="text-[11px] text-kk-error/80">
               用于确认当前手机是否能基础访问线上 API，不影响 WE 主评分流程。
             </p>
 
-            <div v-if="clientFetchDiagState === 'success' && clientFetchDiagResult" class="mt-2 space-y-1 text-[11px] text-red-700/90">
+            <div v-if="clientFetchDiagState === 'success' && clientFetchDiagResult" class="mt-2 space-y-1 text-[11px] text-kk-error/90">
               <p>结果：可达（status {{ clientFetchDiagResult.status }}）</p>
               <p>请求编号：{{ clientFetchDiagResult.request_id || "N/A" }}</p>
               <p>路由：{{ clientFetchDiagResult.route || "client-fetch" }}</p>
               <p v-if="clientFetchDiagResult.used_url">目标：{{ clientFetchDiagResult.used_url }}</p>
             </div>
 
-            <div v-else-if="clientFetchDiagState === 'failed' && clientFetchDiagResult" class="mt-2 space-y-1 text-[11px] text-red-700/90">
+            <div v-else-if="clientFetchDiagState === 'failed' && clientFetchDiagResult" class="mt-2 space-y-1 text-[11px] text-kk-error/90">
               <p>结果：不可达 / 异常（{{ clientFetchDiagMessage || "Fetch failed" }}）</p>
               <p>请求编号：{{ clientFetchDiagResult.request_id || "N/A" }}</p>
               <p v-if="clientFetchDiagResult.status">状态：{{ clientFetchDiagResult.status }}</p>
@@ -1106,7 +1106,7 @@ onUnmounted(() => {
               <p v-if="clientFetchDiagResult.used_url">目标：{{ clientFetchDiagResult.used_url }}</p>
             </div>
 
-            <div v-if="postProbeDiagState === 'success' && postProbeDiagResult" class="mt-3 space-y-1 text-[11px] text-red-700/90">
+            <div v-if="postProbeDiagState === 'success' && postProbeDiagResult" class="mt-3 space-y-1 text-[11px] text-kk-error/90">
               <p>POST结果：可达（status {{ postProbeDiagResult.status }}）</p>
               <p>请求编号：{{ postProbeDiagResult.request_id || "N/A" }}</p>
               <p>路由：{{ postProbeDiagResult.route || "post-probe" }}</p>
@@ -1116,7 +1116,7 @@ onUnmounted(() => {
               <p v-if="postProbeDiagResult.used_url">目标：{{ postProbeDiagResult.used_url }}</p>
             </div>
 
-            <div v-else-if="postProbeDiagState === 'failed' && postProbeDiagResult" class="mt-3 space-y-1 text-[11px] text-red-700/90">
+            <div v-else-if="postProbeDiagState === 'failed' && postProbeDiagResult" class="mt-3 space-y-1 text-[11px] text-kk-error/90">
               <p>POST结果：失败 / 异常</p>
               <p>错误码：{{ postProbeDiagResult.error_code || "SCORE_API_FAILED" }}</p>
               <p>类型：{{ postProbeDiagResult.failure_type || "Fetch failed" }}</p>
@@ -1128,49 +1128,49 @@ onUnmounted(() => {
           </div>
         </section>
 
-        <section v-if="weResult && reviewState === 'done'" class="mt-4 rounded-xl border bg-white p-6 shadow-card">
+        <section v-if="weResult && reviewState === 'done'" class="mt-4 rounded-[20px] border border-kk-line bg-kk-surface p-6 shadow-kk">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <p class="text-sm font-semibold text-navy">{{ reviewTitle }}</p>
-            <p class="text-sm text-orange">
+            <p class="text-sm font-semibold text-kk-ink">{{ reviewTitle }}</p>
+            <p class="text-sm font-medium text-kk-ink-2">
               总分：<span class="font-bold">{{ weResult.overall_estimated }}/90</span>
             </p>
           </div>
 
-          <p class="mb-3 text-sm text-text">
+          <p class="mb-3 text-sm text-kk-ink">
             等级：<span class="font-semibold">{{ weResult.visible_summary?.level || "中等" }}</span>
           </p>
 
           <div class="mb-3">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-navy">优点</p>
-            <ul class="list-disc space-y-1 pl-5 text-sm text-text">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-kk-ink">优点</p>
+            <ul class="list-disc space-y-1 pl-5 text-sm text-kk-ink">
               <li v-for="(item, idx) in weStrengths.slice(0, 2)" :key="`strength-${idx}`">{{ item }}</li>
             </ul>
           </div>
 
           <div class="mb-3">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-navy">改进建议</p>
-            <ul class="list-disc space-y-1 pl-5 text-sm text-text">
+            <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-kk-ink">改进建议</p>
+            <ul class="list-disc space-y-1 pl-5 text-sm text-kk-ink">
               <li v-for="(item, idx) in weImprovements.slice(0, 2)" :key="`improve-${idx}`">{{ item }}</li>
             </ul>
           </div>
 
-          <div v-if="isAiFallbackGate" class="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <p class="text-sm font-semibold text-blue-700">{{ WE_AI_FALLBACK_NOTICE }}</p>
+          <div v-if="isAiFallbackGate" class="mb-3 rounded-2xl border border-kk-notice-line bg-kk-notice-bg p-3">
+            <p class="text-sm font-semibold text-kk-notice">{{ WE_AI_FALLBACK_NOTICE }}</p>
           </div>
 
-          <div v-if="weResult.gate?.triggered && gateReasonTips.length" class="mb-3 rounded-lg border border-orange/40 bg-orange/5 p-3">
-            <p class="mb-1 text-xs font-semibold text-orange">规则提醒</p>
-            <ul class="list-disc space-y-1 pl-5 text-sm text-text">
+          <div v-if="weResult.gate?.triggered && gateReasonTips.length" class="mb-3 rounded-2xl border border-kk-notice-line bg-kk-notice-bg p-3">
+            <p class="mb-1 text-xs font-semibold text-kk-notice">规则提醒</p>
+            <ul class="list-disc space-y-1 pl-5 text-sm text-kk-ink">
               <li v-for="(tip, idx) in gateReasonTips" :key="`gate-${idx}`">{{ tip }}</li>
             </ul>
           </div>
 
-          <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-navy">总评</p>
-          <p class="text-sm leading-relaxed text-muted">
+          <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-kk-ink">总评</p>
+          <p class="text-sm leading-relaxed text-kk-ink-3">
             {{ weResult.visible_summary?.final_comment || weResult.feedback }}
           </p>
 
-          <p class="mt-3 text-xs text-muted">
+          <p class="mt-3 text-xs text-kk-ink-3">
             当前结果对应最近一次提交内容。
             <span v-if="weResult.submitted_word_count">（提交词数：{{ weResult.submitted_word_count }}）</span>
           </p>

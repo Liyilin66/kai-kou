@@ -1,20 +1,20 @@
 <template>
-  <div class="min-h-screen bg-[#f5f5f7] px-4 py-8 md:px-6 md:py-10">
+  <div class="kk-page min-h-screen px-4 py-8 md:px-6 md:py-10">
     <div class="flex min-h-screen items-center justify-center">
       <div class="w-full max-w-[680px]">
         <div class="mb-10 text-center md:mb-12">
           <div class="mb-2 inline-flex items-center justify-center gap-3">
-            <svg class="h-9 w-9 text-[#273144] md:h-10 md:w-10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="h-9 w-9 text-kk-ink md:h-10 md:w-10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3L1 9L5 11.18V17.18L12 21L19 17.18V11.18L21 10.09V17H23V9L12 3ZM18.82 9L12 12.72L5.18 9L12 5.28L18.82 9ZM17 15.99L12 18.72L7 15.99V12.27L12 15L17 12.27V15.99Z" />
             </svg>
-            <span class="text-[34px] font-semibold tracking-tight text-[#1f2d42] md:text-[40px]">开口</span>
+            <span class="text-[28px] font-bold tracking-tight text-kk-ink md:text-[32px]">开口</span>
           </div>
         </div>
 
-        <div class="rounded-[28px] bg-white px-6 py-7 shadow-[0_18px_42px_rgba(15,23,42,0.10),0_6px_18px_rgba(15,23,42,0.06)] md:px-11 md:py-10">
+        <div class="rounded-[20px] bg-kk-surface px-6 py-7 shadow-kk md:px-11 md:py-10">
           <button
             type="button"
-            class="group mb-8 flex items-center gap-3 text-[16px] font-medium text-gray-600 transition-colors hover:text-gray-800 md:mb-10 md:text-[18px]"
+            class="group mb-8 flex items-center gap-3 min-h-[44px] text-[15px] font-medium text-kk-ink-2 transition-colors hover:text-kk-ink md:mb-10"
             @click="router.push('/auth')"
           >
             <svg
@@ -32,30 +32,30 @@
           </button>
 
           <div class="mb-10 text-center md:mb-12">
-            <h1 class="mb-3 text-[30px] font-bold text-[#1f3150] md:text-[34px]">重置密码</h1>
-            <p class="mx-auto max-w-[440px] text-[16px] leading-8 text-[#7b8698] md:text-[17px]">
+            <h1 class="mb-3 text-[24px] font-bold text-kk-ink md:text-[28px]">重置密码</h1>
+            <p class="mx-auto max-w-[440px] text-[16px] leading-8 text-kk-ink-3 md:text-[17px]">
               {{ pageSubtitle }}
             </p>
           </div>
 
           <div v-if="viewState === 'success'" class="space-y-6">
-            <div class="rounded-[24px] border border-[#e8edf5] bg-[#f8fafc] px-5 py-6 text-center md:px-7 md:py-8">
+            <div class="rounded-2xl border border-kk-line bg-kk-surface-2 px-5 py-6 text-center md:px-7 md:py-8">
               <div
-                class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#1e3a8a]/10 text-[#1e3a8a]"
+                class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-kk-success-bg text-kk-success"
               >
                 <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p class="text-[18px] font-semibold text-[#1f3150]">密码已更新</p>
-              <p class="mt-3 text-[15px] leading-7 text-[#52627c]">
+              <p class="text-[17px] font-semibold text-kk-ink">密码已更新</p>
+              <p class="mt-3 text-[15px] leading-7 text-kk-ink-2">
                 你现在可以使用新密码重新登录。为确保账号状态一致，我们会在
-                <strong class="font-semibold text-[#1f3150]">{{ redirectCountdown }}</strong>
+                <strong class="font-semibold text-kk-ink">{{ redirectCountdown }}</strong>
                 秒后带你返回登录页。
               </p>
               <button
                 type="button"
-                class="mt-8 flex h-[64px] w-full items-center justify-center gap-2 rounded-[20px] bg-[#1e3a8a] text-[20px] font-medium text-white transition-all duration-200 hover:bg-[#2247ae]"
+                class="mt-8 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-kk-action text-[16px] font-bold text-kk-on-action transition-all duration-200 hover:bg-kk-action-hover"
                 @click="handleSuccessPrimaryAction"
               >
                 <span>返回登录</span>
@@ -65,10 +65,10 @@
               </button>
             </div>
 
-            <div class="rounded-[20px] border border-[#b8d2ff] bg-[#eef5ff] px-5 py-5 md:px-6 md:py-6">
+            <div class="rounded-[20px] border border-kk-line bg-kk-surface-2 px-5 py-5 md:px-6 md:py-6">
               <div class="flex items-start gap-3">
-                <span class="mt-0.5 text-[18px] leading-none">提示</span>
-                <p class="text-[16px] leading-8 text-[#1f3150] md:text-[17px]">
+                <span class="mt-0.5 shrink-0 text-[13px] font-semibold leading-5">提示</span>
+                <p class="text-[16px] leading-8 text-kk-ink md:text-[17px]">
                   如果页面没有自动跳转，可以点击上方按钮立即返回登录；返回后请直接使用新密码登录。
                 </p>
               </div>
@@ -86,23 +86,23 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-[18px] font-bold text-[#1f3150]">这个重置链接已失效</p>
-                  <p class="mt-2 text-[15px] leading-7 text-[#52627c] md:text-[16px]">
+                  <p class="text-[17px] font-bold text-kk-ink">这个重置链接已失效</p>
+                  <p class="mt-2 text-[15px] leading-7 text-kk-ink-2 md:text-[16px]">
                     {{ invalidStateMessage }}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-[20px] border border-[#e8edf5] bg-[#f8fafc] px-5 py-5 md:px-6 md:py-6">
-              <p class="text-[16px] leading-8 text-[#52627c] md:text-[17px]">
+            <div class="rounded-[20px] border border-kk-line bg-kk-surface-2 px-5 py-5 md:px-6 md:py-6">
+              <p class="text-[16px] leading-8 text-kk-ink-2 md:text-[17px]">
                 你可以重新申请一封密码重置邮件，收到后请优先使用最新邮件中的链接继续操作。
               </p>
             </div>
 
             <button
               type="button"
-              class="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[18px] bg-[#1e3a8a] px-4 py-2 text-[18px] font-semibold text-white transition-all duration-200 hover:bg-[#1e40af] md:h-16 md:rounded-[20px] md:text-[20px]"
+              class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-kk-action px-4 py-2 text-[16px] font-bold text-kk-on-action transition-all duration-200 hover:bg-kk-action-hover"
               @click="router.push('/forgot-password')"
             >
               重新申请重置邮件
@@ -110,7 +110,7 @@
 
             <button
               type="button"
-              class="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[18px] border border-[#d9e2f1] bg-white px-4 py-2 text-[17px] font-semibold text-[#4b586d] transition-all duration-200 hover:border-[#c7d4ea] hover:text-[#243042] md:h-16 md:rounded-[20px] md:text-[18px]"
+              class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-kk-line bg-kk-surface px-4 py-2 text-[16px] font-semibold text-kk-ink-2 transition-all duration-200 hover:border-kk-line hover:text-kk-ink"
               @click="router.push('/auth')"
             >
               返回登录
@@ -145,8 +145,8 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <p class="text-[18px] font-bold text-[#1f3150]">{{ statusCardTitle }}</p>
-                  <p class="mt-2 text-[15px] leading-7 text-[#52627c] md:text-[16px]">
+                  <p class="text-[17px] font-bold text-kk-ink">{{ statusCardTitle }}</p>
+                  <p class="mt-2 text-[15px] leading-7 text-kk-ink-2 md:text-[16px]">
                     {{ statusCardDescription }}
                   </p>
                 </div>
@@ -155,10 +155,10 @@
 
             <form v-if="viewState === 'ready'" class="mt-8 space-y-6 md:mt-10 md:space-y-7" @submit.prevent="handleSubmit">
               <div class="space-y-3">
-                <label class="block text-[18px] font-bold text-[#1f3150]">新密码</label>
+                <label class="block text-[14px] font-semibold text-kk-ink-2">新密码</label>
                 <div class="relative">
                   <svg
-                    class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                    class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -177,7 +177,7 @@
                   />
                   <button
                     type="button"
-                    class="absolute right-5 top-1/2 -translate-y-1/2 text-[#9aa4b5] transition-colors hover:text-[#7c8798]"
+                    class="absolute right-5 top-1/2 -translate-y-1/2 text-kk-ink-3 transition-colors hover:text-kk-ink-3"
                     @click="showPassword = !showPassword"
                   >
                     <svg
@@ -208,14 +208,14 @@
                     </svg>
                   </button>
                 </div>
-                <p v-if="fieldErrors.password" class="text-sm text-[#ff7f50]">{{ fieldErrors.password }}</p>
+                <p v-if="fieldErrors.password" class="text-sm text-kk-error">{{ fieldErrors.password }}</p>
               </div>
 
               <div class="space-y-3">
-                <label class="block text-[18px] font-bold text-[#1f3150]">确认新密码</label>
+                <label class="block text-[14px] font-semibold text-kk-ink-2">确认新密码</label>
                 <div class="relative">
                   <svg
-                    class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                    class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -234,7 +234,7 @@
                   />
                   <button
                     type="button"
-                    class="absolute right-5 top-1/2 -translate-y-1/2 text-[#9aa4b5] transition-colors hover:text-[#7c8798]"
+                    class="absolute right-5 top-1/2 -translate-y-1/2 text-kk-ink-3 transition-colors hover:text-kk-ink-3"
                     @click="showConfirmPassword = !showConfirmPassword"
                   >
                     <svg
@@ -265,26 +265,26 @@
                     </svg>
                   </button>
                 </div>
-                <p v-if="fieldErrors.confirmPassword" class="text-sm text-[#ff7f50]">{{ fieldErrors.confirmPassword }}</p>
+                <p v-if="fieldErrors.confirmPassword" class="text-sm text-kk-error">{{ fieldErrors.confirmPassword }}</p>
               </div>
 
-              <div class="rounded-[18px] bg-[#f8fafc] px-5 py-4 text-[15px] leading-7 text-[#52627c]">
+              <div class="rounded-2xl bg-kk-surface-2 px-5 py-4 text-[15px] leading-7 text-kk-ink-2">
                 密码至少需要 6 位。为了账号安全，建议使用和旧密码不同的新密码。
               </div>
 
               <div
                 v-if="feedbackMessage"
-                class="rounded-[18px] px-5 py-4 text-[15px] leading-7"
+                class="rounded-2xl px-5 py-4 text-[15px] leading-7"
                 :class="feedbackTone === 'error'
-                  ? 'bg-[#fff3ee] text-[#dd6b43]'
-                  : 'bg-[#eef4ff] text-[#3658b0]'"
+                  ? 'bg-kk-error-bg text-kk-error'
+                  : 'bg-kk-surface-2 text-kk-ink-2'"
               >
                 {{ feedbackMessage }}
               </div>
 
               <button
                 type="submit"
-                class="mt-2 flex h-[68px] w-full items-center justify-center gap-2 rounded-[22px] bg-[#1e3a8a] text-[22px] font-medium text-white transition-all duration-200 hover:bg-[#2146ad] disabled:cursor-not-allowed disabled:bg-[#b8c2d8]"
+                class="mt-2 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-kk-action text-[16px] font-bold text-kk-on-action transition-all duration-200 hover:bg-kk-action-hover disabled:cursor-not-allowed disabled:bg-kk-surface-2"
                 :disabled="loading || !sessionReady"
               >
                 <template v-if="loading">
@@ -302,7 +302,7 @@
           </div>
         </div>
 
-        <p class="mt-10 text-center text-[16px] text-[#4b586d] md:mt-12 md:text-[18px]">放弃完美，拥抱流利</p>
+        <p class="mt-10 text-center text-[15px] text-kk-ink-3 md:mt-12">放弃完美，拥抱流利</p>
       </div>
     </div>
   </div>
@@ -335,8 +335,8 @@ const fieldErrors = reactive({
   confirmPassword: ""
 });
 
-const basePasswordInputClass = "h-[70px] w-full rounded-[20px] border-0 bg-[#f5f7fb] pl-14 pr-14 text-[18px] text-[#23324a] placeholder:text-[#95a0b5] transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff7f50]/45";
-const errorInputClass = "ring-2 ring-[#ff7f50]/55";
+const basePasswordInputClass = "h-14 w-full rounded-2xl border-0 bg-kk-surface-2 pl-14 pr-14 text-[16px] text-kk-ink placeholder:text-kk-ink-3 transition-all duration-200 focus:bg-kk-surface focus:outline-none focus:ring-2 focus:ring-[rgba(30,27,24,0.18)]";
+const errorInputClass = "ring-2 ring-kk-error-line";
 
 let authSubscription = null;
 let verificationTimer = null;
@@ -384,18 +384,18 @@ const statusCardDescription = computed(() => {
 
 const statusCardClass = computed(() => {
   if (viewState.value === "invalid") {
-    return "rounded-[20px] border border-[#ffd8c7] bg-[#fff6f1] px-5 py-5 md:px-6 md:py-6";
+    return "rounded-[20px] border border-kk-error-line bg-kk-error-bg px-5 py-5 md:px-6 md:py-6";
   }
 
-  return "rounded-[20px] border border-[#b8d2ff] bg-[#eef5ff] px-5 py-5 md:px-6 md:py-6";
+  return "rounded-[20px] border border-kk-line bg-kk-surface-2 px-5 py-5 md:px-6 md:py-6";
 });
 
 const statusIconWrapperClass = computed(() => {
   if (viewState.value === "invalid") {
-    return "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ffe7db] text-[#dd6b43]";
+    return "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-kk-error-bg text-kk-error";
   }
 
-  return "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/80 text-[#3658b0]";
+  return "flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-kk-surface text-kk-ink-2";
 });
 
 onMounted(async () => {

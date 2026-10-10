@@ -1,40 +1,40 @@
 <template>
-  <div class="min-h-screen bg-[#f5f5f7] px-4 py-10 md:py-16">
+  <div class="kk-page min-h-screen px-4 py-10 md:py-16">
     <div class="mx-auto w-full max-w-[680px]">
       <div class="text-center">
         <div class="inline-flex items-center justify-center gap-3 md:gap-4">
           <svg
-            class="h-8 w-8 text-[#273144] md:h-10 md:w-10"
+            class="h-8 w-8 text-kk-ink md:h-10 md:w-10"
             fill="currentColor"
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
             <path d="M12 3L1 9L5 11.18V17.18L12 21L19 17.18V11.18L21 10.09V17H23V9L12 3ZM18.82 9L12 12.72L5.18 9L12 5.28L18.82 9ZM17 15.99L12 18.72L7 15.99V12.27L12 15L17 12.27V15.99Z" />
           </svg>
-          <span class="text-[34px] font-semibold tracking-tight text-[#1f2d42] md:text-[48px]">开口</span>
+          <span class="text-[28px] font-bold tracking-tight text-kk-ink md:text-[32px]">开口</span>
         </div>
       </div>
 
       <div
-        class="mt-10 rounded-[30px] bg-white px-5 py-6 shadow-[0_18px_45px_rgba(15,23,42,0.10),0_4px_12px_rgba(15,23,42,0.05)] md:mt-14 md:px-12 md:py-10"
+        class="mt-10 rounded-[20px] bg-kk-surface px-5 py-6 shadow-kk md:mt-14 md:px-12 md:py-10"
       >
-        <div class="grid grid-cols-2 gap-4 md:gap-6">
+        <div class="grid grid-cols-2 gap-1 rounded-full bg-kk-surface-2 p-1">
           <button
             type="button"
-            class="h-[60px] rounded-[18px] text-[20px] font-medium transition-all duration-200 md:h-[72px] md:text-[24px]"
+            class="h-11 rounded-full text-[16px] font-semibold transition-all duration-200"
             :class="mode === 'login'
-              ? 'bg-white text-[#243042] shadow-[0_10px_25px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)]'
-              : 'text-[#6c7a90]'"
+              ? 'bg-kk-surface text-kk-ink shadow-kk'
+              : 'text-kk-ink-2 hover:text-kk-ink'"
             @click="switchMode('login')"
           >
             登录
           </button>
           <button
             type="button"
-            class="h-[60px] rounded-[18px] text-[20px] font-medium transition-all duration-200 md:h-[72px] md:text-[24px]"
+            class="h-11 rounded-full text-[16px] font-semibold transition-all duration-200"
             :class="mode === 'register'
-              ? 'bg-white text-[#243042] shadow-[0_10px_25px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)]'
-              : 'text-[#6c7a90]'"
+              ? 'bg-kk-surface text-kk-ink shadow-kk'
+              : 'text-kk-ink-2 hover:text-kk-ink'"
             @click="switchMode('register')"
           >
             注册
@@ -42,27 +42,27 @@
         </div>
 
         <div class="mt-10 text-center md:mt-14">
-          <h2 class="text-[30px] font-bold text-[#1f3150] md:text-[42px]">{{ panelTitle }}</h2>
-          <p class="mt-3 text-[18px] text-[#7f8aa1] md:text-[19px]">{{ panelSubtitle }}</p>
+          <h2 class="text-[24px] font-bold text-kk-ink md:text-[28px]">{{ panelTitle }}</h2>
+          <p class="mt-2 text-[15px] text-kk-ink-2">{{ panelSubtitle }}</p>
         </div>
 
         <div v-if="registerSuccess" class="mt-10 md:mt-14">
-          <div class="rounded-[24px] border border-[#e8edf5] bg-[#f8fafc] px-5 py-6 text-center md:px-7 md:py-8">
+          <div class="rounded-2xl border border-kk-line bg-kk-surface-2 px-5 py-6 text-center md:px-7 md:py-8">
             <div
-              class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#1e3a8a]/10 text-[#1e3a8a]"
+              class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-kk-success-bg text-kk-success"
             >
               <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p class="text-[18px] font-semibold text-[#1f3150]">{{ registerSuccessMessage }}</p>
-            <p class="mt-3 text-[15px] leading-7 text-[#52627c]">
+            <p class="text-[17px] font-semibold text-kk-ink">{{ registerSuccessMessage }}</p>
+            <p class="mt-3 text-[15px] leading-7 text-kk-ink-2">
               新账号：
-              <strong class="font-semibold text-[#1f3150]">{{ registeredEmail }}</strong>
+              <strong class="font-semibold text-kk-ink">{{ registeredEmail }}</strong>
             </p>
             <button
               type="button"
-              class="mt-8 flex h-[64px] w-full items-center justify-center gap-2 rounded-[20px] bg-[#1e3a8a] text-[20px] font-medium text-white transition-all duration-200 hover:bg-[#2247ae]"
+              class="mt-8 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-kk-action text-[16px] font-bold text-kk-on-action transition-all duration-200 hover:bg-kk-action-hover"
               @click="handleSuccessPrimaryAction"
             >
               <span>{{ successPrimaryActionLabel }}</span>
@@ -75,10 +75,10 @@
 
         <form v-else class="mt-10 space-y-6 md:mt-14 md:space-y-7" @submit.prevent="handleSubmit">
           <div v-if="mode === 'register'" class="space-y-3">
-            <label class="block text-[18px] font-bold text-[#1f3150]">用户名</label>
+            <label class="block text-[14px] font-semibold text-kk-ink-2">用户名</label>
             <div class="relative">
               <svg
-                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -96,14 +96,14 @@
                 :class="[baseInputClass, fieldErrors.username ? errorInputClass : '']"
               />
             </div>
-            <p v-if="fieldErrors.username" class="text-sm text-[#ff7f50]">{{ fieldErrors.username }}</p>
+            <p v-if="fieldErrors.username" class="text-sm text-kk-error">{{ fieldErrors.username }}</p>
           </div>
 
           <div class="space-y-3">
-            <label class="block text-[18px] font-bold text-[#1f3150]">邮箱</label>
+            <label class="block text-[14px] font-semibold text-kk-ink-2">邮箱</label>
             <div class="relative">
               <svg
-                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -121,15 +121,15 @@
                 :class="[baseInputClass, fieldErrors.email ? errorInputClass : '']"
               />
             </div>
-            <p v-if="fieldErrors.email" class="text-sm text-[#ff7f50]">{{ fieldErrors.email }}</p>
+            <p v-if="fieldErrors.email" class="text-sm text-kk-error">{{ fieldErrors.email }}</p>
           </div>
 
           <div v-if="mode === 'register'" class="space-y-3">
-            <label class="block text-[18px] font-bold text-[#1f3150]">邮箱验证码</label>
+            <label class="block text-[14px] font-semibold text-kk-ink-2">邮箱验证码</label>
             <div class="flex items-center gap-3">
               <div class="relative flex-1">
                 <svg
-                  class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                  class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -150,23 +150,23 @@
               </div>
               <button
                 type="button"
-                class="shrink-0 px-2 text-[18px] font-medium text-[#ff7f50] transition-colors hover:text-[#ff6a35] disabled:cursor-not-allowed disabled:text-[#b8c0cc]"
+                class="inline-flex min-h-[44px] shrink-0 items-center px-2 text-[15px] font-semibold text-kk-action-text transition-colors hover:text-kk-action-press disabled:cursor-not-allowed disabled:text-kk-ink-3"
                 :disabled="codeSending || codeCountdown > 0 || loading"
                 @click="handleSendCode"
               >
                 {{ codeButtonLabel }}
               </button>
             </div>
-            <p v-if="fieldErrors.verificationCode" class="text-sm text-[#ff7f50]">{{ fieldErrors.verificationCode }}</p>
+            <p v-if="fieldErrors.verificationCode" class="text-sm text-kk-error">{{ fieldErrors.verificationCode }}</p>
           </div>
 
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <label class="block text-[18px] font-bold text-[#1f3150]">密码</label>
+              <label class="block text-[14px] font-semibold text-kk-ink-2">密码</label>
               <button
                 v-if="mode === 'login'"
                 type="button"
-                class="text-[16px] font-medium text-[#ff7f50] transition-colors hover:text-[#ff6a35]"
+                class="inline-flex min-h-[44px] items-center text-[15px] font-semibold text-kk-action-text transition-colors hover:text-kk-action-press"
                 @click="router.push('/forgot-password')"
               >
                 忘记密码？
@@ -174,7 +174,7 @@
             </div>
             <div class="relative">
               <svg
-                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -193,7 +193,7 @@
               />
               <button
                 type="button"
-                class="absolute right-5 top-1/2 -translate-y-1/2 text-[#9aa4b5] transition-colors hover:text-[#7c8798]"
+                class="absolute right-5 top-1/2 -translate-y-1/2 text-kk-ink-3 transition-colors hover:text-kk-ink-3"
                 @click="showPassword = !showPassword"
               >
                 <svg
@@ -224,14 +224,14 @@
                 </svg>
               </button>
             </div>
-            <p v-if="fieldErrors.password" class="text-sm text-[#ff7f50]">{{ fieldErrors.password }}</p>
+            <p v-if="fieldErrors.password" class="text-sm text-kk-error">{{ fieldErrors.password }}</p>
           </div>
 
           <div v-if="mode === 'register'" class="space-y-3">
-            <label class="block text-[18px] font-bold text-[#1f3150]">确认密码</label>
+            <label class="block text-[14px] font-semibold text-kk-ink-2">确认密码</label>
             <div class="relative">
               <svg
-                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-[#9aa4b5]"
+                class="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-kk-ink-3"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
@@ -250,7 +250,7 @@
               />
               <button
                 type="button"
-                class="absolute right-5 top-1/2 -translate-y-1/2 text-[#9aa4b5] transition-colors hover:text-[#7c8798]"
+                class="absolute right-5 top-1/2 -translate-y-1/2 text-kk-ink-3 transition-colors hover:text-kk-ink-3"
                 @click="showConfirmPassword = !showConfirmPassword"
               >
                 <svg
@@ -281,22 +281,22 @@
                 </svg>
               </button>
             </div>
-            <p v-if="fieldErrors.confirmPassword" class="text-sm text-[#ff7f50]">{{ fieldErrors.confirmPassword }}</p>
+            <p v-if="fieldErrors.confirmPassword" class="text-sm text-kk-error">{{ fieldErrors.confirmPassword }}</p>
           </div>
 
           <div
             v-if="feedbackMessage"
-            class="rounded-[18px] px-5 py-4 text-[15px] leading-7"
+            class="rounded-2xl px-5 py-4 text-[15px] leading-7"
             :class="feedbackTone === 'error'
-              ? 'bg-[#fff3ee] text-[#dd6b43]'
-              : 'bg-[#eef4ff] text-[#3658b0]'"
+              ? 'bg-kk-error-bg text-kk-error'
+              : 'bg-kk-surface-2 text-kk-ink-2'"
           >
             {{ feedbackMessage }}
           </div>
 
           <button
             type="submit"
-            class="mt-2 flex h-[68px] w-full items-center justify-center gap-2 rounded-[22px] bg-[#1e3a8a] text-[22px] font-medium text-white transition-all duration-200 hover:bg-[#2146ad] disabled:cursor-not-allowed disabled:bg-[#b8c2d8]"
+            class="mt-2 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-kk-action text-[16px] font-bold text-kk-on-action transition-all duration-200 hover:bg-kk-action-hover disabled:cursor-not-allowed disabled:bg-kk-surface-2"
             :disabled="loading"
           >
             <template v-if="loading">
@@ -314,7 +314,7 @@
       </div>
 
       <div class="mt-10 text-center md:mt-12">
-        <p class="text-[18px] text-[#7b8597] italic">放弃完美，拥抱流利</p>
+        <p class="text-[15px] text-kk-ink-3">放弃完美，拥抱流利</p>
       </div>
     </div>
   </div>
@@ -354,9 +354,9 @@ const fieldErrors = reactive({
   confirmPassword: ""
 });
 
-const baseInputClass = "h-[70px] w-full rounded-[20px] border-0 bg-[#f5f7fb] pl-14 pr-4 text-[18px] text-[#23324a] placeholder:text-[#95a0b5] transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff7f50]/45";
-const basePasswordInputClass = "h-[70px] w-full rounded-[20px] border-0 bg-[#f5f7fb] pl-14 pr-14 text-[18px] text-[#23324a] placeholder:text-[#95a0b5] transition-all duration-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff7f50]/45";
-const errorInputClass = "ring-2 ring-[#ff7f50]/55";
+const baseInputClass = "h-14 w-full rounded-2xl border-0 bg-kk-surface-2 pl-14 pr-4 text-[16px] text-kk-ink placeholder:text-kk-ink-3 transition-all duration-200 focus:bg-kk-surface focus:outline-none focus:ring-2 focus:ring-[rgba(30,27,24,0.18)]";
+const basePasswordInputClass = "h-14 w-full rounded-2xl border-0 bg-kk-surface-2 pl-14 pr-14 text-[16px] text-kk-ink placeholder:text-kk-ink-3 transition-all duration-200 focus:bg-kk-surface focus:outline-none focus:ring-2 focus:ring-[rgba(30,27,24,0.18)]";
+const errorInputClass = "ring-2 ring-kk-error-line";
 
 let countdownTimer = null;
 let successRedirectTimer = null;

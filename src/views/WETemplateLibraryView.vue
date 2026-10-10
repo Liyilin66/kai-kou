@@ -74,17 +74,17 @@ function startRandomPractice() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="WE 通用模板" back-to="/we" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="WE 通用模板" back-to="/we" variant="kk" />
 
-    <main class="mx-auto max-w-4xl px-4 py-6">
-      <section class="mb-4 rounded-xl border bg-white p-4 shadow-sm">
+    <main class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:py-8">
+      <section class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="text-sm font-semibold text-navy">10 个全文通用模板</p>
-            <p class="text-xs text-muted">查看、复制，并带着模板去练习页使用。</p>
+            <p class="text-sm font-semibold text-kk-ink">10 个全文通用模板</p>
+            <p class="text-xs text-kk-ink-3">查看、复制，并带着模板去练习页使用。</p>
           </div>
-          <OrangeButton tone="outline" @click="startRandomPractice">去随机练习</OrangeButton>
+          <OrangeButton tone="secondary" @click="startRandomPractice">去随机练习</OrangeButton>
         </div>
       </section>
 
@@ -92,32 +92,32 @@ function startRandomPractice() {
         <article
           v-for="template in templates"
           :key="template.id"
-          class="rounded-xl border bg-white p-4 shadow-sm"
-          :class="template.id === activeTemplateId ? 'border-orange' : 'border-gray-200'"
+          class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk"
+          :class="template.id === activeTemplateId ? 'border-kk-ink' : 'border-kk-line'"
         >
           <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p class="text-sm font-semibold text-navy">{{ template.title }}</p>
-              <p class="text-xs text-muted">{{ template.shortLabel || template.id }} · difficulty {{ template.difficulty }}</p>
+              <p class="text-sm font-semibold text-kk-ink">{{ template.title }}</p>
+              <p class="text-xs text-kk-ink-3">{{ template.shortLabel || template.id }} · difficulty {{ template.difficulty }}</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button
                 type="button"
-                class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-[13px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="toggleExpand(template.id)"
               >
                 {{ isExpanded(template.id) ? "收起" : "查看全文" }}
               </button>
               <button
                 type="button"
-                class="rounded-lg border border-gray-300 px-3 py-1 text-xs font-semibold text-muted transition-colors hover:border-orange hover:text-orange"
+                class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-3 text-[13px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="copyTemplate(template)"
               >
                 复制
               </button>
               <button
                 type="button"
-                class="rounded-lg bg-orange px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                class="inline-flex min-h-[36px] items-center rounded-full bg-kk-action px-3 text-[13px] font-bold text-kk-on-action transition-colors hover:bg-kk-action-hover"
                 @click="useTemplateInPractice(template.id)"
               >
                 去练习中使用
@@ -127,9 +127,9 @@ function startRandomPractice() {
 
           <pre
             v-if="isExpanded(template.id)"
-            class="overflow-auto whitespace-pre-wrap rounded-md bg-[#F8FAFC] p-3 text-xs leading-relaxed text-text"
+            class="overflow-auto whitespace-pre-wrap rounded-2xl bg-kk-surface-2 p-3 text-[13px] leading-relaxed text-kk-ink"
           >{{ template.content }}</pre>
-          <p v-else class="text-xs leading-relaxed text-text">{{ previewText(template.content) }}</p>
+          <p v-else class="text-xs leading-relaxed text-kk-ink">{{ previewText(template.content) }}</p>
         </article>
       </div>
     </main>

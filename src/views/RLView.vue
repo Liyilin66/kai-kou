@@ -377,31 +377,31 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="Re-tell Lecture" back-to="/home" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="Re-tell Lecture" back-to="/home" variant="kk" />
 
-    <main class="mx-auto max-w-2xl px-4 py-6">
-      <p class="mb-4 text-sm text-muted">Question {{ questionIndex }}</p>
+    <main class="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:py-8">
+      <p class="kk-num mb-4 text-[13px] font-semibold text-kk-ink-3">Question {{ questionIndex }}</p>
 
       <div v-if="questionLoading" class="py-16 text-center">
-        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
-        <p class="mt-3 text-sm text-muted">Loading question...</p>
+        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
+        <p class="mt-3 text-sm text-kk-ink-3">Loading question...</p>
       </div>
 
       <template v-else>
         <section v-if="phase === 'playing'" class="space-y-4">
-          <article class="overflow-hidden rounded-xl border bg-white shadow-card">
+          <article class="overflow-hidden rounded-[20px] border border-kk-line bg-kk-surface shadow-kk">
             <img :src="imageUrl" :alt="question.topic || 'Lecture topic'" class="h-48 w-full object-cover" @error="(e) => (e.target.style.display = 'none')" />
             <div class="p-4">
-              <p class="text-xs text-muted">Topic</p>
-              <p class="font-bold text-navy">{{ question.topic || "General Topic" }}</p>
+              <p class="text-xs text-kk-ink-3">Topic</p>
+              <p class="text-[17px] font-bold text-kk-ink">{{ question.topic || "General Topic" }}</p>
             </div>
           </article>
 
-          <section class="rounded-xl border bg-white p-4 shadow-card">
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
             <div class="mb-3 flex items-center justify-between text-sm">
-              <span class="text-muted">Lecture Playback</span>
-              <span :class="tts.isPlaying ? 'font-semibold text-orange' : 'text-muted'">
+              <span class="text-kk-ink-3">Lecture Playback</span>
+              <span :class="tts.isPlaying ? 'font-semibold text-kk-action-text' : 'text-kk-ink-3'">
                 {{ tts.isPlaying ? "Playing..." : "Loading..." }}
               </span>
             </div>
@@ -409,82 +409,82 @@ onUnmounted(() => {
               <div
                 v-for="(h, i) in barHeights"
                 :key="i"
-                class="w-1.5 rounded-full bg-orange transition-all"
+                class="w-1.5 rounded-full bg-kk-ink transition-all"
                 :class="tts.isPlaying ? 'animate-pulse' : 'opacity-25'"
                 :style="{ height: `${h}px`, animationDelay: `${i * 0.08}s` }"
               />
             </div>
           </section>
 
-          <section class="rounded-xl border bg-white p-4 shadow-card">
-            <p class="mb-2 text-sm font-semibold text-navy">Quick Notes (not scored)</p>
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="mb-2 text-sm font-semibold text-kk-ink">Quick Notes (not scored)</p>
             <textarea
               v-model="notes"
               placeholder="Write key words while listening..."
-              class="h-20 w-full resize-none rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-text focus:border-orange focus:outline-none"
+              class="h-24 w-full resize-none rounded-2xl border border-kk-line bg-kk-surface-2 p-3 text-[15px] text-kk-ink focus:border-kk-ink focus:bg-kk-surface focus:outline-none"
             />
           </section>
 
-          <button type="button" class="w-full text-sm text-muted underline transition-colors hover:text-navy" @click="skipQuestion">Skip</button>
+          <button type="button" class="inline-flex min-h-[44px] w-full items-center justify-center text-sm font-semibold text-kk-action-text" @click="skipQuestion">Skip</button>
         </section>
 
         <section v-else-if="phase === 'preparing'" class="space-y-4">
-          <article class="rounded-xl border bg-white p-6 text-center shadow-card">
-            <p class="text-lg font-bold text-navy">Get ready to re-tell the lecture</p>
-            <p class="mt-1 text-sm text-muted">Recording starts automatically</p>
+          <article class="rounded-[20px] border border-kk-line bg-kk-surface p-6 text-center shadow-kk">
+            <p class="text-lg font-bold text-kk-ink">Get ready to re-tell the lecture</p>
+            <p class="mt-1 text-sm text-kk-ink-3">Recording starts automatically</p>
           </article>
 
-          <TimerBar label="Preparation" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
+          <TimerBar tone="kk" label="Preparation" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
 
-          <section class="rounded-xl border-l-4 border-orange bg-white p-4 shadow-sm">
-            <p class="mb-2 text-sm font-semibold text-navy">Structure template</p>
-            <p class="text-sm leading-relaxed text-muted">
-              The lecture mainly discusses <span class="font-bold text-orange">[topic]</span>. The speaker mentions
-              <span class="font-bold text-orange">[point 1]</span>, then explains
-              <span class="font-bold text-orange">[point 2]</span>, and finally concludes
-              <span class="font-bold text-orange">[conclusion]</span>.
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+            <p class="mb-2 text-sm font-semibold text-kk-ink">Structure template</p>
+            <p class="text-sm leading-relaxed text-kk-ink-3">
+              The lecture mainly discusses <span class="rounded bg-kk-notice-bg px-1 font-semibold text-kk-notice">[topic]</span>. The speaker mentions
+              <span class="rounded bg-kk-notice-bg px-1 font-semibold text-kk-notice">[point 1]</span>, then explains
+              <span class="rounded bg-kk-notice-bg px-1 font-semibold text-kk-notice">[point 2]</span>, and finally concludes
+              <span class="rounded bg-kk-notice-bg px-1 font-semibold text-kk-notice">[conclusion]</span>.
             </p>
           </section>
 
-          <section v-if="notes" class="rounded-xl border bg-white p-4 shadow-sm">
-            <p class="mb-1 text-xs text-muted">Your notes</p>
-            <p class="text-sm text-navy">{{ notes }}</p>
+          <section v-if="notes" class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <p class="mb-1 text-xs text-kk-ink-3">Your notes</p>
+            <p class="text-sm text-kk-ink">{{ notes }}</p>
           </section>
         </section>
 
         <section v-else-if="phase === 'recording'" class="space-y-4">
           <div class="flex items-start gap-3">
             <div class="flex-1">
-              <TimerBar label="Recording" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
+              <TimerBar tone="kk" label="Recording" :remaining="timer.remaining" :progress="timer.progress" :is-warning="timer.isWarning" />
             </div>
-            <button type="button" class="pt-1 text-sm text-muted underline transition-colors hover:text-navy" @click="skipQuestion">Skip</button>
+            <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="skipQuestion">Skip</button>
           </div>
 
-          <section class="rounded-xl border bg-white p-4 text-center shadow-card">
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 text-center shadow-kk">
             <div v-if="!recorder.isReady" class="flex items-center justify-center gap-2">
-              <div class="h-4 w-4 animate-spin rounded-full border-2 border-orange border-t-transparent" />
-              <p class="text-sm text-muted">Microphone warming up...</p>
+              <div class="h-4 w-4 animate-spin rounded-full border-2 border-kk-ink border-t-transparent" />
+              <p class="text-sm text-kk-ink-3">Microphone warming up...</p>
             </div>
             <div v-else class="flex items-center justify-center gap-2">
-              <div class="h-3 w-3 animate-pulse rounded-full bg-red-500" />
-              <p class="font-bold text-navy">Start re-telling now</p>
+              <div class="h-3 w-3 animate-pulse rounded-full bg-kk-action" />
+              <p class="font-bold text-kk-ink">Start re-telling now</p>
             </div>
           </section>
 
-          <section class="rounded-xl border bg-white p-4 shadow-card">
-            <RecordingWave :is-recording="Boolean(recorder.isRecording.value)" />
+          <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 shadow-kk">
+            <RecordingWave tone="kk" :is-recording="Boolean(recorder.isRecording.value)" />
             <div class="mt-4 flex gap-3">
               <button
                 type="button"
-                class="flex-1 rounded-xl border-2 border-gray-200 py-4 text-sm font-semibold text-muted transition-all hover:border-orange hover:text-orange"
+                class="min-h-[52px] flex-1 rounded-full border border-kk-line bg-kk-surface py-3 text-[15px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
                 @click="restartRecording"
               >
                 Re-record
               </button>
               <button
                 type="button"
-                class="flex-1 rounded-xl py-4 text-lg font-bold transition-all"
-                :class="canSubmit ? 'bg-orange text-white shadow-md hover:opacity-90 active:scale-95' : 'cursor-not-allowed bg-gray-200 text-gray-400'"
+                class="min-h-[52px] flex-1 rounded-full py-3 text-[15px] font-bold transition-colors"
+                :class="canSubmit ? 'bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press' : 'cursor-not-allowed bg-kk-surface-2 text-kk-ink-3'"
                 :disabled="!canSubmit"
                 @click="handleSubmit"
               >
@@ -494,11 +494,11 @@ onUnmounted(() => {
           </section>
 
           <section>
-            <button type="button" class="text-sm text-orange underline transition-opacity hover:opacity-75" @click="showTemplate = !showTemplate">
+            <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="showTemplate = !showTemplate">
               {{ showTemplate ? "Hide template" : "Show template" }}
             </button>
-            <div v-if="showTemplate" class="mt-2 rounded-xl border border-blue-100 bg-blue-50 p-4">
-              <p class="text-sm leading-relaxed text-navy">
+            <div v-if="showTemplate" class="mt-2 rounded-xl border border-kk-line bg-kk-surface-2 p-4">
+              <p class="text-sm leading-relaxed text-kk-ink">
                 The lecture mainly discusses <strong>{{ question.topic || "the topic" }}</strong>. The speaker mentions
                 <strong>{{ keyPoints[0] || "the first key point" }}</strong> and explains
                 <strong>{{ keyPoints[1] || "the second key point" }}</strong>.
@@ -508,19 +508,19 @@ onUnmounted(() => {
         </section>
 
         <section v-else-if="phase === 'processing'" class="py-10 text-center">
-          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange/10">
-            <div class="h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
+          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-kk-surface-2">
+            <div class="h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
           </div>
-          <p class="text-xl font-bold text-navy">Analysing your response...</p>
+          <p class="text-xl font-bold text-kk-ink">Analysing your response...</p>
         </section>
 
-        <section v-else class="rounded-xl border bg-white p-6 text-center shadow-card">
-          <p class="text-sm text-muted">Microphone permission or speech recognition is required.</p>
-          <button type="button" class="mt-4 text-sm text-orange underline" @click="startLecturePlayback(200)">Try again</button>
+        <section v-else class="rounded-[20px] border border-kk-line bg-kk-surface p-6 text-center shadow-kk">
+          <p class="text-sm text-kk-ink-3">Microphone permission or speech recognition is required.</p>
+          <button type="button" class="mt-4 inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="startLecturePlayback(200)">Try again</button>
         </section>
 
-        <section v-if="recorder.error && phase !== 'processing'" class="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-          <p class="text-sm text-red-600">{{ recorder.error }}</p>
+        <section v-if="recorder.error && phase !== 'processing'" class="mt-4 rounded-lg border border-kk-error-line bg-kk-error-bg p-4">
+          <p class="text-sm text-kk-error">{{ recorder.error }}</p>
         </section>
       </template>
     </main>

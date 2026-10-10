@@ -3,6 +3,11 @@ const props = defineProps({
   isRecording: {
     type: Boolean,
     default: false
+  },
+  // "kk" opts into docs/ui-guidelines.md; RA/RS keep the legacy look until their batch.
+  tone: {
+    type: String,
+    default: "legacy"
   }
 });
 
@@ -11,17 +16,17 @@ const bars = [14, 22, 16, 24, 18];
 
 <template>
   <div class="flex h-12 items-center justify-center gap-1">
-    <div class="h-3 w-3 rounded-full bg-orange" :class="props.isRecording ? 'animate-pulse' : 'opacity-30'" />
+    <div class="h-3 w-3 rounded-full" :class="[props.tone === 'kk' ? 'bg-kk-action' : 'bg-orange', props.isRecording ? 'animate-pulse' : 'opacity-30']" />
 
     <div
       v-for="(height, index) in bars"
       :key="index"
-      class="bar w-1.5 rounded-full bg-orange"
-      :class="props.isRecording ? 'is-recording' : 'h-1 opacity-30'"
+      class="bar w-1.5 rounded-full"
+      :class="[props.tone === 'kk' ? 'bg-kk-action' : 'bg-orange', props.isRecording ? 'is-recording' : 'h-1 opacity-30']"
       :style="props.isRecording ? { '--target-height': `${height}px`, animationDelay: `${index * 0.12}s` } : {}"
     />
 
-    <span class="ml-2 text-sm" :class="props.isRecording ? 'text-orange' : 'text-muted'">
+    <span class="ml-2 text-sm" :class="props.tone === 'kk' ? (props.isRecording ? 'font-semibold text-kk-action-text' : 'text-kk-ink-3') : (props.isRecording ? 'text-orange' : 'text-muted')">
       {{ props.isRecording ? 'Recording...' : 'Waiting...' }}
     </span>
   </div>

@@ -106,7 +106,7 @@ async function handleLogout() {
         </div>
 
         <template v-if="authStore.isLoggedIn">
-          <span class="rounded-full font-medium" :class="[statusClass, isKK ? 'px-3 py-1 text-xs font-semibold' : 'px-2 py-1 text-[11px]']">
+          <span class="rounded-full font-medium" :class="[statusClass, isKK ? 'hidden px-3 py-1 text-xs font-semibold sm:inline-flex' : 'px-2 py-1 text-[11px]']">
             {{ authStore.statusText }}
           </span>
           <button type="button" :class="isKK ? 'min-h-[44px] px-2 text-sm text-kk-ink-2 hover:text-kk-ink' : 'text-[11px] text-white/80 transition-colors hover:text-white'" @click="handleLogout">退出</button>

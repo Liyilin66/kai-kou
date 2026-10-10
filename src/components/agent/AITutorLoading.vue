@@ -390,9 +390,9 @@ function normalizeText(value) {
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
-  background: #ede8df;
-  color: #2c1f0e;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  background: var(--kk-bg);
+  color: var(--kk-ink);
+  font-family: var(--kk-font);
   font-synthesis: none;
   letter-spacing: 0;
 }
@@ -402,8 +402,8 @@ function normalizeText(value) {
   flex: 0 0 200px;
   width: 200px;
   flex-direction: column;
-  background: #e5dfd4;
-  border-right: .5px solid #d4cdbf;
+  background: var(--kk-surface);
+  border-right: .5px solid var(--kk-line);
 }
 
 .ai-tutor-loading-logo {
@@ -414,7 +414,7 @@ function normalizeText(value) {
   height: 64px;
   flex: 0 0 64px;
   padding: 0 18px;
-  border-bottom: .5px solid #d4cdbf;
+  border-bottom: .5px solid var(--kk-line);
   text-decoration: none;
 }
 
@@ -425,11 +425,11 @@ function normalizeText(value) {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: #7c5c3e;
+  background: var(--kk-ink);
 }
 
 .ai-tutor-loading-logo-name {
-  color: #2c1f0e;
+  color: var(--kk-ink);
   font-size: 17px;
   font-weight: 500;
   letter-spacing: .03em;
@@ -452,10 +452,10 @@ function normalizeText(value) {
   border: .5px solid transparent;
   border-radius: 10px;
   background: transparent;
-  color: #9a8f80;
+  color: var(--kk-ink-3);
   cursor: pointer;
   font-family: inherit;
-  font-size: 13.8px;
+  font-size: 15px;
   line-height: 1.3;
   text-align: left;
   text-decoration: none;
@@ -463,16 +463,16 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-nav-item:hover {
-  background: #ede8df;
-  color: #6b5a44;
+  background: var(--kk-bg);
+  color: var(--kk-ink-2);
 }
 
 .ai-tutor-loading-nav-item--active {
-  border-color: #cabdaa;
-  background: #d9cfbd;
-  color: #7c5c3e;
+  border-color: var(--kk-line);
+  background: var(--kk-action-soft);
+  color: var(--kk-ink);
   font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(245, 239, 228, .5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
 }
 
 .ai-tutor-loading-nav-icon {
@@ -500,27 +500,27 @@ function normalizeText(value) {
 
 .ai-tutor-loading-sidebar-footer {
   padding: 16px 12px 18px;
-  border-top: .5px solid #d4cdbf;
+  border-top: .5px solid var(--kk-line);
 }
 
 .ai-tutor-loading-promo {
   padding: 12px;
-  border: .5px solid #c4baa8;
+  border: .5px solid var(--kk-line);
   border-radius: 10px;
-  background: #d8cebc;
+  background: var(--kk-surface-2);
 }
 
 .ai-tutor-loading-promo-title {
   margin-bottom: 2px;
-  color: #7c5c3e;
-  font-size: 11.5px;
+  color: var(--kk-ink);
+  font-size: 13px;
   font-weight: 500;
 }
 
 .ai-tutor-loading-promo-sub {
   margin-bottom: 9px;
-  color: #9a8f80;
-  font-size: 10.5px;
+  color: var(--kk-ink-3);
+  font-size: 12px;
 }
 
 .ai-tutor-loading-promo-button {
@@ -529,9 +529,9 @@ function normalizeText(value) {
   justify-content: center;
   border: 0;
   border-radius: 6px;
-  background: #7c5c3e;
-  color: #f5efe4;
-  font-size: 11px;
+  background: var(--kk-ink);
+  color: var(--kk-surface);
+  font-size: 13px;
   line-height: 1;
   padding: 6px 13px;
 }
@@ -552,13 +552,13 @@ function normalizeText(value) {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  border-bottom: .5px solid #d4cdbf;
-  background: #e5dfd4;
+  border-bottom: .5px solid var(--kk-line);
+  background: var(--kk-surface);
 }
 
 .ai-tutor-loading-top-label {
-  color: #b8afa0;
-  font-size: 10px;
+  color: var(--kk-ink-3);
+  font-size: 12px;
   letter-spacing: .14em;
   text-transform: uppercase;
 }
@@ -575,12 +575,12 @@ function normalizeText(value) {
   height: 7px;
   flex: 0 0 7px;
   border-radius: 50%;
-  background: #6baa6b;
+  background: var(--kk-success);
   animation: aiTutorLoadingBlink 2s ease-in-out infinite;
 }
 
 .ai-tutor-loading-live-dot--failed {
-  background: #9b6642;
+  background: var(--kk-error);
   animation: none;
 }
 
@@ -595,22 +595,22 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-live-text {
-  color: #6baa6b;
-  font-size: 12px;
+  color: var(--kk-success);
+  font-size: 13px;
   white-space: nowrap;
 }
 
 .ai-tutor-loading-shell--failed .ai-tutor-loading-live-text {
-  color: #9b6642;
+  color: var(--kk-error);
 }
 
 .ai-tutor-loading-shell--access .ai-tutor-loading-live-dot {
-  background: #9b6642;
+  background: var(--kk-error);
   animation: none;
 }
 
 .ai-tutor-loading-shell--access .ai-tutor-loading-live-text {
-  color: #9b6642;
+  color: var(--kk-error);
 }
 
 .ai-tutor-loading-user-avatar {
@@ -619,12 +619,12 @@ function normalizeText(value) {
   margin-left: 8px;
   overflow: hidden;
   border-radius: 50%;
-  background: #7c5c3e;
-  color: #f5efe4;
+  background: var(--kk-ink);
+  color: var(--kk-surface);
   display: grid;
   place-items: center;
   flex: 0 0 24px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -642,8 +642,8 @@ function normalizeText(value) {
 .ai-tutor-loading-user-id {
   min-width: 0;
   overflow: hidden;
-  color: #b8afa0;
-  font-size: 12px;
+  color: var(--kk-ink-3);
+  font-size: 13px;
   margin-left: 6px;
   max-width: 160px;
   text-overflow: ellipsis;
@@ -665,10 +665,10 @@ function normalizeText(value) {
   flex-direction: column;
   align-items: center;
   padding: 50px 60px;
-  border: .5px solid #d4cdbf;
+  border: .5px solid var(--kk-line);
   border-radius: 22px;
-  background: #f5efe4;
-  box-shadow: 0 2px 0 #c4baa8;
+  background: var(--kk-surface);
+  box-shadow: 0 2px 0 var(--kk-line);
 }
 
 .ai-tutor-loading-seal {
@@ -684,7 +684,7 @@ function normalizeText(value) {
   height: 56px;
   align-items: center;
   justify-content: center;
-  border: 1.5px dashed #c4baa8;
+  border: 1.5px dashed var(--kk-line);
   border-radius: 50%;
   animation: aiTutorLoadingSeal 12s linear infinite;
 }
@@ -706,7 +706,7 @@ function normalizeText(value) {
   justify-content: center;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: #7c5c3e;
+  background: var(--kk-ink);
 }
 
 .ai-tutor-loading-seal--failed .ai-tutor-loading-seal-outer {
@@ -714,7 +714,7 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-seal--failed .ai-tutor-loading-seal-inner {
-  background: #8c5533;
+  background: var(--kk-error);
 }
 
 .ai-tutor-loading-seal--access .ai-tutor-loading-seal-outer {
@@ -722,11 +722,11 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-seal--access .ai-tutor-loading-seal-inner {
-  background: #7c5c3e;
+  background: var(--kk-ink);
 }
 
 .ai-tutor-loading-title {
-  color: #2a2118;
+  color: var(--kk-ink);
   font-family: inherit;
   font-size: 25px;
   font-weight: 680;
@@ -737,8 +737,8 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-subtitle {
-  color: #b8afa0;
-  font-size: 12.5px;
+  color: var(--kk-ink-3);
+  font-size: 13px;
   line-height: 1.9;
   margin: 0 0 34px;
   text-align: center;
@@ -748,9 +748,9 @@ function normalizeText(value) {
   width: 100%;
   overflow: hidden;
   margin-bottom: 26px;
-  border: .5px solid #d4cdbf;
+  border: .5px solid var(--kk-line);
   border-radius: 13px;
-  background: #ede8df;
+  background: var(--kk-bg);
 }
 
 .ai-tutor-loading-features {
@@ -766,11 +766,11 @@ function normalizeText(value) {
   min-height: 44px;
   align-items: center;
   gap: 10px;
-  border: .5px solid #d4cdbf;
+  border: .5px solid var(--kk-line);
   border-radius: 11px;
   padding: 0 14px;
-  background: #f8f2e8;
-  color: #7c5c3e;
+  background: var(--kk-surface);
+  color: var(--kk-ink);
 }
 
 .ai-tutor-loading-feature span {
@@ -780,16 +780,16 @@ function normalizeText(value) {
   flex: 0 0 18px;
   place-items: center;
   border-radius: 50%;
-  background: #e5d9c8;
-  color: #2d6a2d;
-  font-size: 12px;
+  background: var(--kk-surface-2);
+  color: var(--kk-success);
+  font-size: 13px;
   font-weight: 800;
 }
 
 .ai-tutor-loading-feature strong {
   min-width: 0;
-  color: #3d2a1c;
-  font-size: 12px;
+  color: var(--kk-ink);
+  font-size: 13px;
   font-weight: 680;
   line-height: 1.35;
 }
@@ -799,7 +799,7 @@ function normalizeText(value) {
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
-  border-bottom: .5px solid #d4cdbf;
+  border-bottom: .5px solid var(--kk-line);
 }
 
 .ai-tutor-loading-step:last-child {
@@ -807,19 +807,19 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-step--done {
-  background: #f5efe4;
+  background: var(--kk-surface);
 }
 
 .ai-tutor-loading-step--going {
-  background: #f0e9db;
+  background: var(--kk-surface-2);
 }
 
 .ai-tutor-loading-step--failed {
-  background: #f3e8dc;
+  background: var(--kk-surface-2);
 }
 
 .ai-tutor-loading-step--wait {
-  background: #ede8df;
+  background: var(--kk-bg);
   opacity: .55;
 }
 
@@ -834,19 +834,19 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-step--done .ai-tutor-loading-step-icon {
-  background: #d4edd4;
+  background: var(--kk-success-bg);
 }
 
 .ai-tutor-loading-step--going .ai-tutor-loading-step-icon {
-  background: #e8dfd0;
+  background: var(--kk-surface-2);
 }
 
 .ai-tutor-loading-step--failed .ai-tutor-loading-step-icon {
-  background: #ead8c9;
+  background: var(--kk-error-bg);
 }
 
 .ai-tutor-loading-step--wait .ai-tutor-loading-step-icon {
-  background: #ddd7cc;
+  background: var(--kk-line);
 }
 
 .ai-tutor-loading-step-text {
@@ -855,61 +855,61 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-step-name {
-  color: #2c1f0e;
-  font-size: 13px;
+  color: var(--kk-ink);
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
   margin-bottom: 1px;
 }
 
 .ai-tutor-loading-step--wait .ai-tutor-loading-step-name {
-  color: #b8afa0;
+  color: var(--kk-ink-3);
 }
 
 .ai-tutor-loading-step--failed .ai-tutor-loading-step-name {
-  color: #4a2c1a;
+  color: var(--kk-ink);
 }
 
 .ai-tutor-loading-step-desc {
-  color: #b8afa0;
-  font-size: 11.5px;
+  color: var(--kk-ink-3);
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .ai-tutor-loading-step-tag {
   flex: 0 0 auto;
   border-radius: 20px;
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 1.25;
   padding: 3px 10px;
   white-space: nowrap;
 }
 
 .ai-tutor-loading-step--done .ai-tutor-loading-step-tag {
-  background: #d4edd4;
-  color: #2d6a2d;
+  background: var(--kk-success-bg);
+  color: var(--kk-success);
 }
 
 .ai-tutor-loading-step--going .ai-tutor-loading-step-tag {
-  background: #e8dfd0;
-  color: #7c5c3e;
+  background: var(--kk-surface-2);
+  color: var(--kk-ink);
 }
 
 .ai-tutor-loading-step--failed .ai-tutor-loading-step-tag {
-  background: #ead8c9;
-  color: #8c5533;
+  background: var(--kk-error-bg);
+  color: var(--kk-error);
 }
 
 .ai-tutor-loading-step--wait .ai-tutor-loading-step-tag {
-  background: #ddd7cc;
-  color: #b8afa0;
+  background: var(--kk-line);
+  color: var(--kk-ink-3);
 }
 
 .ai-tutor-loading-spinner {
   width: 13px;
   height: 13px;
-  border: 1.5px solid #c4baa8;
-  border-top-color: #7c5c3e;
+  border: 1.5px solid var(--kk-line);
+  border-top-color: var(--kk-ink);
   border-radius: 50%;
   animation: aiTutorLoadingSpin .75s linear infinite;
 }
@@ -925,23 +925,23 @@ function normalizeText(value) {
   height: 2px;
   overflow: hidden;
   border-radius: 99px;
-  background: #d4cdbf;
+  background: var(--kk-line);
 }
 
 .ai-tutor-loading-progress-fill {
   height: 100%;
   border-radius: 99px;
-  background: #7c5c3e;
+  background: var(--kk-ink);
   transition: width .35s ease;
 }
 
 .ai-tutor-loading-progress-fill--failed {
-  background: #8c5533;
+  background: var(--kk-error);
 }
 
 .ai-tutor-loading-progress-note {
-  color: #b8afa0;
-  font-size: 10.5px;
+  color: var(--kk-ink-3);
+  font-size: 12px;
   letter-spacing: .03em;
   line-height: 1.4;
   margin: 8px 0 0;
@@ -963,7 +963,7 @@ function normalizeText(value) {
   border-radius: 8px;
   padding: 0 18px;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -980,15 +980,15 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-action--primary {
-  border: 1px solid #7c5c3e;
-  background: #7c5c3e;
-  color: #f5efe4;
+  border: 1px solid var(--kk-ink);
+  background: var(--kk-ink);
+  color: var(--kk-surface);
 }
 
 .ai-tutor-loading-action--secondary {
-  border: 1px solid #c4baa8;
-  background: #f5efe4;
-  color: #7c5c3e;
+  border: 1px solid var(--kk-line);
+  background: var(--kk-surface);
+  color: var(--kk-ink);
 }
 
 .ai-tutor-loading-insight {
@@ -997,8 +997,8 @@ function normalizeText(value) {
   width: 260px;
   flex-direction: column;
   overflow: hidden;
-  border-left: .5px solid #d4cdbf;
-  background: #e5dfd4;
+  border-left: .5px solid var(--kk-line);
+  background: var(--kk-surface);
 }
 
 .ai-tutor-loading-insight-head {
@@ -1007,21 +1007,21 @@ function normalizeText(value) {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 12px;
-  border-bottom: .5px solid #d4cdbf;
+  border-bottom: .5px solid var(--kk-line);
 }
 
 .ai-tutor-loading-insight-label {
-  color: #b8afa0;
-  font-size: 9.5px;
+  color: var(--kk-ink-3);
+  font-size: 12px;
   letter-spacing: .12em;
   text-transform: uppercase;
 }
 
 .ai-tutor-loading-insight-badge {
   border-radius: 6px;
-  background: #d8cebc;
-  color: #7c5c3e;
-  font-size: 10px;
+  background: var(--kk-surface-2);
+  color: var(--kk-ink);
+  font-size: 12px;
   line-height: 1;
   padding: 5px 9px;
 }
@@ -1041,8 +1041,8 @@ function normalizeText(value) {
 }
 
 .ai-tutor-loading-insight-section-label {
-  color: #b8afa0;
-  font-size: 10px;
+  color: var(--kk-ink-3);
+  font-size: 12px;
   letter-spacing: .1em;
   line-height: 1.4;
   margin-bottom: 8px;
@@ -1053,7 +1053,7 @@ function normalizeText(value) {
   display: block;
   height: 7px;
   border-radius: 4px;
-  background: #d4cdbf;
+  background: var(--kk-line);
   margin-bottom: 5px;
   animation: aiTutorLoadingShimmer 1.8s ease-in-out infinite;
 }
@@ -1086,9 +1086,9 @@ function normalizeText(value) {
   gap: 10px;
   padding: 9px 12px;
   border-radius: 9px;
-  background: #ddd7cc;
-  color: #9a8f80;
-  font-size: 12px;
+  background: var(--kk-line);
+  color: var(--kk-ink-3);
+  font-size: 13px;
   line-height: 1.4;
   margin-bottom: 5px;
 }
@@ -1098,14 +1098,14 @@ function normalizeText(value) {
   height: 6px;
   flex: 0 0 6px;
   border-radius: 50%;
-  background: #c4baa8;
+  background: var(--kk-line);
 }
 
 .ai-tutor-loading-insight-note {
   border-radius: 9px;
-  background: #ddd7cc;
-  color: #b8afa0;
-  font-size: 11px;
+  background: var(--kk-line);
+  color: var(--kk-ink-3);
+  font-size: 13px;
   line-height: 1.7;
   padding: 10px 12px;
 }
@@ -1137,4 +1137,14 @@ function normalizeText(value) {
     grid-template-columns: 1fr;
   }
 }
+
+/* docs/ui-guidelines.md: failure uses the error colour, locked access uses notice, the main action is vermilion. */
+.ai-tutor-loading-logo-icon { background: var(--kk-action); border-radius: 50%; }
+.ai-tutor-loading-nav-item--active { background: var(--kk-action-soft); color: var(--kk-action-text); border-color: transparent; box-shadow: none; }
+.ai-tutor-loading-promo-button { background: var(--kk-surface); color: var(--kk-ink); border: 1px solid var(--kk-line); border-radius: 999px; }
+.ai-tutor-loading-user-avatar { color: var(--kk-ink-inverse); }
+.ai-tutor-loading-shell--access .ai-tutor-loading-live-dot { background: var(--kk-notice); }
+.ai-tutor-loading-shell--access .ai-tutor-loading-live-text { color: var(--kk-notice); }
+.ai-tutor-loading-action--primary { background: var(--kk-action); border-color: var(--kk-action); color: var(--kk-on-action); border-radius: 999px; }
+.ai-tutor-loading-action--primary:hover:not(:disabled) { background: var(--kk-action-hover); border-color: var(--kk-action-hover); }
 </style>

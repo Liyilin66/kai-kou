@@ -1,23 +1,23 @@
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="WFD 听写练习" back-to="/wfd" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="WFD 听写练习" back-to="/wfd" variant="kk" />
 
     <div class="mx-auto max-w-2xl px-4 py-6">
-      <p class="mb-4 text-sm text-muted">{{ question?.id || "" }}</p>
+      <p class="mb-4 text-sm text-kk-ink-3">{{ question?.id || "" }}</p>
 
       <div v-if="questionLoading" class="py-16 text-center">
-        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
-        <p class="mt-3 text-sm text-muted">加载题目中...</p>
+        <div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
+        <p class="mt-3 text-sm text-kk-ink-3">加载题目中...</p>
       </div>
 
-      <div v-else-if="!question" class="rounded-2xl bg-white p-8 text-center shadow-md">
-        <p class="text-xl font-bold text-navy">暂无可用 WFD 题目</p>
-        <p class="mt-2 text-sm leading-relaxed text-muted">
+      <div v-else-if="!question" class="rounded-2xl bg-kk-surface p-8 text-center shadow-kk">
+        <p class="text-xl font-bold text-kk-ink">暂无可用 WFD 题目</p>
+        <p class="mt-2 text-sm leading-relaxed text-kk-ink-3">
           当前账号或环境没有读取到 WFD 题库。可以稍后重试，或先返回题库页检查题目状态。
         </p>
         <button
           type="button"
-          class="mt-5 rounded-xl bg-orange px-5 py-3 text-sm font-bold text-white shadow-md hover:opacity-90"
+          class="mt-5 min-h-[48px] rounded-full px-6 py-3 text-[15px] font-bold bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press"
           @click="router.push('/wfd/list')"
         >
           返回 WFD 题库
@@ -25,26 +25,26 @@
       </div>
 
       <div v-else-if="phase !== 'processing'">
-        <div class="mb-4 rounded-xl bg-white p-5 shadow-md">
+        <div class="mb-4 rounded-[20px] bg-kk-surface p-5 shadow-kk">
           <div class="mb-3 flex items-center justify-between">
-            <p class="text-sm font-semibold text-navy">Listen carefully</p>
+            <p class="text-sm font-semibold text-kk-ink">Listen carefully</p>
             <button
               v-if="!isAudioPlaying && replaysLeft > 0"
               type="button"
-              class="rounded-lg border border-orange px-3 py-1.5 text-xs text-orange transition-all hover:bg-orange hover:text-white"
+              class="inline-flex min-h-[36px] items-center rounded-full border border-kk-line bg-kk-surface px-4 text-sm font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2"
               @click="replayAudio"
             >
               再听一遍 ({{ replaysLeft }})
             </button>
-            <span v-else-if="isAudioPlaying" class="text-xs text-orange">播放中...</span>
-            <span v-else class="text-xs text-muted">已无重听次数</span>
+            <span v-else-if="isAudioPlaying" class="text-[13px] font-semibold text-kk-action-text">播放中...</span>
+            <span v-else class="text-xs text-kk-ink-3">已无重听次数</span>
           </div>
 
           <div class="flex h-8 items-end justify-center gap-1">
             <div
               v-for="i in 11"
               :key="i"
-              class="w-1.5 rounded-full bg-orange transition-all duration-150"
+              class="w-1.5 rounded-full bg-kk-ink transition-all duration-150"
               :class="isAudioPlaying ? 'animate-bounce' : 'opacity-20'"
               :style="{
                 height: isAudioPlaying ? `${[8, 14, 20, 26, 30, 32, 30, 26, 20, 14, 8][i - 1]}px` : '4px',
@@ -52,48 +52,48 @@
               }"
             />
           </div>
-          <p v-if="audioError" class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm leading-relaxed text-red-600">
+          <p v-if="audioError" class="mt-4 rounded-2xl bg-kk-error-bg px-3 py-2 text-sm leading-relaxed text-kk-error">
             {{ audioError }}
           </p>
         </div>
 
-        <div class="mb-4 rounded-xl bg-white p-5 shadow-md">
-          <p class="mb-3 text-sm font-semibold text-navy">Type what you heard</p>
+        <div class="mb-4 rounded-[20px] bg-kk-surface p-5 shadow-kk">
+          <p class="mb-3 text-sm font-semibold text-kk-ink">Type what you heard</p>
           <input
             v-model="userInput"
             type="text"
             placeholder="Type the sentence here..."
-            class="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-base text-text focus:border-orange focus:outline-none"
+            class="kk-text min-h-[52px] w-full rounded-2xl border border-kk-line bg-kk-surface-2 px-4 py-3 text-[17px] text-kk-ink focus:border-kk-ink focus:bg-kk-surface focus:outline-none"
             @keyup.enter="canSubmit && handleSubmit()"
           />
-          <p class="mt-2 text-right text-xs text-muted">
+          <p class="mt-2 text-right text-xs text-kk-ink-3">
             {{ wordCount }} words
           </p>
         </div>
 
         <div class="mb-4">
-          <button type="button" class="text-sm text-orange underline hover:opacity-75" @click="showAnswer = !showAnswer">
+          <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="showAnswer = !showAnswer">
             {{ showAnswer ? "隐藏答案" : "查看答案" }}
           </button>
-          <div v-if="showAnswer" class="mt-2 rounded-xl border border-blue-100 bg-blue-50 p-4">
-            <p class="mb-1 text-xs text-muted">标准答案</p>
-            <p class="font-medium leading-relaxed text-navy">{{ question?.content }}</p>
+          <div v-if="showAnswer" class="mt-2 rounded-2xl border border-kk-line bg-kk-surface-2 p-4">
+            <p class="mb-1 text-xs text-kk-ink-3">标准答案</p>
+            <p class="font-medium leading-relaxed text-kk-ink">{{ question?.content }}</p>
           </div>
         </div>
 
         <button
           type="button"
-          class="mb-4 w-full rounded-xl py-4 text-lg font-bold transition-all"
-          :class="canSubmit ? 'bg-orange text-white shadow-md hover:opacity-90 active:scale-95' : 'cursor-not-allowed bg-gray-200 text-gray-400'"
+          class="mb-4 min-h-[52px] w-full rounded-full py-3 text-[15px] font-bold transition-colors"
+          :class="canSubmit ? 'bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press' : 'cursor-not-allowed bg-kk-surface-2 text-kk-ink-3'"
           :disabled="!canSubmit"
           @click="handleSubmit"
         >
           Submit
         </button>
 
-        <div class="mb-4 rounded-xl border-l-4 border-orange bg-white p-4 shadow-sm">
-          <p class="mb-2 text-sm font-semibold text-navy">Tips</p>
-          <ul class="space-y-1 text-sm text-muted">
+        <div class="mb-4 rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk">
+          <p class="mb-2 text-sm font-semibold text-kk-ink">Tips</p>
+          <ul class="space-y-1 text-sm text-kk-ink-3">
             <li>- 拼写要准确，大小写不影响得分</li>
             <li>- 冠词和介词也要写</li>
             <li>- 可以边听边打，不用等音频结束</li>
@@ -101,15 +101,15 @@
         </div>
 
         <div class="text-center">
-          <button type="button" class="text-sm text-muted underline hover:text-navy" @click="skipQuestion">跳过这题 →</button>
+          <button type="button" class="inline-flex min-h-[44px] items-center text-sm font-semibold text-kk-action-text" @click="skipQuestion">跳过这题 →</button>
         </div>
       </div>
 
       <div v-else class="py-16 text-center">
-        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange/10">
-          <div class="h-8 w-8 animate-spin rounded-full border-4 border-orange border-t-transparent" />
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-kk-surface-2">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-kk-ink border-t-transparent" />
         </div>
-        <p class="text-xl font-bold text-navy">批改中...</p>
+        <p class="text-xl font-bold text-kk-ink">批改中...</p>
       </div>
     </div>
   </div>
