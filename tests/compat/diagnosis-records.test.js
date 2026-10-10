@@ -18,6 +18,8 @@ function invoke(path, expression) {
 const diagnosis = { task_type: 'RA', question_id: 'RA_024', created_at: new Date().toISOString(),
   score_json: { analysis_id: 'analysis-1', diagnosis_version: 'ra-diag-0.1', metrics: { completeness: 0.8 } } };
 const legacy = { ...diagnosis, score_json: { overall: 72, pronunciation: 70, fluency: 72, content: 74 } };
+// Shown overall for an unversioned legacy RA row: content and fluency only, half each (docs/ra-scoring-rules.md).
+const LEGACY_DISPLAY_OVERALL = 73;
 
 test('RA history exposes diagnosis completeness without fabricating overall or trait scores', () => {
   const log = invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(diagnosis)})`);
@@ -33,7 +35,7 @@ test('home analytics counts diagnosis practice but excludes it from score averag
   const result = invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([diagnosis, legacy])})`);
   assert.equal(result.totalCount, 2);
   assert.equal(result.scoredCount, 1);
-  assert.equal(result.averageScore, 72);
+  assert.equal(result.averageScore, LEGACY_DISPLAY_OVERALL);
   const only = invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([diagnosis])})`);
   assert.equal(only.averageScore, null);
 });
@@ -54,8 +56,9 @@ test('agent context retains diagnosis activity without weak scores or a false tr
 test('diagnosis markers suppress stale legacy score fields while old score records stay readable', () => {
   const stale = { ...diagnosis, score_json: { ...diagnosis.score_json, overall: 90, scores: { overall: 90, pronunciation: 90 } } };
   assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(stale)}).overall`), null);
-  assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([stale, legacy])}).averageScore`), 72);
-  assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(legacy)}).overall`), 72);
+  assert.equal(invoke('src/lib/home-analytics.js', `buildHomeAnalyticsSnapshotFromRows(${JSON.stringify([stale, legacy])}).averageScore`), LEGACY_DISPLAY_OVERALL);
+  assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(legacy)}).overall`), LEGACY_DISPLAY_OVERALL);
+  assert.equal(invoke('src/lib/ra-history.js', `normalizeRALog(${JSON.stringify(legacy)}).scores.pronunciation`), null);
 });
 
 test('desktop history labels diagnosis and excludes it from trends', () => {

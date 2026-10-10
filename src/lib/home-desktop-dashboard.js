@@ -1,4 +1,4 @@
-import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "./ra-diagnosis-score.js";
+import { isRADiagnosis, diagnosisLabel, hasNumericScore, legacySpeakingDisplayOverall } from "./ra-diagnosis-score.js";
 import { getEnabledTaskTypes } from "./enabled-task-types.js";
 import { supabase } from "@/lib/supabase";
 
@@ -1213,6 +1213,11 @@ function resolveAccuracyPercent(row) {
 function resolveOverallScore(taskType, scoreJson) {
   if (["RA", "RS"].includes(normalizeTaskType(taskType)) && isRADiagnosis(toObject(scoreJson))) return null;
   const score = toObject(scoreJson) || {};
+  // Legacy RA/RS overalls included pronunciation; show content and fluency only (docs/ra-scoring-rules.md).
+  if (["RA", "RS"].includes(normalizeTaskType(taskType))) {
+    const legacyOverall = legacySpeakingDisplayOverall(score);
+    if (legacyOverall !== null) return normalizeOverallCandidate(legacyOverall);
+  }
   const candidates = [
     score?.overall,
     score?.score_overall,
@@ -1248,7 +1253,6 @@ function resolveOverallScore(taskType, scoreJson) {
 function resolveLegacySpeechOverall(scoreJson) {
   const score = toObject(scoreJson) || {};
   const nestedScores = toObject(score?.scores) || {};
-  const pronunciation = pickFirstPresentScore(score?.pronunciation, nestedScores?.pronunciation);
   const fluency = pickFirstPresentScore(
     score?.fluency,
     score?.oral_fluency,
@@ -1263,7 +1267,8 @@ function resolveLegacySpeechOverall(scoreJson) {
     nestedScores?.content,
     nestedScores?.appropriacy
   );
-  const validScores = [pronunciation, fluency, content].filter((item) => item !== null);
+  // RS and RL pronunciation is not assessed, so it never enters the fallback average.
+  const validScores = [fluency, content].filter((item) => item !== null);
   if (validScores.length < 2) return null;
 
   const average = validScores.reduce((sum, item) => sum + Number(item || 0), 0) / validScores.length;

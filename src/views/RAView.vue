@@ -155,7 +155,7 @@ const activeTimerLabel = computed(() => {
 const currentAiTip = computed(() => {
   if (phase.value === "recording" && hasFinalizedRecording.value) return "录音完成后先试听，确认没有明显断句或空白，再提交评测。";
   if (phase.value === "recording") return "录音中优先保持稳定节奏，遇到长句用短停顿切开，不要突然加速。";
-  if (phase.value === "processing" || phase.value === "done") return "本次录音已进入 AI 评分，结果页会展示发音、流利度和内容覆盖。";
+  if (phase.value === "processing" || phase.value === "done") return "本次录音已进入 AI 评分，结果页会展示内容和流利度；发音本版本未评估。";
   return `这题是${difficultyLabel.value}难度，${readingRhythmHint.value}`;
 });
 const aiCoachMessages = computed(() => [

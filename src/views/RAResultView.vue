@@ -3,6 +3,7 @@ import RADiagnosisResult from "@/components/ra/RADiagnosisResult.vue";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { fetchRAHistoryByQuestion } from "@/lib/ra-history";
+import { legacySpeakingDisplayOverall, PRONUNCIATION_NOT_ASSESSED_LABEL, PRONUNCIATION_NOT_ASSESSED_REASON } from "@/lib/ra-diagnosis-score.js";
 import { fetchQuestions, getRandomQuestion } from "@/lib/questions";
 import { supabase } from "@/lib/supabase";
 import { usePracticeStore } from "@/stores/practice";
@@ -107,15 +108,20 @@ const difficultyClass = computed(() => {
   return "medium";
 });
 
+// docs/ra-scoring-rules.md: the shown overall uses content and fluency only; pronunciation is not assessed.
 const overallScore = computed(() => {
+  const legacyOverall = legacySpeakingDisplayOverall(scoreResult.value);
+  if (legacyOverall !== null) return legacyOverall;
   const explicit = normalizeScore(scoreResult.value?.overall, Number.NaN);
   if (Number.isFinite(explicit)) return explicit;
-  const values = dimensionConfig.map((item) => rawDimensionScore(item.key));
-  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+  return Math.round((rawDimensionScore("content") + rawDimensionScore("fluency")) / 2);
 });
 
 const dimensionItems = computed(() =>
   dimensionConfig.map((item) => {
+    if (item.key === "pronunciation") {
+      return { ...item, notAssessed: true, rawScore: null, score: PRONUNCIATION_NOT_ASSESSED_LABEL, max: 90, pct: 0, desc: PRONUNCIATION_NOT_ASSESSED_REASON, feedback: PRONUNCIATION_NOT_ASSESSED_REASON, tips: [] };
+    }
     const rawScore = rawDimensionScore(item.key);
     return {
       ...item,
@@ -129,9 +135,10 @@ const dimensionItems = computed(() =>
   })
 );
 
-const weakestDimension = computed(() =>
-  [...dimensionItems.value].sort((left, right) => left.rawScore - right.rawScore)[0] || dimensionItems.value[0]
-);
+const weakestDimension = computed(() => {
+  const assessed = dimensionItems.value.filter((item) => !item.notAssessed);
+  return [...assessed].sort((left, right) => left.rawScore - right.rawScore)[0] || assessed[0];
+});
 
 const resultHeadline = computed(() => {
   if (overallScore.value >= 78) return "很棒的练习，继续保持稳定输出！";
@@ -159,7 +166,7 @@ const currentAttempt = computed(() => ({
   transcript: transcript.value,
   createdAt: normalizeText(scoreResult.value?.reviewed_at || new Date().toISOString()),
   scores: {
-    pronunciation: rawDimensionScore("pronunciation"),
+    pronunciation: null,
     fluency: rawDimensionScore("fluency"),
     content: rawDimensionScore("content")
   },
@@ -554,9 +561,9 @@ function normalizeStatsLog(row) {
     questionId: normalizeText(row?.question_id),
     transcript: normalizeText(row?.transcript),
     createdAt: normalizeText(row?.created_at),
-    overall: normalizeScore(scores?.overall ?? scoreJson?.overall, 0),
+    overall: legacySpeakingDisplayOverall(scoreJson) ?? normalizeScore(scores?.overall ?? scoreJson?.overall, 0),
     scores: {
-      pronunciation: normalizeScore(scores?.pronunciation, 0),
+      pronunciation: null,
       fluency: normalizeScore(scores?.fluency, 0),
       content: normalizeScore(scores?.content, 0)
     }
@@ -794,8 +801,8 @@ function inferNextQuestionId(id) {
             <article v-for="dimension in dimensionItems" :key="dimension.key" class="dim-item">
               <div class="di-name">{{ dimension.label }}</div>
               <div class="di-val-row">
-                <span class="di-val">{{ dimension.score }}</span>
-                <span class="di-max">/{{ dimension.max }}</span>
+                <span class="di-val" :class="{ 'di-val--na': dimension.notAssessed }">{{ dimension.score }}</span>
+                <span v-if="!dimension.notAssessed" class="di-max">/{{ dimension.max }}</span>
               </div>
               <div class="di-bar-bg">
                 <div class="di-bar-fill" :style="{ width: `${dimension.pct}%`, background: dimension.color }"></div>
@@ -880,7 +887,7 @@ function inferNextQuestionId(id) {
               <div class="rdim-bar-bg">
                 <div class="rdim-bar-fill" :style="{ width: `${dimension.pct}%`, background: dimension.color }"></div>
               </div>
-              <span class="rdim-val" :style="{ color: dimension.color }">{{ dimension.score }}</span>
+              <span class="rdim-val" :class="{ 'rdim-val--na': dimension.notAssessed }" :style="{ color: dimension.color }">{{ dimension.score }}</span>
             </div>
             <div class="rdim-total">
               <span>总分</span>
@@ -1982,4 +1989,5 @@ function inferNextQuestionId(id) {
 .ba-ghost.warm { background: var(--kk-surface); border-color: var(--kk-line); color: var(--kk-ink); }
 .ai-suggest { background: var(--kk-surface-2); border-color: transparent; color: var(--kk-ink); }
 @media (max-width: 767px) { .vip-pill { display: none; } }
+.di-val.di-val--na, .rdim-val.rdim-val--na { font-family: var(--kk-font); font-size: 15px; font-weight: 600; color: var(--kk-ink-2) !important; }
 </style>

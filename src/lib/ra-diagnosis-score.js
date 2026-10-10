@@ -26,6 +26,17 @@ export function diagnosisLabel(score) {
     : '诊断：完整度待确认';
 }
 
+// docs/ra-scoring-rules.md (ra-score-0.1): content and fluency weigh half each and pronunciation is not
+// assessed. Unversioned legacy RA/RS rows stored an overall that included a pronunciation number, so their
+// display overall is rebuilt from content and fluency alone. Versioned reference scores and diagnosis rows
+// are left as stored (null here).
+export function legacySpeakingDisplayOverall(score) {
+  if (!score || typeof score !== 'object' || hasSpeakingReferenceScore(score) || isRADiagnosis(score)) return null;
+  const scores = score.scores && typeof score.scores === 'object' ? score.scores : score;
+  if (!hasNumericScore(scores.content) || !hasNumericScore(scores.fluency)) return null;
+  return Math.round((Number(scores.content) + Number(scores.fluency)) / 2);
+}
+
 export function hasNumericScore(value) {
   return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
 }

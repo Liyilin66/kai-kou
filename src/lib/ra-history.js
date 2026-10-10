@@ -1,4 +1,4 @@
-import { isRADiagnosis, diagnosisLabel, hasNumericScore } from "./ra-diagnosis-score.js";
+import { isRADiagnosis, diagnosisLabel, hasNumericScore, legacySpeakingDisplayOverall } from "./ra-diagnosis-score.js";
 import { supabase } from "@/lib/supabase";
 
 const PER_QUESTION_HISTORY_LIMIT = 10;
@@ -109,13 +109,14 @@ export function normalizeRALog(row) {
   const nestedScores = toObject(scoreJson?.scores);
   const legacyScores = nestedScores || scoreJson;
   const diagnosis = isRADiagnosis(scoreJson);
-  const pronunciation = diagnosis ? null : normalizeScore(legacyScores?.pronunciation);
+  // Pronunciation is not assessed (docs/ra-scoring-rules.md); old rows' pronunciation numbers are not shown.
+  const pronunciation = null;
   const fluency = diagnosis ? null : normalizeScore(legacyScores?.fluency);
   const content = diagnosis ? null : normalizeScore(legacyScores?.content);
-  const overall = diagnosis ? null : normalizeOverall(
+  const overall = diagnosis ? null : (legacySpeakingDisplayOverall(scoreJson) ?? normalizeOverall(
     nestedScores?.overall ?? scoreJson?.overall,
-    [pronunciation, fluency, content]
-  );
+    [fluency, content]
+  ));
   const questionSnapshot = toObject(scoreJson?.questionSnapshot);
   const questionContent = `${questionSnapshot?.content || ""}`.trim();
   const audio = normalizeAudioMeta(scoreJson?.audio);
