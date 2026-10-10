@@ -48,7 +48,8 @@ VITE_API_BASE=
 | `GROQ_API_KEY` | 服务端 | Whisper 转写；同时是评分 LLM 的备用模型 |
 | `GEMINI_API_KEY` | 服务端 | 评分 LLM 主模型 |
 | `LLM_GROQ_MODEL`、`LLM_PRIMARY_TIMEOUT_MS`、`LLM_FALLBACK_TIMEOUT_MS` | 服务端 | 备用模型名与超时 |
-| `AGENT_OPENAI_BASE_URL`、`AGENT_OPENAI_API_KEY` | 服务端 | AI 私教使用的 OpenAI 兼容接口 |
+| `AGENT_OPENAI_BASE_URL`、`AGENT_OPENAI_API_KEY`、`AGENT_OPENAI_MODEL` | 服务端 | AI 私教使用的 OpenAI 兼容接口与模型名，三项都必须配置；代码里没有默认地址和模型，缺任何一项 AI 私教都会提示"暂未配置" |
+| `SCORING_OPENAI_BASE_URL`、`SCORING_OPENAI_API_KEY`、`SCORING_OPENAI_MODEL` | 服务端 | 评分用的 OpenAI 兼容接口；不配时依次回退到 `AGENT_OPENAI_*`，同样没有代码默认值 |
 | `BREVO_API_KEY`、`REGISTER_OTP_FROM_EMAIL`、`REGISTER_OTP_FROM_NAME` | 服务端 | 注册验证码邮件 |
 | `SITE_URL`、`ALIPAY_*` | 服务端 | 支付宝会员支付（当前暂停） |
 | `CRON_SECRET` | 服务端 | 每日健康检查（数据库保活）的鉴权 |

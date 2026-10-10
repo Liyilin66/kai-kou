@@ -1,7 +1,5 @@
 import { callOpenAICompatibleChat, getOpenAICompatibleConfig } from "../llm/providers/openai-compatible.js";
 
-const DEFAULT_BASE_URL = "https://testvideo.site/v1";
-const DEFAULT_MODEL = "gpt-5.4";
 const DEFAULT_TIMEOUT_MS = 30000;
 const DEFAULT_MAX_OUTPUT_TOKENS = 1000;
 const DEFAULT_TEMPERATURE = 0.6;
@@ -466,14 +464,16 @@ function matchesDataAnalysisIntent(message) {
     || DATA_ANALYSIS_KEYWORDS.some((keyword) => normalizedMessage.includes(keyword));
 }
 
+// Endpoint and model come only from AGENT_OPENAI_BASE_URL / AGENT_OPENAI_MODEL; a missing value
+// surfaces as the "not configured" error instead of silently using a built-in service.
 export function getAgentChatConfig() {
   const providerConfig = getOpenAICompatibleConfig();
   const configuredMaxTokens = toPositiveInt(providerConfig.maxTokens, 0);
 
   return {
-    baseUrl: normalizeText(providerConfig.baseUrl) || DEFAULT_BASE_URL,
+    baseUrl: normalizeText(providerConfig.baseUrl),
     apiKey: normalizeText(providerConfig.apiKey),
-    model: normalizeText(providerConfig.model) || DEFAULT_MODEL,
+    model: normalizeText(providerConfig.model),
     timeoutMs: toPositiveInt(providerConfig.timeoutMs, DEFAULT_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS,
     maxOutputTokens: configuredMaxTokens > 0 ? configuredMaxTokens : DEFAULT_MAX_OUTPUT_TOKENS,
     temperature: DEFAULT_TEMPERATURE
@@ -495,10 +495,10 @@ export async function requestAgentChatCompletion({ messages, intent = "pte_qa", 
     });
   }
 
-  if (!config.apiKey) {
+  if (!config.apiKey || !config.baseUrl || !config.model) {
     throw new AgentChatServiceError("missing_api_key", "AI 私教服务暂未配置，请稍后再试。", {
       status: 503,
-      raw_error_type: "missing_api_key",
+      raw_error_type: !config.apiKey ? "missing_api_key" : !config.baseUrl ? "missing_base_url" : "missing_model",
       provider: "openai_compatible",
       model: config.model,
       error_name: "ConfigurationError",

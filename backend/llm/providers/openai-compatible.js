@@ -4,17 +4,16 @@ const PROVIDER_NAME = "openai_compatible";
 const SCORING_PROVIDER_NAME = "openai";
 const DEFAULT_TIMEOUT_MS = 15000;
 const SCORING_DEFAULT_TIMEOUT_MS = 20000;
-const DEFAULT_BASE_URL = "https://api.openai.com/v1";
-const DEFAULT_MODEL = "gpt-5.4";
-const SCORING_DEFAULT_MODEL = "gpt-5.4-mini";
 const DEFAULT_MAX_TOKENS = 900;
 const SAFE_ERROR_BODY_KEYS = new Set(["error", "message", "type", "code", "param", "status", "status_code", "statusCode"]);
 
+// Base URL and model have no built-in defaults: they must come from the environment
+// (AGENT_OPENAI_* for the AI tutor, SCORING_OPENAI_* falling back to AGENT_OPENAI_* for scoring).
 export function getOpenAICompatibleConfig() {
   return {
     baseUrl: normalizeBaseUrl(process.env.AGENT_OPENAI_BASE_URL),
     apiKey: normalizeText(process.env.AGENT_OPENAI_API_KEY),
-    model: normalizeText(process.env.AGENT_OPENAI_MODEL) || DEFAULT_MODEL,
+    model: normalizeText(process.env.AGENT_OPENAI_MODEL),
     timeoutMs: toPositiveInt(process.env.AGENT_REQUEST_TIMEOUT_MS, DEFAULT_TIMEOUT_MS),
     maxTokens: toPositiveInt(process.env.AGENT_MAX_OUTPUT_TOKENS, DEFAULT_MAX_TOKENS)
   };
@@ -25,7 +24,7 @@ export function getScoringOpenAICompatibleApiKeyFromEnv() {
 }
 
 export function getScoringOpenAICompatibleModelFromEnv() {
-  return normalizeText(process.env.SCORING_OPENAI_MODEL) || normalizeText(process.env.AGENT_OPENAI_MODEL) || SCORING_DEFAULT_MODEL;
+  return normalizeText(process.env.SCORING_OPENAI_MODEL) || normalizeText(process.env.AGENT_OPENAI_MODEL);
 }
 
 export function getScoringOpenAICompatibleConfig() {
@@ -34,7 +33,6 @@ export function getScoringOpenAICompatibleConfig() {
       process.env.SCORING_OPENAI_BASE_URL
         || process.env.AGENT_OPENAI_BASE_URL
         || process.env.OPENAI_BASE_URL
-        || DEFAULT_BASE_URL
     ),
     apiKey: getScoringOpenAICompatibleApiKeyFromEnv(),
     model: getScoringOpenAICompatibleModelFromEnv(),

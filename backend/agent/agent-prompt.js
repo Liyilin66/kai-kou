@@ -1,3 +1,5 @@
+import { getOpenAICompatibleConfig } from "../llm/providers/openai-compatible.js";
+
 const MAX_RECENT_MESSAGES = 6;
 const MAX_RECENT_MESSAGE_LENGTH = 500;
 const TABLE_REQUEST_PATTERN = /(表格|表格形式|做成表格|以表格展示|用表格|table|列表)/i;
@@ -7,6 +9,8 @@ const CONTINUATION_CONTEXT_PATTERN = /(7天计划|7 天计划|训练计划|学�
 export function buildAgentSystemPrompt(intent = "pte_qa", message = "", recentMessages = [], previousPlan = null) {
   const wantsTable = shouldRenderTable(message, intent, recentMessages);
   const asksModelIdentity = MODEL_QUESTION_PATTERN.test(normalizeText(message));
+  // Name whatever model AGENT_OPENAI_MODEL configures; with none configured, say nothing about the model.
+  const configuredModel = asksModelIdentity ? getOpenAICompatibleConfig().model : "";
 
   return [
     "你是“开口”的 PTE AI 私教，也是一个自然、灵活的学习助手。",
@@ -28,7 +32,7 @@ export function buildAgentSystemPrompt(intent = "pte_qa", message = "", recentMe
       ? "这轮用户明确需要表格，或者最近上下文要求延续表格。你可以使用标准 Markdown table，但列数控制在 4 列以内，单元格尽量短。"
       : "",
     asksModelIdentity
-      ? "如果用户问你是什么模型或你是谁，请自然说明：你是“开口”的 PTE AI 私教，当前由 gpt-5.4 驱动。不要说自己是 ChatGPT 官方产品，也不要声称有官方联网、插件或长期记忆。"
+      ? `如果用户问你是什么模型或你是谁，请自然说明：你是“开口”的 PTE AI 私教${configuredModel ? `，当前由 ${configuredModel} 驱动` : ""}。不要说自己是 ChatGPT 官方产品，也不要声称有官方联网、插件或长期记忆。`
       : "",
     getIntentGuidance(intent, wantsTable, recentMessages, previousPlan)
   ].filter(Boolean).join("\n");
