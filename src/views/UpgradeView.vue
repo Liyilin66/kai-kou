@@ -77,21 +77,21 @@ async function handlePay() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg">
-    <NavBar title="开通 VIP" back-to="/profile" />
+  <div class="kk-page min-h-screen">
+    <NavBar title="开通 VIP" back-to="/profile" variant="kk" />
 
-    <div class="mx-auto max-w-2xl px-4 py-6">
-      <section class="rounded-2xl border border-[#E7EDF5] bg-white p-6 shadow-card">
+    <div class="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:py-8">
+      <section class="rounded-[20px] border border-kk-line bg-kk-surface p-5 shadow-kk sm:p-6">
         <div class="text-center">
-          <h1 class="text-2xl font-bold text-navy">选择会员套餐</h1>
-          <p class="mt-2 text-sm leading-6 text-muted">
+          <h1 class="text-[24px] font-bold leading-snug text-kk-ink sm:text-[28px]">选择会员套餐</h1>
+          <p class="mt-2 text-sm leading-6 text-kk-ink-3">
             支付完成后会自动返回结果页确认状态，会员权益以服务端订单结果为准。
           </p>
         </div>
 
         <p
           v-if="BILLING_PAUSED"
-          class="mt-4 rounded-xl border border-[#F2D6D3] bg-[#FFF7F6] px-4 py-3 text-sm text-[#B42318]"
+          class="mt-4 rounded-2xl border border-kk-notice-line bg-kk-notice-bg px-4 py-3 text-sm text-kk-notice"
         >
           {{ BILLING_PAUSED_MESSAGE }}
         </p>
@@ -101,44 +101,44 @@ async function handlePay() {
             v-for="plan in BILLING_PLANS"
             :key="plan.key"
             type="button"
-            class="rounded-2xl border p-4 text-left transition-all disabled:cursor-not-allowed"
-            :class="selectedPlanKey === plan.key ? 'border-orange bg-[#FFF7F2] shadow-sm' : 'border-[#E7EDF5] bg-white hover:border-[#C7D4E5]'"
+            class="rounded-2xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            :class="selectedPlanKey === plan.key ? 'border-kk-ink bg-kk-surface ring-1 ring-kk-ink' : 'border-kk-line bg-kk-surface hover:bg-kk-surface-2'"
             :disabled="submitting || BILLING_PAUSED"
             @click="selectPlan(plan.key)"
           >
             <div class="flex items-center justify-between gap-3">
-              <div class="text-lg font-semibold text-navy">{{ plan.name }}</div>
+              <div class="text-[17px] font-semibold text-kk-ink">{{ plan.name }}</div>
               <span
                 v-if="plan.key === 'month'"
-                class="rounded-full bg-orange/10 px-2 py-1 text-xs font-medium text-orange"
+                class="rounded-full bg-kk-ink px-2.5 py-1 text-xs font-semibold text-kk-ink-inverse"
               >
                 推荐
               </span>
             </div>
-            <div class="mt-3 text-2xl font-bold text-text">¥{{ plan.price }}</div>
-            <div class="mt-1 text-sm text-muted">{{ plan.unit }}</div>
-            <div class="mt-4 text-xs text-muted">{{ plan.hint }}</div>
+            <div class="kk-num mt-3 text-[28px] font-extrabold text-kk-ink">¥{{ plan.price }}</div>
+            <div class="mt-1 text-sm text-kk-ink-3">{{ plan.unit }}</div>
+            <div class="mt-4 text-xs text-kk-ink-3">{{ plan.hint }}</div>
           </button>
         </div>
 
-        <div class="mt-6 rounded-xl bg-[#F8FAFD] p-4">
+        <div class="mt-6 rounded-2xl bg-kk-surface-2 p-4">
           <div class="flex items-center justify-between gap-4">
-            <span class="text-sm text-muted">当前选择</span>
-            <span class="text-sm font-medium text-text">{{ selectedPlan.name }} · ¥{{ selectedPlan.price }}</span>
+            <span class="text-sm text-kk-ink-3">当前选择</span>
+            <span class="text-sm font-medium text-kk-ink">{{ selectedPlan.name }} · ¥{{ selectedPlan.price }}</span>
           </div>
-          <p class="mt-2 text-xs leading-5 text-muted">
+          <p class="mt-2 text-xs leading-5 text-kk-ink-3">
             将通过支付宝手机网站支付发起购买，请勿重复点击，避免生成重复订单。
           </p>
         </div>
 
-        <p v-if="submitError" class="mt-4 rounded-xl border border-[#F2D6D3] bg-[#FFF7F6] px-4 py-3 text-sm text-[#B42318]">
+        <p v-if="submitError" class="mt-4 rounded-2xl border border-kk-error-line bg-kk-error-bg px-4 py-3 text-sm text-kk-error">
           {{ submitError }}
         </p>
 
         <div class="mt-6 space-y-3">
           <button
             type="button"
-            class="w-full rounded-xl bg-orange py-4 text-base font-bold text-white shadow-md transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            class="min-h-[52px] w-full rounded-full py-3 text-[16px] font-bold transition-colors bg-kk-action text-kk-on-action hover:bg-kk-action-hover active:bg-kk-action-press disabled:cursor-not-allowed disabled:opacity-45"
             :disabled="submitting || BILLING_PAUSED"
             @click="handlePay"
           >
@@ -146,7 +146,7 @@ async function handlePay() {
           </button>
           <button
             type="button"
-            class="w-full rounded-xl border border-gray-200 py-3 text-sm text-muted transition-all hover:border-navy hover:text-navy disabled:cursor-not-allowed disabled:opacity-70"
+            class="w-full min-h-[48px] rounded-full border border-kk-line bg-kk-surface py-3 text-[15px] font-semibold text-kk-ink transition-colors hover:bg-kk-surface-2 disabled:cursor-not-allowed disabled:opacity-45"
             :disabled="submitting"
             @click="router.push('/profile')"
           >
