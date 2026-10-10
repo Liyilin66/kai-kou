@@ -19,7 +19,7 @@ function initialize(path, diEnabled = false) {
  vm.runInContext(source,context);
  return context;
 }
-for(const path of ['src/views/HomeView.vue','src/views/HomeReplicaView.vue']) {
+for(const path of ['src/views/HomeView.vue']) {
  test(`${path} initializes disabled-DI suggestions without accessing uninitialized computed values`,()=>{
   const ctx=initialize(path);
   const state=vm.runInContext('dailyAiSuggestionState.value',ctx);
@@ -27,7 +27,7 @@ for(const path of ['src/views/HomeView.vue','src/views/HomeReplicaView.vue']) {
  });
 }
 
-for(const path of ['src/views/HomeView.vue','src/views/HomeReplicaView.vue']) {
+for(const path of ['src/views/HomeView.vue']) {
  test(`${path} rejects cached DI prose and falls back to open practice tasks`,()=>{
   const ctx=initialize(path);
   const output=vm.runInContext(`sanitizeDailySuggestion({main_task_type:'DI',headline:'练 DI',reason:'DI weak',advice:'练 DI',tasks:[{task_type:'DI',count:2}],cta_text:'DI'})`,ctx);
@@ -35,7 +35,7 @@ for(const path of ['src/views/HomeView.vue','src/views/HomeReplicaView.vue']) {
  });
 }
 
-for(const path of ['src/views/HomeView.vue','src/views/HomeReplicaView.vue']) {
+for(const path of ['src/views/HomeView.vue']) {
  test(`${path} preserves a DI recommendation when DI is explicitly enabled`,()=>{
   const ctx=initialize(path,true);
   const output=vm.runInContext(`sanitizeDailySuggestion({main_task_type:'DI',advice:'先练 DI',tasks:[{task_type:'DI',count:2}]})`,ctx);

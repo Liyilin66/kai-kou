@@ -68,9 +68,7 @@ test('empty dashboard state and homepage source do not expose fake coach or rece
   assert.doesNotMatch(empty.coach.banner, /\bDI\b/);
 
   const homeSource = readProjectFile('src/views/HomeView.vue');
-  const desktopSource = readProjectFile('src/components/home/HomeDesktopDashboard.vue');
   assert.doesNotMatch(homeSource, /10:32|10:33|2 天内可见提升|免费领取|PTE 备考资料包/);
-  assert.doesNotMatch(desktopSource, /placeholder-di|72\/90|64\/90|05-16|免费领取|PTE 备考资料包/);
 });
 
 test('recent practice keeps RS and RL records and only hides a closed DI', () => {
@@ -94,7 +92,7 @@ test('task names follow the practice store: RS is 复述句子 and RTS is 情景
   assert.equal(vm.runInContext('HOME_TASK_TYPE_META.RTS.name', context), '情景回应');
   assert.match(readProjectFile('src/stores/practice.js'), /title: "RS - 复述句子"[\s\S]*title: "RTS - 情景回应"/);
   assert.match(readProjectFile('src/lib/home-desktop-dashboard.js'), /RTS: \{ label: "RTS", title: "情景回应"[\s\S]*RS: \{ label: "RS", title: "复述句子"/);
-  for (const file of ['src/views/HomeView.vue', 'src/views/AgentView.vue', 'src/components/home/HomeDesktopDashboard.vue', 'src/views/HomeReplicaView.vue', 'src/lib/enabled-task-types.js']) {
+  for (const file of ['src/views/HomeView.vue', 'src/views/AgentView.vue', 'src/lib/enabled-task-types.js']) {
     const source = readProjectFile(file);
     assert.doesNotMatch(source, /RTS[^\n]*复述句子|复述句子\\n逻辑|逻辑连贯|逻辑重组/, file);
     assert.match(source, /情景回应/, file);

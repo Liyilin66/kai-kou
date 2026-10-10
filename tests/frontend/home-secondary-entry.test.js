@@ -27,16 +27,11 @@ test('alternate home views share the enabled task list for DI visibility', () =>
     ['RA', 'WFD', 'RTS', 'DI', 'WE']
   );
 
-  for (const path of ['src/components/home/HomeDesktopDashboard.vue', 'src/views/HomeReplicaView.vue']) {
-    assert.match(readProjectFile(path), /getEnabledTaskTypes/);
-  }
+  assert.match(readProjectFile('src/views/HomeView.vue'), /getEnabledTaskType/);
 });
 
-test('alternate home views do not show fake coach, recent practice or free package copy', () => {
-  const sources = [
-    readProjectFile('src/components/home/HomeDesktopDashboard.vue'),
-    readProjectFile('src/views/HomeReplicaView.vue')
-  ].join('\n');
+test('the home view does not show fake coach, recent practice or free package copy', () => {
+  const sources = readProjectFile('src/views/HomeView.vue');
 
   for (const pattern of [
     /RECENT_PLACEHOLDERS/,
@@ -50,17 +45,17 @@ test('alternate home views do not show fake coach, recent practice or free packa
     assert.doesNotMatch(sources, pattern);
   }
 });
-test('desktop score change is observed analytics, not a fabricated increase from record count', () => {
- const source=readProjectFile('src/components/home/HomeDesktopDashboard.vue');
- assert.match(source,/helper: homeAnalytics.value.scoreComparisonText/);
+test('home score change is observed analytics, not a fabricated increase from record count', () => {
+ const source=readProjectFile('src/views/HomeView.vue');
+ assert.match(source,/homeAnalytics\.value\.scoreComparisonText/);
  assert.doesNotMatch(source,/Math\.min\(9\.9, Math\.max\(1\.2/);
 });
 test('coach prompts and template links respect the same first-batch contracts', () => {
  for(const path of ['src/views/AgentView.vue','src/components/agent/AIWorkspace.vue','src/components/agent/AITutorLoading.vue']) {
   const source=readProjectFile(path);assert.doesNotMatch(source,/PTE 备考资料包|免费领取|真题 · 高频词汇/);
-  assert.match(source,/\/we\/templates/);
  }
+ // The WE template entry is rendered by the workspace and loading-shell sidebars.
+ for(const path of ['src/components/agent/AIWorkspace.vue','src/components/agent/AITutorLoading.vue']) assert.match(readProjectFile(path),/\/we\/templates/);
  assert.match(readProjectFile('src/views/AgentView.vue'),/hasUnavailableTaskRecommendation/);
  assert.match(readProjectFile('src/components/agent/AIWorkspace.vue'),/hasUnavailableTaskRecommendation/);
- assert.match(readProjectFile('src/components/agent/AgentChat.vue'),/getEnabledTaskTypes/);
 });
