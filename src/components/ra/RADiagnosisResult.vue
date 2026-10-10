@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { diagnosisWordItems, evidencePlaybackSeconds, loadRADiagnosisFeedback } from '@/lib/ra-diagnosis';
 import { trackPracticeEvent } from '@/lib/practice-events';
 import { compareDiagnoses, loadPreviousRADiagnosis } from '@/lib/ra-compare';
+import { ANNOTATION_TAP_HINT, EVIDENCE_LABELS, IMPROVED_CHECK_NOTE, evidenceLabel, evidenceNote, evidencePhrase, fluencyExplanation } from '@/lib/ra-diagnosis-copy';
 import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({ result: { type: Object, required: true } });
@@ -34,6 +35,8 @@ const resultSteps = [
 ];
 const memberLabel = computed(() => authStore.statusText || '未开通');
 const evidenceById = computed(() => new Map((props.result.evidence || []).map(item => [item.id, item])));
+const phrases = computed(() => new Map((props.result.evidence || []).map(item => [item.id, evidencePhrase(item, words.value)])));
+const phraseFor = (id) => phrases.value.get(id) || null;
 async function loadFeedback() {
   try {
     const output = await loadRADiagnosisFeedback({ client: supabase, result: props.result, signal: feedbackController.signal });
@@ -56,7 +59,7 @@ onBeforeUnmount(() => feedbackController.abort());
 // docs/ui-guidelines.md 2.4: misread words are errors; disfluencies are notices. Class names only.
 const ERROR_EVIDENCE = new Set(['omission', 'substitution']);
 const evidenceTone = (type) => (ERROR_EVIDENCE.has(type) ? 'tone-error' : 'tone-notice');
-const labels = { omission: '漏读', substitution: '可能读错或识别不清', repetition: '重复', insertion: '多读', hesitation: '犹豫', long_pause: '长停顿', late_start: '开口延迟' };
+const labels = EVIDENCE_LABELS;
 const words = computed(() => diagnosisWordItems(props.result.alignment, props.result.evidence, props.result.question?.content));
 const metrics = computed(() => props.result.metrics || {});
 const score = computed(() => metrics.value.score || null);
@@ -86,6 +89,7 @@ const rulesCopy = computed(() => taskType.value === 'RS'
       formula: 'round(10 + 80 × (0.5 × 内容比例 + 0.5 × 流利度档位 / 5))',
       zero: '内容比例为 0 时总分直接为 10，流利度不评分。依据 Score Guide 第 8 页：Content 为 0 的回答不得分，也不再评其他项；10 是本项目换算的最低分。'
     });
+const fluencyCopy = computed(() => fluencyExplanation(score.value?.fluency, { metrics: metrics.value, evidence: props.result.evidence || [] }));
 const fluencyEvidence = computed(() => (props.result.evidence || []).filter(item => ['hesitation','long_pause','repetition'].includes(item.type)));
 const cards = computed(() => [
   { label: '内容完整度', value: `${Math.round((metrics.value.completeness || 0) * 100)}%` },
@@ -95,7 +99,7 @@ const cards = computed(() => [
   { label: '开口延迟', value: Number.isFinite(metrics.value.speech_onset_ms) ? `${(metrics.value.speech_onset_ms / 1000).toFixed(1)} 秒` : '未检测到语音' }
 ]);
 const comparisonGroups = computed(() => comparison.value ? [
-  { key: 'improved', title: '已改善', note: '上次有，这次没有', items: comparison.value.improved, playable: false },
+  { key: 'improved', title: '已改善', note: '上次有，这次没有', hint: IMPROVED_CHECK_NOTE, items: comparison.value.improved, playable: false },
   { key: 'ongoing', title: '仍需练习', note: '两次都出现', items: comparison.value.ongoing, playable: true },
   { key: 'newIssues', title: '新出现', note: '这次新增', items: comparison.value.newIssues, playable: true }
 ] : []);
@@ -161,8 +165,8 @@ function retrySameQuestion() {
         <article data-testid="ra-score-card-content"><h2>内容</h2><strong>{{ contentCard.heading }}</strong><p>{{ contentCard.detail }}</p></article>
         <article data-testid="ra-score-card-fluency"><h2>流利度</h2>
           <template v-if="score.fluency.band === null"><strong>内容为 0，不评分</strong><p>Score Guide 第 8 页：内容为 0 时，本题不再评流利度和发音。</p></template>
-          <template v-else><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p>{{ score.fluency.evidence.D }} 次犹豫／重复 · {{ score.fluency.evidence.L }} 次长停顿</p>
-          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" :class="evidenceTone(item.type)" @click="playEvidence(item)">▶ {{ labels[item.type] }}<span v-if="item.text"> · {{ item.text }}</span></button></div></template>
+          <template v-else><strong>{{ score.fluency.band }} / 5（{{ score.fluency.label }}）</strong><p data-testid="ra-fluency-basis">{{ fluencyCopy.basis }}</p><p class="fluency-meaning">{{ fluencyCopy.meaning }}</p>
+          <div class="evidence-tags"><button v-for="item in fluencyEvidence" :key="item.id" type="button" :class="evidenceTone(item.type)" @click="playEvidence(item)">▶ {{ evidenceLabel(item) }}<span v-if="item.text"> · {{ item.text }}</span></button></div></template>
         </article>
         <article data-testid="ra-score-card-pronunciation"><h2>发音</h2><strong>本版本未评估</strong><p>现有技术无法可靠测量发音，测不出来的项不给分。</p></article>
       </div>
@@ -188,9 +192,10 @@ function retrySameQuestion() {
       <div class="compare-groups">
         <section v-for="group in comparisonGroups" :key="group.key" class="compare-group">
           <h3>{{ group.title }} <small>{{ group.note }}</small></h3>
+          <p v-if="group.hint && group.items.length" class="note compare-hint">{{ group.hint }}</p>
           <div v-if="group.items.length" class="compare-tags">
             <button v-for="item in group.items" :key="item.key" type="button" data-testid="ra-comparison-chip" :class="evidenceTone(item.type)" :disabled="!group.playable" @click="group.playable && playEvidence(item.evidence)">
-              {{ labels[item.type] || item.type }}<span v-if="item.text"> · {{ item.text }}</span>
+              {{ item.evidence ? evidenceLabel(item.evidence) : labels[item.type] || item.type }}<span v-if="item.text"> · {{ item.text }}</span>
             </button>
           </div>
           <p v-else class="note">暂无</p>
@@ -206,19 +211,22 @@ function retrySameQuestion() {
           <li v-for="(suggestion, index) in feedback.suggestions" :key="index">
             <strong>{{ suggestion.issue }}</strong>
             <p>{{ suggestion.action }}</p>
-            <div class="evidence-tags">
+            <ul class="evidence-tags evidence-phrases">
               <template v-for="id in suggestion.evidence_ids" :key="id">
-                <button v-if="evidenceById.has(id)" type="button" :class="evidenceTone(evidenceById.get(id).type)" @click="playEvidence(evidenceById.get(id))" :aria-label="`回听证据 ${id}：${labels[evidenceById.get(id).type] || ''}`">▶ {{ id }} · {{ labels[evidenceById.get(id).type] || '回听' }}</button>
+                <li v-if="evidenceById.has(id)">
+                  <button type="button" :class="evidenceTone(evidenceById.get(id).type)" @click="playEvidence(evidenceById.get(id))" :aria-label="`回听证据 ${id}：${evidenceLabel(evidenceById.get(id))}`">▶ {{ id }} · {{ evidenceLabel(evidenceById.get(id)) }}</button>
+                  <span v-if="phraseFor(id)" class="phrase" data-testid="ra-suggestion-phrase"><template v-if="phraseFor(id).leading">… </template>{{ phraseFor(id).before.join(' ') }}{{ phraseFor(id).before.length ? ' ' : '' }}<template v-if="phraseFor(id).inserted">{{ phraseFor(id).focus.join(' ') }} <b>+{{ phraseFor(id).inserted }}</b></template><b v-else>{{ phraseFor(id).focus.join(' ') }}</b>{{ phraseFor(id).after.length ? ' ' : '' }}{{ phraseFor(id).after.join(' ') }}<template v-if="phraseFor(id).trailing"> …</template></span>
+                </li>
               </template>
-            </div>
+            </ul>
           </li>
         </ol>
       </template>
     </section>
-    <section class="panel"><details :open="taskType !== 'RS'"><summary><h2>原文与标注</h2></summary><p class="legend"><span class="legend-item"><i class="swatch swatch-error" aria-hidden="true"></i>漏读 / 可能读错或识别不清</span><span class="legend-item"><i class="swatch swatch-notice" aria-hidden="true"></i>重复 / 多读 · 犹豫 / 长停顿</span></p>
+    <section class="panel"><details :open="taskType !== 'RS'"><summary><h2>原文与标注</h2><span class="tap-hint" data-testid="ra-annotation-hint">{{ ANNOTATION_TAP_HINT }}</span></summary><p class="legend"><span class="legend-item"><i class="swatch swatch-error" aria-hidden="true"></i>漏读 / 可能读错或识别不清</span><span class="legend-item"><i class="swatch swatch-notice" aria-hidden="true"></i>重复 / 多读 · 犹豫 / 长停顿</span></p>
       <div class="annotated-text">
         <template v-for="word in words" :key="word.index">
-          <button v-if="word.annotations.length" type="button" :class="['word', word.type]" :title="word.annotations.map(item => labels[item.type]).join('、')" @click="playEvidence(word.annotations[0])">{{ word.text }}</button>
+          <button v-if="word.annotations.length" type="button" :class="['word', word.type]" :title="word.annotations.map(evidenceLabel).join('、')" @click="playEvidence(word.annotations[0])">{{ word.text }}</button>
           <span v-else :class="['word', word.type]" :title="word.uncertain ? '同音词或识别不确定，不计为用户错误' : ''">{{ word.text }}</span>{{ ' ' }}
         </template>
       </div></details>
@@ -229,7 +237,7 @@ function retrySameQuestion() {
     <section class="panel"><h2>可回听的证据</h2>
       <p v-if="!result.evidence?.length">本次未检测到符合当前规则的明显问题。</p>
       <button v-for="item in result.evidence || []" :key="item.id" type="button" :class="['evidence', { active: activeEvidence === item.id }]" @click="playEvidence(item)">
-        <span><strong :class="['ev-tag', evidenceTone(item.type)]">{{ labels[item.type] || item.type }}</strong><span v-if="item.text"> · {{ item.text }}</span><small>{{ item.detail?.description || (item.detail?.pause_ms ? `持续 ${(item.detail.pause_ms / 1000).toFixed(1)} 秒` : '点击回听核验') }}</small></span><span aria-hidden="true">▶</span>
+        <span><strong :class="['ev-tag', evidenceTone(item.type)]">{{ evidenceLabel(item) }}</strong><span v-if="item.text"> · {{ item.text }}</span><small>{{ evidenceNote(item) }}</small></span><span aria-hidden="true">▶</span>
       </button>
     </section>
     <button class="primary-action retry" type="button" @click="retrySameQuestion">再练一次</button>
@@ -368,6 +376,11 @@ footer {
   color: var(--kk-ink-2);
 }
 
+.score-grid .fluency-meaning {
+  margin-top: 2px;
+  color: var(--kk-ink-3);
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -399,6 +412,15 @@ details > summary {
 
 details > summary h2 {
   display: inline;
+}
+
+/* Feedback 8: on phones the original text sits far down the page; say up front that marked words play back. */
+.tap-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--kk-ink-2);
 }
 
 .legend {
@@ -624,6 +646,41 @@ button:focus-visible {
 
 .evidence-tags button {
   min-height: 44px;
+}
+
+/* Each suggestion lists its evidence with the surrounding phrase, so learners need not scroll back to the text. */
+.evidence-phrases {
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evidence-phrases li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.phrase {
+  min-width: 0;
+  font-family: var(--kk-font-text);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--kk-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.phrase b {
+  font-weight: 700;
+  color: var(--kk-ink);
+}
+
+.compare-hint {
+  margin: -2px 0 8px;
 }
 
 .compare-head {
