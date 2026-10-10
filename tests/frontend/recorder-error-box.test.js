@@ -12,3 +12,11 @@ for (const path of ['src/views/RLView.vue', 'src/views/RSView.vue']) {
     assert.doesNotMatch(source, /v-if="[^"]*recorder\.error(?!\.value)[^"]*"/);
   });
 }
+
+for (const path of ['src/views/RLView.vue', 'src/views/RSView.vue']) {
+  test(`${path} shows "Microphone warming up" until the recorder is really ready`, () => {
+    const source = template(path);
+    assert.match(source, /v-if="!recorder\.isReady\.value"/);
+    assert.doesNotMatch(source, /v-if="!recorder\.isReady"/);
+  });
+}

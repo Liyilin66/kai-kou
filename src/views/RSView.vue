@@ -451,7 +451,7 @@ onUnmounted(() => {
           </div>
 
           <section class="rounded-[20px] border border-kk-line bg-kk-surface p-4 text-center shadow-kk">
-            <div v-if="!recorder.isReady" class="flex items-center justify-center gap-2">
+            <div v-if="!recorder.isReady.value" class="flex items-center justify-center gap-2">
               <div class="h-4 w-4 animate-spin rounded-full border-2 border-kk-ink border-t-transparent" />
               <p class="text-sm text-kk-ink-3">Microphone warming up...</p>
             </div>
