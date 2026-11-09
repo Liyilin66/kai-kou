@@ -1,8 +1,8 @@
-import { isRADiagnosis } from "../../src/lib/ra-diagnosis-score.js";
+import { hasNumericScore, hasSpeakingReferenceScore, isRADiagnosis } from "../../src/lib/ra-diagnosis-score.js";
 import { callOpenAICompatibleChat, getOpenAICompatibleConfig } from "../llm/providers/openai-compatible.js";
 import { buildDailySuggestionMessages } from "./daily-suggestion-prompt.js";
 
-const DAILY_TASK_TYPES = ["RA", "WFD", "WE", "DI", "RTS"];
+const DAILY_TASK_TYPES = ["RA", "RS", "RL", "WFD", "WE", "DI", "RTS"];
 const RECENT_LOG_LIMIT = 100;
 const PROVIDER_MAX_TOKENS = 500;
 const PROVIDER_TEMPERATURE = 0.5;
@@ -17,6 +17,8 @@ const dailySummaryInFlight = new Map();
 
 const TASK_META = {
   RA: { title: "RA 朗读句子", method: "重点保持不断句，卡顿超过 3 秒就重读一遍。" },
+  RS: { title: "RS 复述句子", method: "先听清句子主干，再连贯复述，保留关键词。" },
+  RL: { title: "RL 复述讲座", method: "先记主题和关键细节，再按逻辑连贯复述。" },
   WFD: { title: "WFD 听写句子", method: "先听主干，再补冠词、复数和时态细节。" },
   WE: { title: "WE 写作议论文", method: "先列结构，再写正文，避免边想边写。" },
   DI: { title: "DI 描述图表", method: "先说主图信息，再补 2 个细节，最后总结一句。" },
@@ -281,8 +283,7 @@ function buildSummaryFromRows(rows, totalAttempts) {
     const createdAt = new Date(row?.created_at);
     const createdAtValid = Number.isFinite(createdAt.getTime());
     const dateKey = createdAtValid ? toDateKey(createdAt) : "";
-    const score = taskType === "RA" && isRADiagnosis(parseJsonObject(row?.score_json))
-      ? null : extractOverallScore(row?.score_json);
+    const score = extractOverallScore(row?.score_json, taskType);
     const bucket = taskStats[taskType];
 
     bucket.attempts += 1;
@@ -522,9 +523,24 @@ function createEmptySummary() {
   };
 }
 
-function extractOverallScore(scoreJson) {
+function extractOverallScore(scoreJson, taskType) {
   const score = parseJsonObject(scoreJson);
   const nestedScores = parseJsonObject(score?.scores);
+  if (["RA", "RS"].includes(taskType)) {
+    // Modern diagnoses store the same versioned reference score under metrics.score.
+    const referenceScore = parseJsonObject(score?.metrics?.score);
+    const normalizedReference = {
+      score_version: referenceScore.score_version,
+      scores: { overall: referenceScore.total }
+    };
+    if (hasSpeakingReferenceScore(normalizedReference)) {
+      return Number(Math.max(0, Math.min(90, Number(referenceScore.total))).toFixed(1));
+    }
+    if (isRADiagnosis(score)) return null;
+    if (hasSpeakingReferenceScore(score)) {
+      return Number(Math.max(0, Math.min(90, Number(nestedScores.overall))).toFixed(1));
+    }
+  }
   const candidates = [
     score?.overall,
     score?.score_overall,
@@ -538,6 +554,7 @@ function extractOverallScore(scoreJson) {
   ];
 
   for (const candidate of candidates) {
+    if (!hasNumericScore(candidate)) continue;
     const numeric = Number(candidate);
     if (!Number.isFinite(numeric) || numeric <= 0) continue;
     return Number(Math.max(0, Math.min(90, numeric)).toFixed(1));
