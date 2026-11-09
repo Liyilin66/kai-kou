@@ -18,19 +18,19 @@ export async function generateScoreTextWithFallback({ prompt, taskType, structur
   if (normalizedTaskType === "WE") {
     return generateWEScoreTextWithFallback({ prompt });
   }
-  if (normalizedTaskType === "RA") {
-    return generateRAScoreTextWithFallback({ prompt });
+  if (normalizedTaskType === "RA" || normalizedTaskType === "RTS") {
+    return generateOpenAIScoreTextWithFallback({ prompt, taskType: normalizedTaskType });
   }
   return generateDefaultScoreTextWithFallback({ prompt, taskType: normalizedTaskType, structuredOutput });
 }
 
-async function generateRAScoreTextWithFallback({ prompt } = {}) {
+async function generateOpenAIScoreTextWithFallback({ prompt, taskType } = {}) {
   const startedAt = nowMs();
   const openaiApiKey = getScoringOpenAICompatibleApiKeyFromEnv();
   const fallbackApiKey = getGroqApiKeyFromEnv();
   const providerAttempts = [];
-  const primaryTimeoutMs = resolveDefaultProviderTimeoutMs("RA", "primary");
-  const fallbackTimeoutMs = resolveDefaultProviderTimeoutMs("RA", "fallback");
+  const primaryTimeoutMs = resolveDefaultProviderTimeoutMs(taskType, "primary");
+  const fallbackTimeoutMs = resolveDefaultProviderTimeoutMs(taskType, "fallback");
 
   let primaryLatencyMs = 0;
   try {
@@ -431,12 +431,12 @@ function normalizeTaskType(taskType) {
 }
 
 function resolveDefaultProviderTimeoutMs(taskType, stage) {
-  if (taskType !== "RA") return undefined;
-  const specificEnv = stage === "fallback" ? process.env.LLM_RA_FALLBACK_TIMEOUT_MS : process.env.LLM_RA_PRIMARY_TIMEOUT_MS;
+  if (taskType !== "RA" && taskType !== "RTS") return undefined;
+  const specificEnv = stage === "fallback" ? process.env[`LLM_${taskType}_FALLBACK_TIMEOUT_MS`] : process.env[`LLM_${taskType}_PRIMARY_TIMEOUT_MS`];
   const defaultTimeoutMs = stage === "fallback" ? RA_DEFAULT_FALLBACK_TIMEOUT_MS : RA_DEFAULT_PRIMARY_TIMEOUT_MS;
   return toPositiveInt(
     specificEnv,
-    process.env.LLM_RA_TIMEOUT_MS,
+    process.env[`LLM_${taskType}_TIMEOUT_MS`],
     defaultTimeoutMs
   );
 }

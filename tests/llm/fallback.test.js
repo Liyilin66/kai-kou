@@ -21,7 +21,7 @@ beforeEach(() => {
     GEMINI_API_KEY: 'test-gemini', GROQ_API_KEY: 'test-groq',
     SCORING_OPENAI_API_KEY: 'test-openai', SCORING_OPENAI_BASE_URL: 'https://primary.example/v1',
     SCORING_OPENAI_MODEL: 'test-model', LLM_WE_PRIMARY_PROVIDER: 'gemini',
-    LLM_PRIMARY_TIMEOUT_MS: '10', LLM_RA_PRIMARY_TIMEOUT_MS: '10', LLM_WE_PRIMARY_TIMEOUT_MS: '10'
+    LLM_PRIMARY_TIMEOUT_MS: '10', LLM_RA_PRIMARY_TIMEOUT_MS: '10', LLM_RTS_PRIMARY_TIMEOUT_MS: '10', LLM_WE_PRIMARY_TIMEOUT_MS: '10'
   });
   calls = [];
   globalThis.fetch = async () => { throw new Error('Unexpected request: tests never use the network'); };
@@ -41,7 +41,7 @@ function simulate(primaryOutcome, fallbackStatus = 200) {
   globalThis.fetch = async (url, init) => {
     const provider = String(url).includes('api.groq.com') ? 'groq'
       : String(url).includes('generativelanguage.googleapis.com') ? 'gemini' : 'openai';
-    calls.push({ provider, body: JSON.parse(init.body) });
+    calls.push({ provider, url: String(url), authorization: init.headers.Authorization, body: JSON.parse(init.body) });
     if (provider === 'groq') return fallbackStatus === 200 ? reply(provider)
       : new Response(JSON.stringify({ error: { message: 'backup unavailable' } }), { status: fallbackStatus });
     if (primaryOutcome === 'timeout') {
@@ -56,8 +56,8 @@ function simulate(primaryOutcome, fallbackStatus = 200) {
   };
 }
 
-for (const taskType of ['RA', 'RS', 'WE']) {
-  const primary = taskType === 'RA' ? 'openai' : 'gemini';
+for (const taskType of ['RA', 'RTS', 'RS', 'WE', 'DI', 'RL']) {
+  const primary = ['RA', 'RTS'].includes(taskType) ? 'openai' : 'gemini';
   for (const outcome of [401, 402, 403, 404, 408, 409, 429, 500, 503, 'timeout', 'network', 'empty']) {
     test(`${taskType}: ${outcome} falls back and retains primary failure diagnostics`, async () => {
       simulate(outcome);
@@ -72,6 +72,8 @@ for (const taskType of ['RA', 'RS', 'WE']) {
         [[primary, 'primary', 'failed'], ['groq', 'fallback', 'success']]);
       assert.deepEqual(calls.map(c => c.provider), [primary, 'groq']);
       assert.equal(calls[1].body.model, 'openai/gpt-oss-120b');
+      if (primary === 'openai') assert.equal(result.provider_attempts[0].model, 'test-model');
+      assert.equal(result.provider_attempts[1].model, 'openai/gpt-oss-120b');
     });
   }
   for (const status of [400, 413, 422]) {
@@ -102,10 +104,14 @@ for (const taskType of ['RA', 'RS', 'WE']) {
     const result = await generateScoreTextWithFallback({ taskType, prompt: 'Return scoring JSON' });
     assert.equal(result.provider_used, primary);
     assert.equal(result.fallback_reason, null);
+    assert.equal(result.raw_error_type, null);
+    assert.deepEqual(result.provider_attempts.map(a => [a.provider, a.stage, a.status]),
+      [[primary, 'primary', 'success']]);
+    if (primary === 'openai') assert.equal(result.provider_attempts[0].model, 'test-model');
     assert.equal(calls.length, 1);
   });
   test(`${taskType}: missing primary key still uses configured Groq`, async () => {
-    delete process.env[taskType === 'RA' ? 'SCORING_OPENAI_API_KEY' : 'GEMINI_API_KEY'];
+    delete process.env[primary === 'openai' ? 'SCORING_OPENAI_API_KEY' : 'GEMINI_API_KEY'];
     simulate('success');
     const result = await generateScoreTextWithFallback({ taskType, prompt: 'Return scoring JSON' });
     assert.equal(result.provider_used, 'groq');
@@ -113,6 +119,58 @@ for (const taskType of ['RA', 'RS', 'WE']) {
     assert.deepEqual(calls.map(c => c.provider), ['groq']);
   });
 }
+
+test('RTS: reuses AI tutor OpenAI configuration when scoring overrides are absent', async () => {
+  for (const key of ['SCORING_OPENAI_API_KEY', 'SCORING_OPENAI_BASE_URL', 'SCORING_OPENAI_MODEL']) {
+    delete process.env[key];
+  }
+  Object.assign(process.env, {
+    AGENT_OPENAI_API_KEY: 'test-tutor-key',
+    AGENT_OPENAI_BASE_URL: 'https://tutor.example/v1/',
+    AGENT_OPENAI_MODEL: 'tutor-model'
+  });
+  simulate('success');
+  const result = await generateScoreTextWithFallback({ taskType: ' rts ', prompt: 'Original RTS prompt' });
+  assert.equal(result.provider_used, 'openai');
+  assert.equal(result.fallback_reason, null);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'https://tutor.example/v1/chat/completions');
+  assert.equal(calls[0].authorization, 'Bearer test-tutor-key');
+  assert.equal(calls[0].body.model, 'tutor-model');
+  assert.deepEqual(calls[0].body.messages, [{ role: 'user', content: 'Original RTS prompt' }]);
+  assert.equal(result.provider_attempts[0].model, 'tutor-model');
+});
+
+for (const [field, rawType] of [
+  ['SCORING_OPENAI_BASE_URL', 'openai_base_url_missing'],
+  ['SCORING_OPENAI_MODEL', 'openai_model_missing']
+]) {
+  test(`RTS: missing ${field} uses configured Groq without requesting Gemini`, async () => {
+    delete process.env[field];
+    simulate('success');
+    const result = await generateScoreTextWithFallback({ taskType: 'RTS', prompt: 'Original RTS prompt' });
+    assert.equal(result.provider_used, 'groq');
+    assert.equal(result.fallback_reason, rawType);
+    assert.deepEqual(calls.map(c => c.provider), ['groq']);
+    assert.deepEqual(calls[0].body.messages, [{ role: 'user', content: 'Original RTS prompt' }]);
+    assert.deepEqual(result.provider_attempts.map(a => [a.provider, a.status]),
+      [['openai', 'failed'], ['groq', 'success']]);
+  });
+}
+
+test('RTS: eligible primary failure without Groq rejects without trying Gemini', async () => {
+  delete process.env.GROQ_API_KEY;
+  simulate(402);
+  await assert.rejects(generateScoreTextWithFallback({ taskType: 'RTS', prompt: 'Return JSON' }), error => {
+    assert.equal(error.fallback_reason, 'openai_http_402');
+    assert.equal(error.fallback_error_type, 'groq_api_key_missing');
+    assert.equal(error.provider_used, null);
+    assert.equal(error.last_provider_attempted, 'openai');
+    assert.equal(error.provider_attempts.length, 1);
+    return true;
+  });
+  assert.deepEqual(calls.map(c => c.provider), ['openai']);
+});
 
 test('explicit fallback policy overrides default classification', () => {
   assert.equal(isFallbackEligible(createProviderError('test', { status: 400, fallback_allowed: true })), true);
