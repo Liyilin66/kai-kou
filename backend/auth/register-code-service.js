@@ -186,7 +186,8 @@ export async function handleRegisterWithCode(req, res) {
           id: user.id,
           email
         },
-        { onConflict: "id" }
+        // The auth.users trigger owns signup VIP dates. Never overwrite its row.
+        { onConflict: "id", ignoreDuplicates: true }
       );
 
     if (profileError) {
